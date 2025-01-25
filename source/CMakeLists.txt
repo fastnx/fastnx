@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.30)
+target_include_directories(fastnx PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:>
+)
+
+target_sources(fastnx PRIVATE
+    fastnx.cpp
+    base/container.h
+    fs_sys/types.h
+    fs_sys/contains.cpp
+    fs_sys/regex_file.cpp
+    fs_sys/assets.cpp
+    fs_sys/assets.h
+    fs_sys/games_lists.cpp
+    fs_sys/games_lists.h
+    fs_sys/ssd/solid_directory.cpp
+    fs_sys/ssd/solid_directory.h
+)
+
+add_subdirectory(jit)

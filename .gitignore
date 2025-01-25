@@ -1,0 +1,5 @@
+.idea
+cmake-debug
+cmake-debug-clang
+cmake-release
+cmake-release-clang
