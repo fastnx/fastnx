@@ -19,12 +19,23 @@ namespace FastNx::FsSys {
         AccessModeType mode;
     };
 
-    class RegexFile : VfsBackingFile {
+    using VfsBackingFilePtr = std::shared_ptr<VfsBackingFile>;
+
+    class VfsBackingDirectory {
+    public:
+        virtual ~VfsBackingDirectory() = default;
+        explicit VfsBackingDirectory(const FsPath &_path) : path(_path) {}
+        std::vector<FsPath> BlobAllFiles(const std::string& pattern);
+        virtual std::vector<FsPath> ListAllFiles() = 0;
+
+        FsPath path;
+    };
+
+    class RegexFile {
     public:
         explicit RegexFile(const FsPath &_path, const std::string &pattern);
-
         std::vector<std::string> matches;
     };
-    using VfsBackingFilePtr = std::shared_ptr<VfsBackingFile>;
+
     bool IsInsideOf(const FsPath &path, const FsPath &is);
 }

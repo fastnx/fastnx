@@ -1,6 +1,6 @@
 #include <cassert>
 #include <unistd.h>
-#include <fs_sys/ssd/solid_directory.h>
+#include <fs_sys/ssd/editable_directory.h>
 #include <fs_sys/assets.h>
 
 namespace FastNx::FsSys {
@@ -17,7 +17,7 @@ namespace FastNx::FsSys {
     }
 
     void MoveProcess(const FsPath &target) {
-        const SSD::SolidDirectory directory{target, true};
+        const SSD::EditableDirectory directory{target, true};
         assert(fchdir(directory.descriptor) == 0);
     }
 
@@ -27,8 +27,12 @@ namespace FastNx::FsSys {
 
         directory = std::filesystem::current_path();
         games = directory / "games";
+    }
 
-        gLists.emplace(shared_from_this());
+    Assets::~Assets() {
         gLists->assets.reset();
+    }
+    void Assets::Initialize() {
+        gLists.emplace(shared_from_this());
     }
 }

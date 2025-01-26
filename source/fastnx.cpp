@@ -2,8 +2,8 @@
 #include <pwd.h>
 #include <unistd.h>
 
+#include <core/application.h>
 #include <fs_sys/assets.h>
-
 FastNx::FsSys::FsPath GetUserDir() {
     if (const auto *const user{getpwuid(getuid())})
         return user->pw_dir;
@@ -18,7 +18,9 @@ int main() {
     assert(!isPrivileged);
     assert(pthread_self() && getpid());
 
+    [[maybe_unused]] FastNx::Core::Application application;
     {
-        const auto procAssets{std::make_shared<FastNx::FsSys::Assets>()};
+        const auto assets{std::make_shared<FastNx::FsSys::Assets>()};
+        assets->Initialize();
     }
 }
