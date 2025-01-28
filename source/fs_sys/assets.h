@@ -9,7 +9,6 @@ namespace FastNx::FsSys {
     class Assets : public std::enable_shared_from_this<Assets> {
     public:
         Assets();
-        ~Assets();
 
         void Initialize();
 

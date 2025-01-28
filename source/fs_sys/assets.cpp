@@ -29,10 +29,10 @@ namespace FastNx::FsSys {
         games = directory / "games";
     }
 
-    Assets::~Assets() {
-        gLists->assets.reset();
-    }
     void Assets::Initialize() {
         gLists.emplace(shared_from_this());
+        {
+            gLists->assets.reset();
+        }
     }
 }

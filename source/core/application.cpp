@@ -3,7 +3,7 @@
 #include <optional>
 #include <unistd.h>
 
-#include <base/container.h>
+#include <common/container.h>
 #include <fs_sys/ssd/editable_directory.h>
 #include <core/application.h>
 
@@ -16,15 +16,16 @@ uint64_t GetProcessId() {
 
 FastNx::Core::Application::Application() {
 
-    const std::optional<std::string> systemsname;
+    std::optional<std::string> systemsname;
 #if defined(__linux__)
     FsSys::SSD::EditableDirectory release{"/etc"};
     if (const auto files{release.BlobAllFiles("*-release")}; !files.empty()) {
+        systemsname.emplace(files.front().string());
     }
 #endif
 
     const auto current{std::filesystem::current_path()};
     std::println("FastNx application started on core {} with PID {} in directory {}", GetCoreNumber(), GetProcessId(), LandingOf(current));
-    if (const auto sysstr = systemsname.value(); !sysstr.empty())
+    if (const auto sysstr{systemsname.value()}; systemsname)
         std::println("Operating system name: {}", sysstr);
 }

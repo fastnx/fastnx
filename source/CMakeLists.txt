@@ -6,7 +6,7 @@ target_include_directories(fastnx PUBLIC
 
 target_sources(fastnx PRIVATE
     fastnx.cpp
-    base/container.h
+    common/container.h
     fs_sys/types.h
     fs_sys/contains.cpp
     fs_sys/filters.cpp
