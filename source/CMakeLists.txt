@@ -6,6 +6,12 @@ target_include_directories(fastnx PUBLIC
 
 target_sources(fastnx PRIVATE
     fastnx.cpp
+    loaders/nsp_es.cpp
+    loaders/nsp_es.h
+    loaders/app_types.cpp
+    loaders/types.h
+    horizon/switch_ns.cpp
+    horizon/switch_ns.h
     common/container.h
     fs_sys/types.h
     fs_sys/contains.cpp

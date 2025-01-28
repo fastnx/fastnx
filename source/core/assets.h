@@ -15,7 +15,7 @@ namespace FastNx::Core {
         FsSys::FsPath directory;
         FsSys::FsPath games;
 
-        std::optional<GameLists> gLists;
+        std::optional<GamesLists> gamesLists;
         std::map<AssetsType, FsSys::FsPath> paths;
     };
 }

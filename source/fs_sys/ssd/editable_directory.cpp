@@ -12,7 +12,8 @@ namespace FastNx::FsSys::Ssd {
         if (create && !exists(path))
             if (!create_directories(path))
                 return;
-        assert(is_directory(path));
+        if (exists(path))
+            assert(is_directory(path));
         if (const auto &dirpath{path}; !dirpath.empty())
             descriptor = open(LandingOf(dirpath), O_DIRECTORY);
     }

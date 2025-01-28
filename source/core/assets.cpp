@@ -27,8 +27,8 @@ namespace FastNx::Core {
         games = directory / "games";
     }
     void Assets::Initialize() {
-        gLists.emplace(shared_from_this()); {
-            gLists->assets.reset();
+        gamesLists.emplace(shared_from_this()); {
+            gamesLists->assets.reset();
         }
     }
 }

@@ -4,9 +4,9 @@
 #include <fs_sys/types.h>
 namespace FastNx::Core {
     class Assets;
-    class GameLists {
+    class GamesLists {
     public:
-        explicit GameLists(const std::shared_ptr<Assets> &_assets);
+        explicit GamesLists(const std::shared_ptr<Assets> &_assets);
         std::shared_ptr<Assets> assets;
 
         std::list<FsSys::FsPath> gamesLists;
