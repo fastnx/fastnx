@@ -3,7 +3,7 @@
 #include <unistd.h>
 
 #include <core/application.h>
-#include <fs_sys/assets.h>
+#include <core/assets.h>
 FastNx::FsSys::FsPath GetUserDir() {
     if (const auto *const user{getpwuid(getuid())})
         return user->pw_dir;
@@ -20,7 +20,7 @@ int main() {
 
     [[maybe_unused]] FastNx::Core::Application application;
     {
-        const auto assets{std::make_shared<FastNx::FsSys::Assets>()};
+        const auto assets{std::make_shared<FastNx::Core::Assets>()};
         assets->Initialize();
     }
 }

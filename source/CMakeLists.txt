@@ -11,10 +11,6 @@ target_sources(fastnx PRIVATE
     fs_sys/contains.cpp
     fs_sys/filters.cpp
     fs_sys/regex_file.cpp
-    fs_sys/assets.cpp
-    fs_sys/assets.h
-    fs_sys/games_lists.cpp
-    fs_sys/games_lists.h
     fs_sys/ssd/editable_directory.cpp
     fs_sys/ssd/editable_directory.h
 )

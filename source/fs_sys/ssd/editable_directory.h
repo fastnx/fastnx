@@ -1,7 +1,7 @@
 #pragma once
 
 #include <fs_sys/types.h>
-namespace FastNx::FsSys::SSD {
+namespace FastNx::FsSys::Ssd {
     class EditableDirectory final : public VfsBackingDirectory {
     public:
         explicit EditableDirectory(const FsPath &_path, bool create = {});

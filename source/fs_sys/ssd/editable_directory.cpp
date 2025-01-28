@@ -6,7 +6,7 @@
 #include <common/container.h>
 #include <fs_sys/ssd/editable_directory.h>
 
-namespace FastNx::FsSys::SSD {
+namespace FastNx::FsSys::Ssd {
 
     EditableDirectory::EditableDirectory(const FsPath &_path, const bool create) : VfsBackingDirectory(_path) {
         if (create && !exists(path))
@@ -19,11 +19,12 @@ namespace FastNx::FsSys::SSD {
 
     std::vector<FsPath> EditableDirectory::ListAllFiles() {
         std::vector<FsPath> filepaths;
-        if (path == FsPath{"/etc"})
-            filepaths.reserve(1024);
+        for (const auto& folders : ArrayOf<FsPath>("/etc")) {
+            if (path == folders)
+                filepaths.reserve(1024);
+        }
 
-        std::function<void(const std::filesystem::directory_entry &)> FindAllFiles = [&
-                ](const std::filesystem::directory_entry &entry) {
+        std::function<void(const std::filesystem::directory_entry &)> FindAllFiles = [&](const std::filesystem::directory_entry &entry) {
             if (const EditableDirectory directory{entry}; !directory)
                 return;
 

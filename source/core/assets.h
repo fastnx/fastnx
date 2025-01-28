@@ -1,8 +1,8 @@
 #pragma once
 
-#include <fs_sys/games_lists.h>
+#include <core/games_lists.h>
 #include <map>
-namespace FastNx::FsSys {
+namespace FastNx::Core {
     enum class AssetsType {
         Games
     };
@@ -12,10 +12,10 @@ namespace FastNx::FsSys {
 
         void Initialize();
 
-        FsPath directory;
-        FsPath games;
+        FsSys::FsPath directory;
+        FsSys::FsPath games;
 
         std::optional<GameLists> gLists;
-        std::map<AssetsType, FsPath> paths;
+        std::map<AssetsType, FsSys::FsPath> paths;
     };
 }

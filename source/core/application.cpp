@@ -18,7 +18,7 @@ FastNx::Core::Application::Application() {
 
     std::optional<std::string> systemsname;
 #if defined(__linux__)
-    FsSys::SSD::EditableDirectory release{"/etc"};
+    FsSys::Ssd::EditableDirectory release{"/etc"};
     if (const auto files{release.BlobAllFiles("*-release")}; !files.empty()) {
         systemsname.emplace(files.front().string());
     }
