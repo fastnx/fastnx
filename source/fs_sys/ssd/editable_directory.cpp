@@ -24,6 +24,8 @@ namespace FastNx::FsSys::Ssd {
             if (path == folders)
                 filepaths.reserve(1024);
         }
+        if (!filepaths.capacity())
+            filepaths.reserve(GetFilesCount());
 
         std::function<void(const std::filesystem::directory_entry &)> FindAllFiles = [&](const std::filesystem::directory_entry &entry) {
             if (const EditableDirectory directory{entry}; !directory)
@@ -46,6 +48,15 @@ namespace FastNx::FsSys::Ssd {
         FindAllFiles(std::filesystem::directory_entry{path});
         return filepaths;
     }
+
+    U64 EditableDirectory::GetFilesCount() {
+        U64 result{};
+        for (const std::filesystem::recursive_directory_iterator walker{path}; const auto& file : walker)
+            if (file.is_regular_file())
+                result++;
+        return result;
+    }
+
     EditableDirectory::operator bool() const {
         if (!exists(path))
             return {};

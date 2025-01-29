@@ -1,7 +1,7 @@
 #include <fs_sys/types.h>
 
 namespace FastNx::FsSys {
-    std::vector<FsPath> VfsBackingDirectory::BlobAllFiles(const std::string &pattern) {
+    std::vector<FsPath> VfsReadOnlyDirectory::BlobAllFiles(const std::string &pattern) {
         auto filter{pattern};
         if (const auto starfish{filter.find('*')}; starfish != std::string::npos)
             filter.erase(starfish, starfish + 1);

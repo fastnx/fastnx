@@ -13,12 +13,16 @@ target_sources(fastnx PRIVATE
     horizon/switch_ns.cpp
     horizon/switch_ns.h
     common/container.h
+    common/traits.h
+    common/types.h
     fs_sys/types.h
     fs_sys/contains.cpp
     fs_sys/filters.cpp
     fs_sys/regex_file.cpp
     fs_sys/ssd/editable_directory.cpp
     fs_sys/ssd/editable_directory.h
+    fs_sys/nx_fmt/partition_filesystem.cpp
+    fs_sys/nx_fmt/partition_filesystem.h
 )
 
 add_subdirectory(core)
