@@ -15,6 +15,8 @@ target_sources(fastnx PRIVATE
     common/container.h
     common/traits.h
     common/types.h
+    device/arch_aspect.cpp
+    device/arch_aspect.h
     fs_sys/types.h
     fs_sys/contains.cpp
     fs_sys/filters.cpp

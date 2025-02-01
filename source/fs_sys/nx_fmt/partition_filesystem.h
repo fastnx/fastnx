@@ -3,6 +3,7 @@
 #include <map>
 
 #include <common/types.h>
+#include <common/traits.h>
 #include <fs_sys/types.h>
 namespace FastNx::FsSys::NxFmt {
     constexpr auto MaxEntriesCount{0x10};

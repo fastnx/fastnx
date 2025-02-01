@@ -2,8 +2,11 @@
 #include <pwd.h>
 #include <unistd.h>
 
+#include <print>
+
 #include <core/application.h>
 #include <core/assets.h>
+#include <device/arch_aspect.h>
 FastNx::FsSys::FsPath GetUserDir() {
     if (const auto *const user{getpwuid(getuid())})
         return user->pw_dir;
@@ -17,6 +20,9 @@ int main() {
     }();
     assert(!isPrivileged);
     assert(pthread_self() && getpid());
+
+    if (const auto [aspects, rank] = FastNx::Device::IsArchSuitable(); !aspects.empty())
+        std::println("Features supported by the Host system: {}, Your rank {}", aspects, rank);
 
     [[maybe_unused]] FastNx::Core::Application application;
     {
