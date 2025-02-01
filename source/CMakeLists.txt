@@ -15,14 +15,17 @@ target_sources(fastnx PRIVATE
     common/container.h
     common/traits.h
     common/types.h
-    device/arch_aspect.cpp
-    device/arch_aspect.h
+    device/processor.cpp
+    device/capabilities.h
+    device/syslimits.cpp
     fs_sys/types.h
     fs_sys/contains.cpp
     fs_sys/filters.cpp
     fs_sys/regex_file.cpp
     fs_sys/ssd/editable_directory.cpp
     fs_sys/ssd/editable_directory.h
+    fs_sys/ssd/buffered_file.cpp
+    fs_sys/ssd/buffered_file.h
     fs_sys/nx_fmt/partition_filesystem.cpp
     fs_sys/nx_fmt/partition_filesystem.h
 )

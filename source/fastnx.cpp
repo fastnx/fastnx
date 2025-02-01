@@ -6,7 +6,7 @@
 
 #include <core/application.h>
 #include <core/assets.h>
-#include <device/arch_aspect.h>
+#include <device/capabilities.h>
 FastNx::FsSys::FsPath GetUserDir() {
     if (const auto *const user{getpwuid(getuid())})
         return user->pw_dir;

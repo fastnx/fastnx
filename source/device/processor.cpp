@@ -4,13 +4,13 @@
 #include <unistd.h>
 
 #include <algorithm>
-#include <device/arch_aspect.h>
-
-template <typename T, FastNx::U64 Size>
+#include <device/capabilities.h>
+template<typename T, FastNx::U64 Size>
 auto SmallVector() {
     boost::container::small_vector<T, Size> values(Size);
     return values;
 }
+
 boost::container::small_vector<FastNx::U32, 4> FastNx::Device::GetCpuValues() {
     auto values{SmallVector<U32, 4>()};
     assert(values.size() == 4);
@@ -28,7 +28,7 @@ std::pair<std::string, FastNx::I32> FastNx::Device::IsArchSuitable() {
     if (pthread_getconcurrency())
         return {};
 
-    const auto smt{sysconf(_SC_NPROCESSORS_ONLN)};
+    const auto smt{GetCoresCount()};
     pthread_getaffinity_np(pthread_self(), sizeof(cpus), &cpus);
     activated = 0;
     for (I32 proc{}; proc < smt; proc++) {
@@ -44,6 +44,7 @@ std::pair<std::string, FastNx::I32> FastNx::Device::IsArchSuitable() {
 
     auto _xcr0{SmallVector<U32, 4>()};
 
+    // https://www.felixcloutier.com/x86/xgetbv
     __asm__ volatile("XGETBV" : "=a"(_xcr0[0]), "=d"(_xcr0[1]) : "c"(0));
 
     std::string aspect;

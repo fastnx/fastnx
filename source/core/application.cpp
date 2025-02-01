@@ -7,10 +7,10 @@
 #include <fs_sys/ssd/editable_directory.h>
 #include <core/application.h>
 
-uint64_t GetCoreNumber() {
+FastNx::U64 GetCoreNumber() {
     return sched_getcpu();
 }
-uint64_t GetProcessId() {
+FastNx::U64 GetProcessId() {
     return getpid();
 }
 
