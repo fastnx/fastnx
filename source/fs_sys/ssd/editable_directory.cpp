@@ -49,6 +49,18 @@ namespace FastNx::FsSys::Ssd {
         return filepaths;
     }
 
+    std::vector<FsPath> EditableDirectory::ListAllTopLevelFiles() const {
+        std::filesystem::directory_iterator walker{path};
+        std::vector<FsPath> files;
+
+        while (walker != std::filesystem::directory_iterator{}) {
+            files.emplace_back(walker->path());
+            ++walker;
+        }
+
+        return files;
+    }
+
     U64 EditableDirectory::GetFilesCount() {
         U64 result{};
         for (const std::filesystem::recursive_directory_iterator walker{path}; const auto& file : walker)

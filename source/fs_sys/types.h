@@ -26,7 +26,7 @@ namespace FastNx::FsSys {
         T Read(const U64 _offset = {}) {
             T value;
             std::memset(&value, 0, sizeof(T));
-            assert(ReadType(reinterpret_cast<U8*>(&value), sizeof(T), _offset) == sizeof(T));
+            ReadType(reinterpret_cast<U8*>(&value), sizeof(T), _offset);
             return value;
         }
 
@@ -43,6 +43,8 @@ namespace FastNx::FsSys {
         U64 ReadType(U8 *dest, const U64 size, const U64 offset) {
             if (mode == AccessModeType::WriteOnly)
                 throw std::runtime_error("Operation not supported on the file");
+            if (!dest && !size)
+                return {};
             return ReadTypeImpl(dest, size, offset);
         }
 
@@ -57,8 +59,10 @@ namespace FastNx::FsSys {
         explicit VfsReadOnlyDirectory(const FsPath &_path) : path(_path) {}
 
         virtual ~VfsReadOnlyDirectory() = default;
-        std::vector<FsPath> BlobAllFiles(const std::string &pattern);
+        std::vector<FsPath> BlobAllFiles(const std::string &pattern, bool followTree = {});
         virtual std::vector<FsPath> ListAllFiles() = 0;
+        virtual std::vector<FsPath> ListAllTopLevelFiles() const = 0;
+
         virtual U64 GetFilesCount() {
             return {};
         }

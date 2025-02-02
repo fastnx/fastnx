@@ -6,7 +6,7 @@
 namespace FastNx::FsSys::Ssd {
     class BufferedFile final : public VfsBackingFile {
     public:
-        explicit BufferedFile(const FsPath &_path);
+        explicit BufferedFile(const FsPath &_path, AccessModeType _mode = AccessModeType::ReadOnly, bool create = {});
 
         explicit operator bool() const;
 
@@ -15,7 +15,7 @@ namespace FastNx::FsSys::Ssd {
 
     public:
         I32 openedfd{-1};
-        boost::container::small_vector<U8, 8 * 1024> balance;
-        U64 buffered{};
+        boost::container::small_vector<U8, 8 * 1024> buffer;
+        U64 start{};
     };
 }

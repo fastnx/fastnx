@@ -6,6 +6,7 @@ namespace FastNx::FsSys::Ssd {
     public:
         explicit EditableDirectory(const FsPath &_path, bool create = {});
         std::vector<FsPath> ListAllFiles() override;
+        std::vector<FsPath> ListAllTopLevelFiles() const override;
         U64 GetFilesCount() override;
 
         explicit operator bool() const;

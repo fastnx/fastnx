@@ -32,6 +32,10 @@ namespace FastNx::FsSys::NxFmt {
 
         std::vector<FsPath> ListAllFiles() override;
         U64 GetFilesCount() override;
+
+        std::vector<FsPath> ListAllTopLevelFiles() const override {
+            return {};
+        }
     private:
         std::map<std::string, FileEntryMetadata> fentries;
         U64 _count{};
