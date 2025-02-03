@@ -1,6 +1,14 @@
 #include <thread>
-#include <device/capabilities.h>
+#include <numeric>
 
+#define ENABLE_CPU_SET_USAGE 0
+
+#if !ENABLE_CPU_SET_USAGE
+#include <algorithm>
+#include <common/container.h>
+#endif
+
+#include <device/capabilities.h>
 #include <fs_sys/refs/editable_directory.h>
 #include <fs_sys/refs/buffered_file.h>
 
@@ -17,16 +25,30 @@ FastNx::U64 FastNx::Device::GetCoresCount() {
     if (FsSys::ReFs::EditableDirectory cores{"/sys/devices/system/cpu"}) {
         const auto cpus{cores.BlobAllFiles("cpu*")};
         I32 threadable{};
-        for (const auto& cpuef : cpus)
+        for (const auto &cpuef: cpus)
             if (std::isdigit(cpuef.string().back()))
                 threadable++;
         count = threadable;
     }
 
+#if ENABLE_CPU_SET_USAGE
     cpu_set_t cpus;
     pthread_getaffinity_np(pthread_self(), sizeof(cpus), &cpus);
 
     if (CPU_COUNT(&cpus) > count)
         count = CPU_COUNT(&cpus);
+#else
+    std::vector<U64> _maskCount(32 / sizeof(U64)); // Possible with the AMD EPYC Genoa 9004 Series Processor Family
+    assert(SizeofVector(_maskCount) == 32);
+    assert(sched_getaffinity(getpid(), SizeofVector(_maskCount), reinterpret_cast<cpu_set_t *>(_maskCount.data())) == 0);
+    if (I32 result{}; std::ranges::fold_left(_maskCount, 0, std::plus())) {
+        for (const auto &_mask: _maskCount) {
+            if (_mask)
+                result += std::popcount(_mask);
+        }
+        count = result;
+    }
+
+#endif
     return count;
 }

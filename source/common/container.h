@@ -33,4 +33,9 @@ namespace FastNx {
         }
         std::unreachable();
     }
+
+    template<typename T> requires (is_vector_v<T>)
+    auto SizeofVector(const T& vector) {
+        return sizeof(vector[0]) * vector.size();
+    }
 }
