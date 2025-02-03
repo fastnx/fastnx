@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 #include <common/container.h>
-#include <fs_sys/ssd/editable_directory.h>
+#include <fs_sys/refs/editable_directory.h>
 #include <core/application.h>
 
 FastNx::U64 GetCoreNumber() {
@@ -18,7 +18,7 @@ FastNx::Core::Application::Application() {
 
     std::optional<std::string> systemsname;
 #if defined(__linux__)
-    FsSys::Ssd::EditableDirectory release{"/etc"};
+    FsSys::ReFs::EditableDirectory release{"/etc"};
     if (const auto files{release.BlobAllFiles("*-release")}; !files.empty()) {
         systemsname.emplace(files.front().string());
     }

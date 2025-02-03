@@ -22,10 +22,10 @@ target_sources(fastnx PRIVATE
     fs_sys/contains.cpp
     fs_sys/filters.cpp
     fs_sys/regex_file.cpp
-    fs_sys/ssd/editable_directory.cpp
-    fs_sys/ssd/editable_directory.h
-    fs_sys/ssd/buffered_file.cpp
-    fs_sys/ssd/buffered_file.h
+    fs_sys/refs/editable_directory.cpp
+    fs_sys/refs/editable_directory.h
+    fs_sys/refs/buffered_file.cpp
+    fs_sys/refs/buffered_file.h
     fs_sys/nx_fmt/partition_filesystem.cpp
     fs_sys/nx_fmt/partition_filesystem.h
 )

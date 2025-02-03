@@ -3,10 +3,11 @@
 #include <boost/container/small_vector.hpp>
 #include <fs_sys/types.h>
 
-namespace FastNx::FsSys::Ssd {
+namespace FastNx::FsSys::ReFs {
     class BufferedFile final : public VfsBackingFile {
     public:
         explicit BufferedFile(const FsPath &_path, AccessModeType _mode = AccessModeType::ReadOnly, bool create = {});
+        ~BufferedFile() override;
 
         explicit operator bool() const;
 

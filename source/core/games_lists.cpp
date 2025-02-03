@@ -1,5 +1,5 @@
 #include <common/container.h>
-#include <fs_sys/ssd/editable_directory.h>
+#include <fs_sys/refs/editable_directory.h>
 #include <core/assets.h>
 #include <core/games_lists.h>
 
@@ -10,7 +10,7 @@ namespace FastNx::Core {
             gamesLists.emplace_back(defaultDir);
         }
         for (const auto &gameDir: gamesLists) {
-            FsSys::Ssd::EditableDirectory directory{gameDir};
+            FsSys::ReFs::EditableDirectory directory{gameDir};
             if (!directory)
                 continue;
             const auto gamesRoms{directory.ListAllFiles()};

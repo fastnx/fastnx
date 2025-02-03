@@ -1,11 +1,14 @@
 #include <fstream>
 #include <fcntl.h>
+#include <iostream>
 
+#include <sys/stat.h>
 #include <common/container.h>
-#include <fs_sys/ssd/buffered_file.h>
-namespace FastNx::FsSys::Ssd {
+#include <fs_sys/refs/buffered_file.h>
+
+namespace FastNx::FsSys::ReFs {
     BufferedFile::BufferedFile(const FsPath &_path, const AccessModeType _mode, const bool create) : VfsBackingFile(_path, _mode) {
-        if (create) {
+        if (!exists(path) && create) {
             if (std::fstream file{_path, std::ios::trunc}; file.is_open())
                 file.close();
         }
@@ -20,18 +23,51 @@ namespace FastNx::FsSys::Ssd {
 
             return result;
         }();
-        openedfd = open64(LandingOf(_path), ioFileMode);
+        openedfd = open64(LandingOf(path), ioFileMode);
+
+        if (openedfd < 0) {
+            openedfd = {};
+
+            std::println(std::cerr, "Could not open the file {}", path.string());
+            if (create && exists(path))
+                std::filesystem::remove(path);
+        } else if (mode == AccessModeType::ReadWrite) {
+            assert(lockf(openedfd, F_LOCK, 0) == 0);
+        }
+    }
+
+    BufferedFile::~BufferedFile() {
+        switch (lockf(openedfd, F_LOCK, 0)) {
+            case EACCES:
+            case EAGAIN:
+                assert(lockf(openedfd, F_UNLCK, 0) == 0);
+            default: {
+            }
+        }
+        if (openedfd > 0)
+            close(openedfd);
+        auto &&_buffer{std::move(buffer)};
+        _buffer.clear();
     }
 
     BufferedFile::operator bool() const {
-        if (openedfd == -1)
-            return {};
-        return true;
+        I32 fileexists{3};
+        if (!exists(path) || openedfd == -1)
+            fileexists--;
+        if (mode == AccessModeType::None)
+            fileexists--;
+
+        struct stat64 status;
+        fstat64(openedfd, &status);
+        if (status.st_ino < 0)
+            fileexists--;
+
+        return fileexists > 0;
     }
 
     U64 BufferedFile::ReadTypeImpl(U8 *dest, const U64 size, const U64 offset) {
-        if (const auto& _ioBuffering{buffer}; !_ioBuffering.empty()) {
-            auto* source{_ioBuffering.data()};
+        if (const auto &_ioBuffering{buffer}; !_ioBuffering.empty()) {
+            auto *source{_ioBuffering.data()};
             [[assume(start > offset)]];
             if (const auto _ioLocally{start - offset}; _ioLocally < offset) {
                 source += _ioLocally;
@@ -48,21 +84,22 @@ namespace FastNx::FsSys::Ssd {
         const auto result = [&] -> U64 {
             U64 copied{};
 
-            for (U64 _offset{}; _offset < offset + size; ) {
+            for (U64 _offset{}; _offset < offset + size;) {
                 const auto iosize{buffer.size() < size - copied ? buffer.size() : size - copied};
                 assert(buffer.size() >= iosize);
                 const auto retrieved{pread64(openedfd, buffer.data(), iosize, offset)};
 
                 if (retrieved != -1) {
-                    start = offset;
-                    std::memcpy(dest, buffer.data(), retrieved);
-                    _offset += retrieved;
-                    copied += retrieved;
+                    if (errno == EFAULT)
+                        return openedfd = -1;
+                    return {};
                 }
+                start = offset;
+                std::memcpy(dest, buffer.data(), retrieved);
+                _offset += retrieved;
+                copied += retrieved;
                 if (retrieved != iosize)
                     break;
-
-                assert(fdatasync(openedfd) == 0);
             }
             return copied;
         }();

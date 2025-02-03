@@ -1,7 +1,7 @@
 #include <cassert>
 #include <unistd.h>
 
-#include <fs_sys/ssd/editable_directory.h>
+#include <fs_sys/refs/editable_directory.h>
 #include <core/assets.h>
 namespace FastNx::Core {
     auto ContainsPath(const FsSys::FsPath &dest, const FsSys::FsPath &src) {
@@ -17,7 +17,7 @@ namespace FastNx::Core {
     }
 
     void MoveProcess(const FsSys::FsPath &target) {
-        const FsSys::Ssd::EditableDirectory directory{target, true};
+        const FsSys::ReFs::EditableDirectory directory{target, true};
         assert(fchdir(directory.descriptor) == 0);
     }
     Assets::Assets() {

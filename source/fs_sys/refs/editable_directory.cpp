@@ -4,9 +4,9 @@
 #include <unistd.h>
 
 #include <common/container.h>
-#include <fs_sys/ssd/editable_directory.h>
+#include <fs_sys/refs/editable_directory.h>
 
-namespace FastNx::FsSys::Ssd {
+namespace FastNx::FsSys::ReFs {
 
     EditableDirectory::EditableDirectory(const FsPath &_path, const bool create) : VfsBackingDirectory(_path) {
         if (create && !exists(path))
@@ -16,6 +16,11 @@ namespace FastNx::FsSys::Ssd {
             assert(is_directory(path));
         if (const auto &dirpath{path}; !dirpath.empty())
             descriptor = open(LandingOf(dirpath), O_DIRECTORY);
+    }
+
+    EditableDirectory::~EditableDirectory() {
+        if (descriptor > 0)
+            close(descriptor);
     }
 
     std::vector<FsPath> EditableDirectory::ListAllFiles() {
