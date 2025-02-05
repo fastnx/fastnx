@@ -20,8 +20,8 @@ namespace FastNx::FsSys::NxFmt {
         U32 nameOffset;
         [[deprecated]] U32 __reserved;
     };
-    TRAIT_SIZE_MATCH(Pfs0Header, 16);
-    TRAIT_SIZE_MATCH(PartitionEntry, 0x14 + 0x4);
+    static_assert(TraitSizeMatch<Pfs0Header, 16>);
+    static_assert(TraitSizeMatch<PartitionEntry, 0x14 + 0x4>);
 
     struct FileEntryMetadata {
         U64 offset, size;

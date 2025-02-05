@@ -1,3 +1,7 @@
 #pragma once
 
-#define TRAIT_SIZE_MATCH(_type, _size) static_assert(sizeof(_type) == _size && std::is_trivial_v<_type>)
+#include <common/types.h>
+namespace FastNx {
+    template <typename T, U64 Size>
+    concept TraitSizeMatch = sizeof(T) == Size && std::is_trivial_v<T>;
+}

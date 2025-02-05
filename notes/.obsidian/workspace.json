@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "1b4202d77268b7a8",
+        "id": "f2609153e7058ce5",
         "type": "tabs",
         "children": [
           {
-            "id": "7bec4cb3b98ff862",
+            "id": "5ca6ac8629bfd77a",
             "type": "leaf",
             "state": {
               "type": "empty",
@@ -156,7 +156,7 @@
       "obsidian-kanban:Create new board": false
     }
   },
-  "active": "7bec4cb3b98ff862",
+  "active": "5ca6ac8629bfd77a",
   "lastOpenFiles": [
     "Nintendo Store Format (NSP).md",
     "TODO/Files, Formats Support, Loaders.md",

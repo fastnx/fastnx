@@ -20,15 +20,25 @@ namespace FastNx::Core {
         const FsSys::ReFs::EditableDirectory directory{target, true};
         assert(fchdir(directory.descriptor) == 0);
     }
+
     Assets::Assets() {
-        if (const FsSys::FsPath target{"com/callsvc/fastnx"}; !ContainsPath(std::filesystem::current_path(), target))
+        const auto _pcwd{std::filesystem::current_path()};
+        assert(!_pcwd.empty());
+        if (const auto target{"com/callsvc/fastnx"_fs}; !ContainsPath(_pcwd, target)) {
             MoveProcess(target);
+        }
+
         directory = std::filesystem::current_path();
         games = directory / "games";
+
+        FsSys::ReFs::EditableDirectory _games{games, true};
     }
+
+    void Assets::Destroy() {
+        gamesLists->assets.reset();
+    }
+
     void Assets::Initialize() {
-        gamesLists.emplace(shared_from_this()); {
-            gamesLists->assets.reset();
-        }
+        gamesLists.emplace(shared_from_this());
     }
 }

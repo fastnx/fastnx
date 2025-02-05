@@ -95,10 +95,10 @@ namespace FastNx::FsSys::ReFs {
                     return {};
                 }
                 start = offset;
-                std::memcpy(dest, buffer.data(), retrieved);
+                std::memcpy(dest, buffer.data(), static_cast<U32>(retrieved));
                 _offset += retrieved;
                 copied += retrieved;
-                if (retrieved != iosize)
+                if (static_cast<U64>(retrieved) != iosize)
                     break;
             }
             return copied;

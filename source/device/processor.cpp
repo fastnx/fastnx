@@ -23,7 +23,7 @@ boost::container::small_vector<FastNx::U32, 4> FastNx::Device::GetCpuValues() {
 std::pair<std::string, FastNx::I32> FastNx::Device::IsArchSuitable() {
     cpu_set_t cpus;
 
-    I32 activated{};
+    U64 activated{};
 
     if (pthread_getconcurrency())
         return {};
@@ -31,7 +31,7 @@ std::pair<std::string, FastNx::I32> FastNx::Device::IsArchSuitable() {
     const auto smt{GetCoresCount()};
     pthread_getaffinity_np(pthread_self(), sizeof(cpus), &cpus);
     activated = 0;
-    for (I32 proc{}; proc < smt; proc++) {
+    for (U64 proc{}; proc < smt; proc++) {
         if (CPU_ISSET(proc, &cpus))
             activated++;
     }

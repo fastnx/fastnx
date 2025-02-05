@@ -10,6 +10,8 @@ target_sources(fastnx PRIVATE
     loaders/nsp_es.h
     loaders/app_types.cpp
     loaders/types.h
+    loaders/homefs.cpp
+    loaders/homefs.h
     horizon/switch_ns.cpp
     horizon/switch_ns.h
     common/container.h

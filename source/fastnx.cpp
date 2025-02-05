@@ -24,9 +24,8 @@ int main() {
     if (const auto [aspects, rank] = FastNx::Device::IsArchSuitable(); !aspects.empty())
         std::println("Features supported by the Host system: {}, Your rank {}", aspects, rank);
 
-    [[maybe_unused]] FastNx::Core::Application application;
     {
-        const auto assets{std::make_shared<FastNx::Core::Assets>()};
-        assets->Initialize();
+        [[maybe_unused]] const auto application{std::make_shared<FastNx::Core::Application>()};
+        application->Initialize();
     }
 }

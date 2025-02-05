@@ -11,6 +11,7 @@ namespace FastNx::Core {
         Assets();
 
         void Initialize();
+        void Destroy();
 
         FsSys::FsPath directory;
         FsSys::FsPath games;

@@ -4,6 +4,7 @@
 #include <vector>
 #include <cassert>
 #include <cstring>
+#include <utility>
 
 #include <common/types.h>
 namespace FastNx::FsSys {
@@ -80,4 +81,11 @@ namespace FastNx::FsSys {
     };
 
     bool IsInsideOf(const FsPath &path, const FsPath &is);
+}
+
+constexpr FastNx::FsSys::FsPath operator ""_fs(const char *str, const FastNx::U64 len) {
+    if (const std::string_view _pathStr{str, len}; !_pathStr.empty())
+        return FastNx::FsSys::FsPath{_pathStr};
+
+    std::unreachable();
 }
