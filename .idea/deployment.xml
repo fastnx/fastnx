@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false">
+    <serverData>
+      <paths name="Remote Host (97d96ccf-d16e-444c-ab12-662f6d6ab3da)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="FastNx" local="$PROJECT_DIR$" />
+          </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-release-arm" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-debug-clang" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-debug-arm" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-release-clang" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-relwithdebinfo-default" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-relwithdebinfo-bundle" />
+          </excludedPaths>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>

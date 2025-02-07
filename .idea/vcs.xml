@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/assert" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/config" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/container" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/intrusive" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/move" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/predef" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/regex" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/throw_exception" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/tools/cmake" vcs="Git" />
+  </component>
+</project>

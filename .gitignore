@@ -1,5 +1,5 @@
-.idea
-cmake-debug
+cmake-debug-arm
 cmake-debug-clang
-cmake-release
+cmake-release-arm
 cmake-release-clang
+cmake-relwithdebinfo-bundle
