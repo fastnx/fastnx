@@ -1,8 +1,12 @@
 #include <ranges>
 
 #include <fs_sys/nx_fmt/partition_filesystem.h>
+
 namespace FastNx::FsSys::NxFmt {
     PartitionFileSystem::PartitionFileSystem(const VfsBackingFilePtr &pfsf) : VfsReadOnlyDirectory(pfsf->path) {
+        if (!IsAPfs0File(pfsf))
+            return;
+        [[maybe_unused]] auto pfs0hd{pfsf->Read<Pfs0Header>()};
     }
 
     std::vector<FsPath> PartitionFileSystem::ListAllFiles() {
@@ -18,7 +22,6 @@ namespace FastNx::FsSys::NxFmt {
     U64 PartitionFileSystem::GetFilesCount() {
         return std::min(_count, fentries.size());
     }
-
     bool IsAValidPfs(const std::shared_ptr<PartitionFileSystem> &spfs) {
         return spfs->GetFilesCount() > 0;
     }

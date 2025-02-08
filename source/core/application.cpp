@@ -31,12 +31,13 @@ namespace FastNx::Core {
     }
 
     Application::~Application() {
-        if (amApp)
-            amApp->Destroy();
+        if (fsam)
+            fsam->Destroy();
     }
 
     void Application::Initialize() {
-        amApp = std::make_shared<Assets>();
-        amApp->Initialize();
+        if (auto fsAssets{std::make_shared<Assets>()})
+            fsam.swap(fsAssets);
+        fsam->Initialize();
     }
 }

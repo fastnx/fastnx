@@ -7,6 +7,7 @@
 #include <utility>
 
 #include <common/types.h>
+#include <common/values.h>
 namespace FastNx::FsSys {
     using FsPath = std::filesystem::path;
     class SolidDirectory;
@@ -81,6 +82,7 @@ namespace FastNx::FsSys {
     };
 
     bool IsInsideOf(const FsPath &path, const FsPath &is);
+    bool IsAPfs0File(const VfsBackingFilePtr &pfs0);
 }
 
 constexpr FastNx::FsSys::FsPath operator ""_fs(const char *str, const FastNx::U64 len) {

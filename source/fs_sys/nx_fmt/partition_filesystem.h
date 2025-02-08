@@ -13,12 +13,12 @@ namespace FastNx::FsSys::NxFmt {
         U32 magic;
         U32 fileCount;
         U32 strTableSize;
-        [[deprecated("This field is usually zeroed")]] U32 __reserved;
+        [[deprecated("This field is usually zeroed")]] U32 zeroed;
     };
     struct PartitionEntry {
         U64 offset, size;
         U32 nameOffset;
-        [[deprecated]] U32 __reserved;
+        [[deprecated]] U32 version;
     };
     static_assert(TraitSizeMatch<Pfs0Header, 16>);
     static_assert(TraitSizeMatch<PartitionEntry, 0x14 + 0x4>);

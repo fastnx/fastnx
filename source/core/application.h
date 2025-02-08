@@ -9,6 +9,6 @@ namespace FastNx::Core {
         void Initialize();
 
     private:
-        std::shared_ptr<Assets> amApp;
+        std::shared_ptr<Assets> fsam;
     };
 }

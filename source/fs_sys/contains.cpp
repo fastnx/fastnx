@@ -10,4 +10,8 @@ namespace FastNx::FsSys {
         }
         return true;
     }
+
+    bool IsAPfs0File(const VfsBackingFilePtr &pfs0) {
+        return pfs0->Read<U32>() == ConstMagicValue<U32>("PFS0");
+    }
 }
