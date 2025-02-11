@@ -13,13 +13,12 @@ namespace FastNx::Loaders {
         if (!version)
             return {};
 
-        I32 homebrew{};
-
+        I32 points{};
         if (Contains(_content, {"home.json"_fs}))
-            homebrew++;
+            points++;
         if (Contains(_content, {"exefs/main.npdm"_fs, "exefs/main"_fs}))
-            homebrew++;
+            points++;
 
-        return homebrew == 2;
+        return points > 1;
     }
 }

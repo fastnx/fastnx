@@ -14,7 +14,7 @@ namespace FastNx::FsSys::ReFs {
     protected:
         U64 ReadTypeImpl(U8 *dest, U64 size, U64 offset) override;
 
-    public:
+    private:
         I32 openedfd{-1};
         boost::container::small_vector<U8, 8 * 1024> buffer;
         U64 start{};

@@ -38,6 +38,14 @@ namespace FastNx::Core {
         gamesLists->assets.reset();
     }
 
+    std::vector<FsSys::FsPath> Assets::GetAllGames() const {
+        std::vector<FsSys::FsPath> result;
+        if (const auto &_shopTitles{gamesLists->GetAllGamesPaths(GamePathType::Shop)}; !_shopTitles.empty())
+            std::ranges::copy(_shopTitles, std::back_inserter(result));
+
+        return result;
+    }
+
     void Assets::Initialize() {
         gamesLists.emplace(shared_from_this());
     }

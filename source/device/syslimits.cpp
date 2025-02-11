@@ -1,9 +1,9 @@
 #include <thread>
 #include <numeric>
 
-#define ENABLE_CPU_SET_USAGE 0
+#define ENB_CPU_SET_USAGE 0
 
-#if !ENABLE_CPU_SET_USAGE
+#if !ENB_CPU_SET_USAGE
 #include <algorithm>
 #include <common/container.h>
 #endif
@@ -31,7 +31,7 @@ FastNx::U64 FastNx::Device::GetCoresCount() {
         count = threadable;
     }
 
-#if ENABLE_CPU_SET_USAGE
+#if ENB_CPU_SET_USAGE
     cpu_set_t cpus;
     pthread_getaffinity_np(pthread_self(), sizeof(cpus), &cpus);
 

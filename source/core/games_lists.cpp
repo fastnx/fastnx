@@ -38,11 +38,11 @@ namespace FastNx::Core {
         }
     }
 
-    std::vector<FsSys::FsPath> GamesLists::GetAllGamesPaths() const {
+    std::vector<FsSys::FsPath> GamesLists::GetAllGamesPaths(const GamePathType type) const {
         std::vector<FsSys::FsPath> games(gamespaths.size());
         // ReSharper disable once CppUseStructuredBinding
         for (const auto &gamefile: gamespaths) {
-            if (const auto _type{gamefile.first}; _type == GamePathType::Shop) {
+            if (const auto _type{gamefile.first}; _type == type) {
                 games.emplace_back(gamefile.second);
             }
         }

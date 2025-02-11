@@ -29,6 +29,8 @@ target_sources(fastnx PRIVATE
     fs_sys/refs/editable_directory.h
     fs_sys/refs/buffered_file.cpp
     fs_sys/refs/buffered_file.h
+    fs_sys/refs/huge_file.cpp
+    fs_sys/refs/huge_file.h
     fs_sys/nx_fmt/partition_filesystem.cpp
     fs_sys/nx_fmt/partition_filesystem.h
 )

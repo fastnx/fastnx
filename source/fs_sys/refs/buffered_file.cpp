@@ -12,22 +12,9 @@ namespace FastNx::FsSys::ReFs {
             if (std::fstream file{_path, std::ios::trunc}; file.is_open())
                 file.close();
         }
-        const auto ioFileMode = [&] {
-            I32 result{};
-            if (mode == AccessModeType::ReadOnly)
-                result |= O_RDONLY;
-            if (mode == AccessModeType::ReadWrite)
-                result |= O_RDWR;
-            if (mode == AccessModeType::WriteOnly)
-                result |= O_WRONLY;
-
-            return result;
-        }();
-        openedfd = open64(LandingOf(path), ioFileMode);
+        openedfd = open64(LandingOf(path), GetIoMode(mode));
 
         if (openedfd < 0) {
-            openedfd = {};
-
             std::println(std::cerr, "Could not open the file {}", path.string());
             if (create && exists(path))
                 std::filesystem::remove(path);

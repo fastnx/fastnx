@@ -13,6 +13,8 @@ namespace FastNx::Core {
         void Initialize();
         void Destroy();
 
+        std::vector<FsSys::FsPath> GetAllGames() const;
+
         FsSys::FsPath directory;
         FsSys::FsPath games;
 

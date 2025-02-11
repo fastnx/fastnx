@@ -15,7 +15,7 @@ namespace FastNx::Core {
         explicit GamesLists(const std::shared_ptr<Assets> &_assets);
         std::shared_ptr<Assets> assets;
 
-        std::vector<FsSys::FsPath> GetAllGamesPaths() const;
+        std::vector<FsSys::FsPath> GetAllGamesPaths(GamePathType type) const;
 
         std::list<FsSys::FsPath> directories;
         std::list<std::pair<GamePathType, FsSys::FsPath>> gamespaths;

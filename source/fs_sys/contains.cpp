@@ -1,8 +1,21 @@
 #include <cassert>
 #include <unordered_map>
+#include <fcntl.h>
 
 #include <fs_sys/types.h>
 namespace FastNx::FsSys {
+    I32 GetIoMode(const AccessModeType type) {
+        I32 result{};
+        if (type == AccessModeType::ReadOnly)
+            result |= O_RDONLY;
+        if (type == AccessModeType::ReadWrite)
+            result |= O_RDWR;
+        if (type == AccessModeType::WriteOnly)
+            result |= O_WRONLY;
+
+        return result;
+    }
+
     bool IsInsideOf(const FsPath &path, const FsPath &is) {
         assert(exists(path) && exists(is));
         auto dir{path.begin()};
@@ -22,7 +35,7 @@ namespace FastNx::FsSys {
             {ConstMagicValue<U32>("PFS0"), FileFormatType::PartFs}
         };
         const auto uType{fptr->Read<U32>()};
-        if (const auto _typed{formatmap.find(uType)}; _typed != formatmap.end())
+        if (const auto &_typed{formatmap.find(uType)}; _typed != formatmap.end())
             return _typed->second == type;
         return {};
     }

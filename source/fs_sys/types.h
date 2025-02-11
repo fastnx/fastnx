@@ -81,6 +81,8 @@ namespace FastNx::FsSys {
         std::vector<std::string> matches;
     };
 
+
+    I32 GetIoMode(AccessModeType type);
     bool IsInsideOf(const FsPath &path, const FsPath &is);
     bool IsAPfs0File(const VfsBackingFilePtr &pfs0);
 }
