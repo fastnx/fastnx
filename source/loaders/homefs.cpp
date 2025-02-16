@@ -9,16 +9,16 @@ namespace FastNx::Loaders {
         const auto _content{directory.ListAllFiles()};
         I32 version{};
         if (Contains(_content, {"version.txt"_fs}))
-            version = 1;
+            version = directory.ListAllFiles().size(); // We're not reading the version for now, but we expect a value greater than 0
         if (!version)
             return {};
 
-        I32 points{};
+        I32 isHfs{version > 100};
         if (Contains(_content, {"home.json"_fs}))
-            points++;
+            isHfs++;
         if (Contains(_content, {"exefs/main.npdm"_fs, "exefs/main"_fs}))
-            points++;
+            isHfs += 2;
 
-        return points > 1;
+        return isHfs >= 2;
     }
 }

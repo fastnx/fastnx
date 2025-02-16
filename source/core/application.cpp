@@ -46,13 +46,13 @@ namespace FastNx::Core {
 
     void Application::LoadFirstPickedGame() const {
         const auto gamefile = [&]-> FsSys::VfsBackingFilePtr {
-            const auto &games{filesAm->GetAllGames()};
-            if (games.empty())
+            const auto &runnable{filesAm->GetAllGames()};
+            if (runnable.empty())
                 return nullptr;
 
-            const auto &picked{games.front()};
-            std::println("Loading the game from path: {}", picked.string());
-            return std::make_shared<FsSys::ReFs::HugeFile>(picked);
+            const auto &_gamePath{runnable.front()};
+            std::println("Loading the game from path: {}", _gamePath.string());
+            return std::make_shared<FsSys::ReFs::HugeFile>(_gamePath);
         }();
         if (gamefile != nullptr)
             _switch->LoadApplicationFile(gamefile);
