@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="utf-8"?>
+<gaphor xmlns="https://gaphor.org/model" xmlns:Core="https://gaphor.org/modelinglanguage/Core" xmlns:UML="https://gaphor.org/modelinglanguage/UML" xmlns:general="https://gaphor.org/modelinglanguage/general" version="4" gaphor-version="3.0.0">
+<model>
+<Core:StyleSheet id="58d6989a-66f8-11ec-b4c8-0456e5e540ed"/>
+<UML:Package id="58d6c2e8-66f8-11ec-b4c8-0456e5e540ed">
+<name>
+<val>PID, KProcess</val>
+</name>
+<ownedDiagram>
+<reflist>
+<ref refid="58d6c536-66f8-11ec-b4c8-0456e5e540ed"/>
+</reflist>
+</ownedDiagram>
+<ownedType>
+<reflist>
+<ref refid="919d734f-ec64-11ef-8a62-57ec58af5c62"/>
+<ref refid="d7fbb15a-ec64-11ef-98a8-57ec58af5c62"/>
+<ref refid="1371e63a-ec65-11ef-93e2-57ec58af5c62"/>
+</reflist>
+</ownedType>
+<packagedElement>
+<reflist>
+<ref refid="919d734f-ec64-11ef-8a62-57ec58af5c62"/>
+<ref refid="d7fbb15a-ec64-11ef-98a8-57ec58af5c62"/>
+<ref refid="1371e63a-ec65-11ef-93e2-57ec58af5c62"/>
+</reflist>
+</packagedElement>
+</UML:Package>
+<UML:Activity id="919d734f-ec64-11ef-8a62-57ec58af5c62">
+<name>
+<val>Activity</val>
+</name>
+<node>
+<reflist>
+<ref refid="919bb4ce-ec64-11ef-96a9-57ec58af5c62"/>
+<ref refid="73baaedc-ec65-11ef-a612-57ec58af5c62"/>
+<ref refid="98d3dbb1-ec65-11ef-a7d5-57ec58af5c62"/>
+<ref refid="a887c6fa-ec65-11ef-9ad3-57ec58af5c62"/>
+<ref refid="b586408d-ec65-11ef-963f-57ec58af5c62"/>
+</reflist>
+</node>
+<owningPackage>
+<ref refid="58d6c2e8-66f8-11ec-b4c8-0456e5e540ed"/>
+</owningPackage>
+<package>
+<ref refid="58d6c2e8-66f8-11ec-b4c8-0456e5e540ed"/>
+</package>
+</UML:Activity>
+<UML:Diagram id="58d6c536-66f8-11ec-b4c8-0456e5e540ed">
+<element>
+<ref refid="58d6c2e8-66f8-11ec-b4c8-0456e5e540ed"/>
+</element>
+<name>
+<val>New Diagram</val>
+</name>
+<ownedPresentation>
+<reflist>
+<ref refid="919c2349-ec64-11ef-ba92-57ec58af5c62"/>
+<ref refid="d7fc56ef-ec64-11ef-8eef-57ec58af5c62"/>
+<ref refid="1372781c-ec65-11ef-8ea3-57ec58af5c62"/>
+<ref refid="23b36d91-ec65-11ef-81eb-57ec58af5c62"/>
+</reflist>
+</ownedPresentation>
+</UML:Diagram>
+<UML:ActionItem id="919c2349-ec64-11ef-ba92-57ec58af5c62">
+<matrix>
+<val>(1.0, 0.0, 0.0, 1.0, 184.63280868530273, 90.859375)</val>
+</matrix>
+<top-left>
+<val>(-23.144527435302734, 0.0)</val>
+</top-left>
+<width>
+<val>125.14452743530273</val>
+</width>
+<height>
+<val>36.6864577138665</val>
+</height>
+<diagram>
+<ref refid="58d6c536-66f8-11ec-b4c8-0456e5e540ed"/>
+</diagram>
+<subject>
+<ref refid="919bb4ce-ec64-11ef-96a9-57ec58af5c62"/>
+</subject>
+</UML:ActionItem>
+<UML:Action id="919bb4ce-ec64-11ef-96a9-57ec58af5c62">
+<activity>
+<ref refid="919d734f-ec64-11ef-8a62-57ec58af5c62"/>
+</activity>
+<name>
+<val>Nx Kernel</val>
+</name>
+<presentation>
+<reflist>
+<ref refid="919c2349-ec64-11ef-ba92-57ec58af5c62"/>
+</reflist>
+</presentation>
+</UML:Action>
+<UML:Class id="d7fbb15a-ec64-11ef-98a8-57ec58af5c62">
+<name>
+<val>KernelContext</val>
+</name>
+<ownedOperation>
+<reflist>
+<ref refid="316e22ac-ec65-11ef-a4fd-57ec58af5c62"/>
+</reflist>
+</ownedOperation>
+<owningPackage>
+<ref refid="58d6c2e8-66f8-11ec-b4c8-0456e5e540ed"/>
+</owningPackage>
+<package>
+<ref refid="58d6c2e8-66f8-11ec-b4c8-0456e5e540ed"/>
+</package>
+<presentation>
+<reflist>
+<ref refid="d7fc56ef-ec64-11ef-8eef-57ec58af5c62"/>
+</reflist>
+</presentation>
+</UML:Class>
+<UML:ClassItem id="d7fc56ef-ec64-11ef-8eef-57ec58af5c62">
+<matrix>
+<val>(1.0, 0.0, 0.0, 1.0, 161.48828125, 195.4296875)</val>
+</matrix>
+<top-left>
+<val>(0.0, -17.0)</val>
+</top-left>
+<width>
+<val>121.0</val>
+</width>
+<height>
+<val>74.0</val>
+</height>
+<diagram>
+<ref refid="58d6c536-66f8-11ec-b4c8-0456e5e540ed"/>
+</diagram>
+<subject>
+<ref refid="d7fbb15a-ec64-11ef-98a8-57ec58af5c62"/>
+</subject>
+</UML:ClassItem>
+<UML:Class id="1371e63a-ec65-11ef-93e2-57ec58af5c62">
+<name>
+<val>KProcess</val>
+</name>
+<owningPackage>
+<ref refid="58d6c2e8-66f8-11ec-b4c8-0456e5e540ed"/>
+</owningPackage>
+<package>
+<ref refid="58d6c2e8-66f8-11ec-b4c8-0456e5e540ed"/>
+</package>
+<presentation>
+<reflist>
+<ref refid="1372781c-ec65-11ef-8ea3-57ec58af5c62"/>
+</reflist>
+</presentation>
+</UML:Class>
+<UML:ClassItem id="1372781c-ec65-11ef-8ea3-57ec58af5c62">
+<matrix>
+<val>(1.0, 0.0, 0.0, 1.0, 51.95703125, 278.7265625)</val>
+</matrix>
+<top-left>
+<val>(0.0, 0.0)</val>
+</top-left>
+<width>
+<val>100.0</val>
+</width>
+<height>
+<val>57.0</val>
+</height>
+<diagram>
+<ref refid="58d6c536-66f8-11ec-b4c8-0456e5e540ed"/>
+</diagram>
+<subject>
+<ref refid="1371e63a-ec65-11ef-93e2-57ec58af5c62"/>
+</subject>
+</UML:ClassItem>
+<general:Box id="23b36d91-ec65-11ef-81eb-57ec58af5c62">
+<matrix>
+<val>(1.0, 0.0, 0.0, 1.0, 16.757814407348633, 166.3828125)</val>
+</matrix>
+<top-left>
+<val>(0.0, 0.0)</val>
+</top-left>
+<width>
+<val>303.99606132507324</val>
+</width>
+<height>
+<val>200.05859375</val>
+</height>
+<diagram>
+<ref refid="58d6c536-66f8-11ec-b4c8-0456e5e540ed"/>
+</diagram>
+</general:Box>
+<UML:Operation id="316e22ac-ec65-11ef-a4fd-57ec58af5c62">
+<class_>
+<ref refid="d7fbb15a-ec64-11ef-98a8-57ec58af5c62"/>
+</class_>
+<name>
+<val>GetPid</val>
+</name>
+<ownedDiagram>
+<reflist>
+<ref refid="3db4562e-ec65-11ef-a8ac-57ec58af5c62"/>
+</reflist>
+</ownedDiagram>
+</UML:Operation>
+<UML:ComponentDiagram id="3db4562e-ec65-11ef-a8ac-57ec58af5c62">
+<element>
+<ref refid="316e22ac-ec65-11ef-a4fd-57ec58af5c62"/>
+</element>
+<name>
+<val>New Diagram</val>
+</name>
+<ownedDiagram>
+<reflist>
+<ref refid="5d088b4d-ec65-11ef-bc12-57ec58af5c62"/>
+</reflist>
+</ownedDiagram>
+</UML:ComponentDiagram>
+<UML:StateMachineDiagram id="5d088b4d-ec65-11ef-bc12-57ec58af5c62">
+<element>
+<ref refid="3db4562e-ec65-11ef-a8ac-57ec58af5c62"/>
+</element>
+<name>
+<val>New Diagram</val>
+</name>
+<ownedPresentation>
+<reflist>
+<ref refid="73bb253a-ec65-11ef-a6a7-57ec58af5c62"/>
+<ref refid="98d43cdc-ec65-11ef-aea7-57ec58af5c62"/>
+<ref refid="a8882799-ec65-11ef-a321-57ec58af5c62"/>
+<ref refid="b5870103-ec65-11ef-9939-57ec58af5c62"/>
+<ref refid="8b5def3e-ec65-11ef-b8d2-57ec58af5c62"/>
+</reflist>
+</ownedPresentation>
+</UML:StateMachineDiagram>
+<UML:Action id="73baaedc-ec65-11ef-a612-57ec58af5c62">
+<activity>
+<ref refid="919d734f-ec64-11ef-8a62-57ec58af5c62"/>
+</activity>
+<name>
+<val>Search by PID</val>
+</name>
+<presentation>
+<reflist>
+<ref refid="73bb253a-ec65-11ef-a6a7-57ec58af5c62"/>
+</reflist>
+</presentation>
+</UML:Action>
+<UML:ActionItem id="73bb253a-ec65-11ef-a6a7-57ec58af5c62">
+<matrix>
+<val>(1.0, 0.0, 0.0, 1.0, 162.77734375, 102.71879577636719)</val>
+</matrix>
+<top-left>
+<val>(0.0, 0.0)</val>
+</top-left>
+<width>
+<val>100.0</val>
+</width>
+<height>
+<val>42.0</val>
+</height>
+<diagram>
+<ref refid="5d088b4d-ec65-11ef-bc12-57ec58af5c62"/>
+</diagram>
+<subject>
+<ref refid="73baaedc-ec65-11ef-a612-57ec58af5c62"/>
+</subject>
+</UML:ActionItem>
+<UML:ObjectFlowItem id="8b5def3e-ec65-11ef-b8d2-57ec58af5c62">
+<diagram>
+<ref refid="5d088b4d-ec65-11ef-bc12-57ec58af5c62"/>
+</diagram>
+<horizontal>
+<val>0</val>
+</horizontal>
+<orthogonal>
+<val>0</val>
+</orthogonal>
+<matrix>
+<val>(1.0, 0.0, 0.0, 1.0, 212.77734375, 105.12496948242188)</val>
+</matrix>
+<points>
+<val>[(0.0, 39.59382629394531), (0.0, 97.58985900878906)]</val>
+</points>
+<head-connection>
+<ref refid="73bb253a-ec65-11ef-a6a7-57ec58af5c62"/>
+</head-connection>
+</UML:ObjectFlowItem>
+<UML:Action id="98d3dbb1-ec65-11ef-a7d5-57ec58af5c62">
+<activity>
+<ref refid="919d734f-ec64-11ef-8a62-57ec58af5c62"/>
+</activity>
+<name>
+<val>Check for random KProcess value</val>
+</name>
+<presentation>
+<reflist>
+<ref refid="98d43cdc-ec65-11ef-aea7-57ec58af5c62"/>
+</reflist>
+</presentation>
+</UML:Action>
+<UML:ActionItem id="98d43cdc-ec65-11ef-aea7-57ec58af5c62">
+<matrix>
+<val>(1.0, 0.0, 0.0, 1.0, 162.77734375, 202.71482849121094)</val>
+</matrix>
+<top-left>
+<val>(0.0, 0.0)</val>
+</top-left>
+<width>
+<val>102.0</val>
+</width>
+<height>
+<val>76.0</val>
+</height>
+<diagram>
+<ref refid="5d088b4d-ec65-11ef-bc12-57ec58af5c62"/>
+</diagram>
+<subject>
+<ref refid="98d3dbb1-ec65-11ef-a7d5-57ec58af5c62"/>
+</subject>
+</UML:ActionItem>
+<UML:Action id="a887c6fa-ec65-11ef-9ad3-57ec58af5c62">
+<activity>
+<ref refid="919d734f-ec64-11ef-8a62-57ec58af5c62"/>
+</activity>
+<name>
+<val>Not found, create PID</val>
+</name>
+<presentation>
+<reflist>
+<ref refid="a8882799-ec65-11ef-a321-57ec58af5c62"/>
+</reflist>
+</presentation>
+</UML:Action>
+<UML:ActionItem id="a8882799-ec65-11ef-a321-57ec58af5c62">
+<matrix>
+<val>(1.0, 0.0, 0.0, 1.0, 83.93365478515625, 306.8671875)</val>
+</matrix>
+<top-left>
+<val>(0.0, 0.0)</val>
+</top-left>
+<width>
+<val>100.0</val>
+</width>
+<height>
+<val>42.0</val>
+</height>
+<diagram>
+<ref refid="5d088b4d-ec65-11ef-bc12-57ec58af5c62"/>
+</diagram>
+<subject>
+<ref refid="a887c6fa-ec65-11ef-9ad3-57ec58af5c62"/>
+</subject>
+</UML:ActionItem>
+<UML:Action id="b586408d-ec65-11ef-963f-57ec58af5c62">
+<activity>
+<ref refid="919d734f-ec64-11ef-8a62-57ec58af5c62"/>
+</activity>
+<name>
+<val>Imm return</val>
+</name>
+<presentation>
+<reflist>
+<ref refid="b5870103-ec65-11ef-9939-57ec58af5c62"/>
+</reflist>
+</presentation>
+</UML:Action>
+<UML:ActionItem id="b5870103-ec65-11ef-9939-57ec58af5c62">
+<matrix>
+<val>(1.0, 0.0, 0.0, 1.0, 243.05868530273438, 306.8671875)</val>
+</matrix>
+<top-left>
+<val>(0.0, 0.0)</val>
+</top-left>
+<width>
+<val>100.0</val>
+</width>
+<height>
+<val>42.0</val>
+</height>
+<diagram>
+<ref refid="5d088b4d-ec65-11ef-bc12-57ec58af5c62"/>
+</diagram>
+<subject>
+<ref refid="b586408d-ec65-11ef-963f-57ec58af5c62"/>
+</subject>
+</UML:ActionItem>
+</model>
+</gaphor>
