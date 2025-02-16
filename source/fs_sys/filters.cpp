@@ -10,7 +10,7 @@ namespace FastNx::FsSys {
             filter.clear();
 
         std::vector<FsPath> filtered; {
-            for (auto files{followTree ? ListAllFiles() : ListAllTopLevelFiles()}; const auto &_path: files) {
+            for (const auto files{followTree ? ListAllFiles() : ListAllTopLevelFiles()}; const auto &_path: files) {
                 if (const auto &filename{_path.filename()}; _path.has_filename()) {
                     if ((starts && filename.string().starts_with(filter)) || (!starts && filename.string().ends_with(filter)))
                         filtered.emplace_back(std::move(_path));

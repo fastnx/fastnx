@@ -3,6 +3,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/externals/boost" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/align" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/externals/boost/libs/assert" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/externals/boost/libs/config" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/externals/boost/libs/container" vcs="Git" />

@@ -3,7 +3,7 @@
 
 #define ENB_CPU_SET_USAGE 0
 
-#if !ENB_CPU_SET_USAGE
+#if ENB_CPU_SET_USAGE == 0
 #include <algorithm>
 #include <common/container.h>
 #endif

@@ -21,6 +21,8 @@ target_sources(fastnx PRIVATE
     device/processor.cpp
     device/capabilities.h
     device/syslimits.cpp
+    kernel/kernelctx.cpp
+    kernel/kernelctx.h
     fs_sys/types.h
     fs_sys/contains.cpp
     fs_sys/filters.cpp

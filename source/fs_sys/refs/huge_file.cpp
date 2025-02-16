@@ -26,12 +26,13 @@ namespace FastNx::FsSys::ReFs {
 
         struct stat64 status;
         fstat64(openedfd, &status);
-        if (auto *buffering{mmap(nullptr, status.st_size, PROT_READ, MAP_PRIVATE, openedfd, 0)};
-            buffering != MAP_FAILED)
+        if (auto *buffering{mmap(nullptr, status.st_size, PROT_READ, MAP_PRIVATE, openedfd, 0)}; buffering != MAP_FAILED)
             _aliveVirt = static_cast<U8 *>(buffering);
     }
 
     HugeFile::~HugeFile() {
+        if (_aliveVirt)
+            assert(munmap(std::exchange(_aliveVirt, nullptr), _mapSize) == 0);
         assert(lockf(openedfd, F_UNLCK, 0) == 0);
         if (openedfd > 0)
             close(openedfd);
@@ -57,7 +58,7 @@ namespace FastNx::FsSys::ReFs {
 
     U64 HugeFile::ReadTypeImpl(U8 *dest, const U64 size, const U64 offset) {
         auto *_source{&_aliveVirt[offset]};
-        if (const auto _alignedOffset{offset & ~4096})
+        if (const auto _alignedOffset{boost::alignment::align_up(offset, 4096)})
             if (msync(_source, _alignedOffset, MS_ASYNC) != 0)
                 if (errno == ENOMEM)
                     pagemissRec++;

@@ -12,18 +12,18 @@ FastNx::FsSys::FsPath GetUserDir() {
         return user->pw_dir;
     return {};
 }
+
 int main() {
     assert(FastNx::FsSys::IsInsideOf(std::filesystem::current_path(), GetUserDir()));
 
-    [[maybe_unused]] const auto isPrivileged = [] {
+    const auto isPrivileged = [] {
         const auto uid{getuid()};
         return !uid || geteuid() != uid;
-    }();
-
-    assert(!isPrivileged);
+    };
+    assert(!isPrivileged());
     assert(pthread_self() && getpid());
 
-    if (const auto [aspects, rank] = FastNx::Device::IsArchSuitable(); !aspects.empty())
+    if (const auto &[aspects, rank] = FastNx::Device::IsArchSuitable(); !aspects.empty())
         std::println("Features supported by the Host system: {}, Your rank {}", aspects, rank);
 
     if (const auto application{std::make_shared<FastNx::Core::Application>()}) {

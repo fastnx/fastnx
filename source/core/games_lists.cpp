@@ -7,11 +7,7 @@
 namespace FastNx::Core {
     GamesLists::GamesLists(const std::shared_ptr<Assets> &_assets) : assets(_assets) {
         static const auto _games{
-            ArrayOf(
-                "~/.local/fastnx/games"_fs,
-                "~/.fastnx/games"_fs,
-                "~/Documents/games"_fs
-            )
+            ArrayOf("~/.local/fastnx/games"_fs, "~/.fastnx/games"_fs, "~/Documents/games"_fs)
         };
 
         directories.push_back(assets->games);
