@@ -26,8 +26,8 @@ int main() {
     if (const auto &[aspects, rank] = FastNx::Device::IsArchSuitable(); !aspects.empty())
         std::println("Features supported by the Host system: {}, Your rank {}", aspects, rank);
 
-    if (const auto application{std::make_shared<FastNx::Core::Application>()}) {
-        application->Initialize();
-        application->LoadFirstPickedGame();
-    }
+    const auto application{std::make_shared<FastNx::Core::Application>()};
+    application->Initialize();
+    application->LoadFirstPickedGame();
+
 }

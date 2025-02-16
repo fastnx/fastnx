@@ -25,6 +25,7 @@ target_sources(fastnx PRIVATE
     kernel/kernelctx.h
     fs_sys/types.h
     fs_sys/contains.cpp
+    fs_sys/fullpath.cpp
     fs_sys/filters.cpp
     fs_sys/regex_file.cpp
     fs_sys/refs/editable_directory.cpp

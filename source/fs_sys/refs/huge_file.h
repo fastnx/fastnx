@@ -14,9 +14,9 @@ namespace FastNx::FsSys::ReFs {
 
     private:
         I32 openedfd{-1};
-        U8 *_aliveVirt{nullptr};
-        U8 *lastReadFrom{nullptr};
-        U64 _mapSize{};
+        U8 *memory{nullptr};
+        U8 *recorded{nullptr};
+        U64 mapsize{};
 
         U64 pagemissRec{};
     };

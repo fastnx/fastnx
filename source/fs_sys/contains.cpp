@@ -4,16 +4,15 @@
 
 #include <fs_sys/types.h>
 namespace FastNx::FsSys {
-    I32 GetIoMode(const AccessModeType type) {
-        I32 result{};
+    I32 ModeToNative(const AccessModeType type) {
         if (type == AccessModeType::ReadOnly)
-            result |= O_RDONLY;
+            return O_RDONLY;
         if (type == AccessModeType::ReadWrite)
-            result |= O_RDWR;
+            return O_RDWR;
         if (type == AccessModeType::WriteOnly)
-            result |= O_WRONLY;
+            return O_WRONLY;
 
-        return result;
+        std::unreachable();
     }
 
     bool IsInsideOf(const FsPath &path, const FsPath &is) {
@@ -41,7 +40,7 @@ namespace FastNx::FsSys {
     }
     bool IsAPfs0File(const VfsBackingFilePtr &pfs0) {
         if (IsFileOfType(pfs0, FileFormatType::PartFs))
-            return pfs0->Read<U32>(4) == 0;
+            return pfs0->Read<U32>(4) > 0;
         return {};
     }
 }

@@ -51,7 +51,8 @@ namespace FastNx::Core {
                 return nullptr;
 
             const auto &_gamePath{runnable.front()};
-            std::println("Loading the game from path: {}", _gamePath.string());
+            if (const auto _filename{_gamePath.filename()}; _gamePath.has_filename())
+                std::println("Loading the game from path: {}", _filename.string());
             return std::make_shared<FsSys::ReFs::HugeFile>(_gamePath);
         }();
         if (gamefile != nullptr)

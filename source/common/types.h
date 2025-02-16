@@ -2,6 +2,8 @@
 
 #include <cstdint>
 #include <algorithm>
+#include <utility>
+#include <ranges>
 #include <span>
 
 namespace FastNx {
@@ -27,4 +29,8 @@ namespace FastNx {
         std::span<const T> valuesCopy(values);
         return Contains(container, valuesCopy);
     }
+
+    constexpr auto EnumRange(const auto front, const auto back) {
+        return std::views::iota(std::to_underlying(front), std::to_underlying(back) + 1) | std::views::transform([](std::underlying_type_t<decltype(front)> _val) -> decltype(auto) { return static_cast<decltype(front)>(_val); });
+    };
 }

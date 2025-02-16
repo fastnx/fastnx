@@ -40,8 +40,12 @@ namespace FastNx::Core {
 
     std::vector<FsSys::FsPath> Assets::GetAllGames() const {
         std::vector<FsSys::FsPath> result;
-        if (const auto &_shopTitles{gamesLists->GetAllGamesPaths(GamePathType::Shop)}; !_shopTitles.empty())
-            std::ranges::copy(_shopTitles, std::back_inserter(result));
+        assert(EnumRange(GamePathType::HomebrewFs, GamePathType::Card).front());
+
+        for (const auto _type : EnumRange(GamePathType::Homebrew, GamePathType::Shop)) {
+            if (const auto _titles{gamesLists->GetAllGamesPaths(_type)}; !_titles.empty())
+                std::ranges::copy(_titles, std::back_inserter(result));
+        }
 
         return result;
     }

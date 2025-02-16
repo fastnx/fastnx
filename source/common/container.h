@@ -3,8 +3,6 @@
 #include <array>
 #include <fs_sys/types.h>
 namespace FastNx {
-    class FsPath;
-
     template<typename... T>
     auto ArrayOf(T &&... list) {
         return std::array{std::forward<T>(list)...};

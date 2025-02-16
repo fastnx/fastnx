@@ -12,7 +12,7 @@ namespace FastNx::FsSys::ReFs {
             if (std::fstream file{_path, std::ios::trunc}; file.is_open())
                 file.close();
         }
-        openedfd = open64(LandingOf(path), GetIoMode(mode));
+        openedfd = open64(LandingOf(path), ModeToNative(mode));
 
         if (openedfd < 0) {
             std::println(std::cerr, "Could not open the file {}", path.string());

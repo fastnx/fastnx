@@ -82,7 +82,8 @@ namespace FastNx::FsSys {
     };
 
 
-    I32 GetIoMode(AccessModeType type);
+    I32 ModeToNative(AccessModeType type);
+    std::optional<FsPath> GetFullPath(const FsPath &_path);
     bool IsInsideOf(const FsPath &path, const FsPath &is);
     bool IsAPfs0File(const VfsBackingFilePtr &pfs0);
 }

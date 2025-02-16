@@ -23,6 +23,6 @@ namespace FastNx::FsSys::NxFmt {
         return std::min(_count, fentries.size());
     }
     bool IsAValidPfs(const std::shared_ptr<PartitionFileSystem> &spfs) {
-        return spfs->GetFilesCount() > 0;
+        return spfs->GetFilesCount() == 0;
     }
 }

@@ -5,6 +5,7 @@
 namespace FastNx::Core {
     class Assets;
     enum class GamePathType {
+        Unrecognized,
         Homebrew,
         HomebrewFs,
         Card,
@@ -15,9 +16,10 @@ namespace FastNx::Core {
         explicit GamesLists(const std::shared_ptr<Assets> &_assets);
         std::shared_ptr<Assets> assets;
 
+        bool AddTypedGame(const FsSys::FsPath &gamefiles);
         std::vector<FsSys::FsPath> GetAllGamesPaths(GamePathType type) const;
 
-        std::list<FsSys::FsPath> directories;
+        std::list<FsSys::FsPath> _dirs;
         std::list<std::pair<GamePathType, FsSys::FsPath>> gamespaths;
     };
 }
