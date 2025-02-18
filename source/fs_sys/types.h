@@ -61,7 +61,7 @@ namespace FastNx::FsSys {
         explicit VfsReadOnlyDirectory(const FsPath &_path) : path(_path) {}
 
         virtual ~VfsReadOnlyDirectory() = default;
-        std::vector<FsPath> BlobAllFiles(const std::string &pattern, bool followTree = {});
+        std::vector<FsPath> GlobAllFiles(const std::string &pattern, bool followTree = {});
         virtual std::vector<FsPath> ListAllFiles() = 0;
         virtual std::vector<FsPath> ListAllTopLevelFiles() const = 0;
 

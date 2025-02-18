@@ -23,7 +23,7 @@ FastNx::U64 FastNx::Device::GetCoresCount() {
     assert(count == threads);
 
     if (FsSys::ReFs::EditableDirectory cores{"/sys/devices/system/cpu"}) {
-        const auto cpus{cores.BlobAllFiles("cpu*")};
+        const auto cpus{cores.GlobAllFiles("cpu*")};
         I32 threadable{};
         for (const auto &cpuef: cpus)
             if (std::isdigit(cpuef.string().back()))
