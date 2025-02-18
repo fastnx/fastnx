@@ -21,7 +21,7 @@ namespace FastNx::Core {
         std::optional<std::string> systemsname;
 #if defined(__linux__)
         FsSys::ReFs::EditableDirectory release{"/etc"};
-        if (const auto files{release.BlobAllFiles("*-release")}; !files.empty()) {
+        if (const auto files{release.GlobAllFiles("*-release")}; !files.empty()) {
             systemsname.emplace(files.front().string());
         }
 #endif
