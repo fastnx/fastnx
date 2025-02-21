@@ -16,7 +16,7 @@ FastNx::FsSys::FsPath GetUserDir() {
 int main() {
     assert(FastNx::FsSys::IsInsideOf(std::filesystem::current_path(), GetUserDir()));
 
-    const auto isPrivileged = [] {
+    [[maybe_unused]] const auto isPrivileged = [] {
         const auto uid{getuid()};
         return !uid || geteuid() != uid;
     };

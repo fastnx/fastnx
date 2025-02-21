@@ -23,7 +23,7 @@ namespace FastNx::FsSys::ReFs {
         if (mode != AccessModeType::ReadOnly)
             assert(lockf(openedfd, F_LOCK, 0) == 0);
 
-        struct stat64 status;
+        struct stat64 status{};
         fstat64(openedfd, &status);
         if (auto *buffering{mmap(nullptr, status.st_size, PROT_READ, MAP_PRIVATE, openedfd, 0)}; buffering != MAP_FAILED)
             memory = static_cast<U8 *>(buffering);

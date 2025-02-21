@@ -25,7 +25,7 @@ namespace FastNx::Core {
             assert(is_directory(gameDir));
             if (!AddTypedGame(gameDir)) {
                 if (const auto &_roms{directory.ListAllFiles()}; !_roms.empty()) {
-                    for (const auto &_gameFiles: _roms)
+                    for ([[maybe_unused]] const auto &_gameFiles: _roms)
                         assert(AddTypedGame(_gameFiles) == true);
                 }
             }
