@@ -63,6 +63,8 @@ namespace FastNx::FsSys::ReFs {
             return -1;
 
         std::memcpy(dest, _source, size);
+        if (size >= 4_MEGAS)
+            assert(madvise(aligned, size, MADV_REMOVE) == 0);
 
         static auto _flags{MADV_HUGEPAGE};
         [[unlikely]] if (!recorded) {

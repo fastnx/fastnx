@@ -1,4 +1,5 @@
 #include <cassert>
+#include <print>
 #include <loaders/nsp_es.h>
 
 namespace FastNx::Loaders {
@@ -6,6 +7,11 @@ namespace FastNx::Loaders {
         _mainPfs(std::make_shared<FsSys::NxFmt::PartitionFileSystem>(nspf)) {
         if (!IsAValidPfs(_mainPfs))
             status = LoaderStatus::PfsNotFound;
+
+        std::println("Files in this PFS: ");
+        for (const auto &partfile: _mainPfs->ListAllFiles()) {
+            std::println("- {}", partfile.string());
+        }
 
         status = LoaderStatus::Success;
         _Finish();

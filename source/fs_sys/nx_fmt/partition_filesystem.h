@@ -1,6 +1,6 @@
 #pragma once
 
-#include <map>
+#include <boost/container/flat_map.hpp>
 
 #include <common/types.h>
 #include <common/traits.h>
@@ -33,12 +33,13 @@ namespace FastNx::FsSys::NxFmt {
         std::vector<FsPath> ListAllFiles() override;
         U64 GetFilesCount() override;
 
-        std::vector<FsPath> ListAllTopLevelFiles() const override {
+        [[nodiscard]] std::vector<FsPath> ListAllTopLevelFiles() const override {
             return {};
         }
     private:
-        std::map<std::string, FileEntryMetadata> fentries;
+        boost::container::flat_map<std::string, FileEntryMetadata> _files;
         U64 _count{};
+        U64 bytesen{}; // Byte counter used by the data of all files in this partition
     };
 
     bool IsAValidPfs(const std::shared_ptr<PartitionFileSystem>& spfs);

@@ -7,7 +7,9 @@
 #include <utility>
 
 #include <common/types.h>
+#include <common/traits.h>
 #include <common/values.h>
+
 namespace FastNx::FsSys {
     using FsPath = std::filesystem::path;
     class SolidDirectory;
@@ -28,14 +30,21 @@ namespace FastNx::FsSys {
         T Read(const U64 _offset = {}) {
             T value;
             std::memset(&value, 0, sizeof(T));
-            ReadType(reinterpret_cast<U8*>(&value), sizeof(T), _offset);
+            ReadType(reinterpret_cast<U8 *>(&value), sizeof(T), _offset);
             return value;
         }
 
         template<typename T> requires (std::is_trivial_v<T>)
         U64 Read(T &object, const U64 _offset = {}) {
             std::memset(&object, 0, sizeof(T));
-            return ReadType(reinterpret_cast<U8*>(&object), sizeof(T), _offset);
+            return ReadType(reinterpret_cast<U8 *>(&object), sizeof(T), _offset);
+        }
+
+        template<typename T = U8> requires (!is_vector_v<T>)
+        std::vector<T> ReadSome(const U64 _offset, const U64 size) {
+            std::vector<T> _content(size);
+            assert(ReadTypeImpl(reinterpret_cast<U8*>(_content.data()), size, _offset) == size);
+            return _content;
         }
 
         FsPath path;
@@ -63,7 +72,7 @@ namespace FastNx::FsSys {
         virtual ~VfsReadOnlyDirectory() = default;
         std::vector<FsPath> GlobAllFiles(const std::string &pattern, bool followTree = {});
         virtual std::vector<FsPath> ListAllFiles() = 0;
-        virtual std::vector<FsPath> ListAllTopLevelFiles() const = 0;
+        [[nodiscard]] virtual std::vector<FsPath> ListAllTopLevelFiles() const = 0;
 
         virtual U64 GetFilesCount() {
             return {};
@@ -84,6 +93,7 @@ namespace FastNx::FsSys {
 
     I32 ModeToNative(AccessModeType type);
     std::optional<FsPath> GetFullPath(const FsPath &_path);
+
     bool IsInsideOf(const FsPath &path, const FsPath &is);
     bool IsAPfs0File(const VfsBackingFilePtr &pfs0);
 }
