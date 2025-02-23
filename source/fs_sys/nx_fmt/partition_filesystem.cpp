@@ -20,6 +20,8 @@ namespace FastNx::FsSys::NxFmt {
 
             assert(_nextOffset - sizeof(pfs0hd) < _partsSize);
             _nextOffset += sizeof(PartitionEntry);
+            if (_count >= MaxEntriesCount)
+                break;
             _count++;
         }
         _files.reserve(_count);

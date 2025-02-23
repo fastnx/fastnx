@@ -6,7 +6,6 @@
 #include <common/traits.h>
 #include <fs_sys/types.h>
 namespace FastNx::FsSys::NxFmt {
-    constexpr auto MaxEntriesCount{0x10};
 
     // https://switchbrew.org/wiki/NCA
     struct Pfs0Header {
@@ -20,14 +19,16 @@ namespace FastNx::FsSys::NxFmt {
         U32 nameOffset;
         [[deprecated]] U32 version;
     };
-    static_assert(TraitSizeMatch<Pfs0Header, 16>);
-    static_assert(TraitSizeMatch<PartitionEntry, 0x14 + 0x4>);
+    static_assert(IsSizeMatch<Pfs0Header, 16>);
+    static_assert(IsSizeMatch<PartitionEntry, 0x14 + 0x4>);
 
     struct FileEntryMetadata {
         U64 offset, size;
     };
     class PartitionFileSystem final : public VfsReadOnlyDirectory {
     public:
+        static constexpr auto MaxEntriesCount{0x10};
+
         explicit PartitionFileSystem(const VfsBackingFilePtr &pfsf);
 
         std::vector<FsPath> ListAllFiles() override;
