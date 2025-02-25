@@ -12,6 +12,8 @@ target_sources(fastnx PRIVATE
     loaders/types.h
     loaders/homefs.cpp
     loaders/homefs.h
+    loaders/romdir_mkfs.cpp
+    loaders/romdir_mkfs.h
     horizon/switch_ns.cpp
     horizon/switch_ns.h
     common/container.h
@@ -23,21 +25,12 @@ target_sources(fastnx PRIVATE
     device/syslimits.cpp
     kernel/kernelctx.cpp
     kernel/kernelctx.h
-    fs_sys/types.h
-    fs_sys/contains.cpp
-    fs_sys/fsio.cpp
-    fs_sys/fullpath.cpp
-    fs_sys/filters.cpp
-    fs_sys/regex_file.cpp
-    fs_sys/refs/editable_directory.cpp
-    fs_sys/refs/editable_directory.h
-    fs_sys/refs/buffered_file.cpp
-    fs_sys/refs/buffered_file.h
-    fs_sys/refs/huge_file.cpp
-    fs_sys/refs/huge_file.h
-    fs_sys/nx_fmt/partition_filesystem.cpp
-    fs_sys/nx_fmt/partition_filesystem.h
+    crypto/integrity.cpp
+    crypto/types.h
 )
 
 add_subdirectory(core)
 add_subdirectory(jit)
+add_subdirectory(fs_sys)
+
+# https://switchbrew.org/wiki/Glossary

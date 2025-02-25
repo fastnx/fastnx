@@ -40,11 +40,15 @@ namespace FastNx::FsSys {
             return ReadType(reinterpret_cast<U8 *>(&object), sizeof(T), _offset);
         }
 
-        template<typename T = U8> requires (!is_vector_v<T>)
+        template<typename T = U8> requires (!IsVectorType<T>)
         std::vector<T> ReadSome(const U64 _offset, const U64 size) {
             std::vector<T> _content(size);
             assert(ReadTypeImpl(reinterpret_cast<U8*>(_content.data()), size, _offset) == size);
             return _content;
+        }
+        template<typename T>
+        U64 ReadSome(std::vector<T> &content, const U64 _offset) {
+            return ReadTypeImpl(reinterpret_cast<U8*>(content.data()), content.size(), _offset) == content.size();
         }
         virtual U64 GetSize() const = 0;
 
@@ -80,6 +84,8 @@ namespace FastNx::FsSys {
         }
         FsPath path;
     };
+    using VfsReadOnlyDirectoryPtr = std::shared_ptr<VfsReadOnlyDirectory>;
+
     class VfsBackingDirectory : public VfsReadOnlyDirectory {
     public:
         explicit VfsBackingDirectory(const FsPath &_path) : VfsReadOnlyDirectory(_path) {}

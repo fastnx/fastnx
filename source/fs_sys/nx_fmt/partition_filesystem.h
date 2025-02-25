@@ -44,5 +44,5 @@ namespace FastNx::FsSys::NxFmt {
         U64 bytesused{}; // Byte counter used by the data of all files in this partition
     };
 
-    bool IsAValidPfs(const std::shared_ptr<PartitionFileSystem>& spfs);
+    bool IsAValidPfs(const std::shared_ptr<PartitionFileSystem> &spfs);
 }

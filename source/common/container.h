@@ -16,7 +16,7 @@ namespace FastNx {
 
     template<typename T>
     auto LandingOf(const T &container) {
-        if constexpr (is_vector_v<T>) {
+        if constexpr (IsVectorType<T>) {
             return container.data();
         }
         if constexpr (std::is_base_of_v<T, FsSys::FsPath>) {
@@ -25,8 +25,15 @@ namespace FastNx {
         std::unreachable();
     }
 
-    template<typename T> requires (is_vector_v<T>)
+    template<typename T> requires (IsVectorType<T>)
     auto SizeofVector(const T &vector) {
         return sizeof(vector[0]) * vector.size();
+    }
+
+    constexpr auto IsEqual(const auto &first, const auto &second) {
+        return std::ranges::equal(first, second);
+    }
+    auto ToSpan(const auto &container) {
+        return std::span(container.begin(), container.begin());
     }
 }

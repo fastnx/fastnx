@@ -16,4 +16,9 @@ namespace FastNx {
     };
     template<typename T>
     inline constexpr bool is_vector_v = is_vector<T>::value;
+
+    template<typename T>
+    concept IsVectorType = is_vector_v<T>;
+    template<typename T>
+    concept IsStringType = std::is_same_v<T, std::string> || std::is_same_v<T, std::string_view>;
 }
