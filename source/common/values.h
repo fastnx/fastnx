@@ -15,4 +15,8 @@ namespace FastNx {
 
         std::unreachable();
     }
+
+    U64 CalculateCoverage(auto pick, auto total) {
+        return static_cast<F64>(pick) / static_cast<F64>(total) * 100;
+    }
 }

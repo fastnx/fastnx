@@ -46,6 +46,7 @@ namespace FastNx::FsSys {
             assert(ReadTypeImpl(reinterpret_cast<U8*>(_content.data()), size, _offset) == size);
             return _content;
         }
+        virtual U64 GetSize() const = 0;
 
         FsPath path;
         AccessModeType mode;
@@ -96,6 +97,8 @@ namespace FastNx::FsSys {
 
     bool IsInsideOf(const FsPath &path, const FsPath &is);
     bool IsAPfs0File(const VfsBackingFilePtr &pfs0);
+
+    U64 GetSizeBySeek(I32 fd);
 }
 
 constexpr FastNx::FsSys::FsPath operator ""_fs(const char *str, const FastNx::U64 len) {

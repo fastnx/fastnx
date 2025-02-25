@@ -37,10 +37,11 @@ namespace FastNx::FsSys::NxFmt {
         [[nodiscard]] std::vector<FsPath> ListAllTopLevelFiles() const override {
             return {};
         }
+        U8 coverage{};
     private:
         boost::container::flat_map<std::string, FileEntryMetadata> _files;
         U64 _count{};
-        U64 bytesen{}; // Byte counter used by the data of all files in this partition
+        U64 bytesused{}; // Byte counter used by the data of all files in this partition
     };
 
     bool IsAValidPfs(const std::shared_ptr<PartitionFileSystem>& spfs);

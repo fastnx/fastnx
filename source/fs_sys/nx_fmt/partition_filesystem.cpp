@@ -45,10 +45,10 @@ namespace FastNx::FsSys::NxFmt {
                 _files.emplace(std::move(filename), FileEntryMetadata{filedata + file.offset, file.size});
         };
 
-        auto CountAllBytes = [&](const auto &file) {
-            bytesen += file.second.size;
-        };
-        std::ranges::for_each(_files, CountAllBytes);
+        std::ranges::for_each(_files, [&](const auto &file) {
+            bytesused += file.second.size;
+        });
+        coverage = CalculateCoverage(bytesused, pfsf->GetSize());
     }
 
     std::vector<FsPath> PartitionFileSystem::ListAllFiles() {
@@ -67,6 +67,6 @@ namespace FastNx::FsSys::NxFmt {
     }
 
     bool IsAValidPfs(const std::shared_ptr<PartitionFileSystem> &spfs) {
-        return spfs->GetFilesCount() > 0;
+        return spfs->GetFilesCount() > 0 && spfs->coverage > 95;
     }
 }

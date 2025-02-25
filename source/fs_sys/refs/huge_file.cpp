@@ -45,11 +45,16 @@ namespace FastNx::FsSys::ReFs {
             return {};
         if (lockf(openedfd, F_TEST, 0); errno != EAGAIN)
             return {};
-
-        if (const BufferedFile _osPool{"/proc/self/maps"}; !_osPool)
+        if (const BufferedFile pools{"/proc/self/maps"}; !pools)
             return {};
 
         return true;
+    }
+
+    U64 HugeFile::GetSize() const {
+        if (mapsize)
+            return std::max(GetSizeBySeek(openedfd), mapsize);
+        return {};
     }
 
     U64 HugeFile::ReadTypeImpl(U8 *dest, const U64 size, const U64 offset) {

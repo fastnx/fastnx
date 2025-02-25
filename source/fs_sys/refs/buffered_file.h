@@ -11,11 +11,12 @@ namespace FastNx::FsSys::ReFs {
 
         explicit operator bool() const;
 
+        U64 GetSize() const override;
     protected:
         U64 ReadTypeImpl(U8 *dest, U64 size, U64 offset) override;
 
     private:
-        I32 openedfd{-1};
+        I32 openedfd{};
         boost::container::small_vector<U8, 8 * 1024> buffer;
         U64 start{};
     };

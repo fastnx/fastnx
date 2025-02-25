@@ -10,7 +10,7 @@ namespace FastNx::Loaders {
             return;
         }
 
-        std::println("Files in this PFS: ");
+        std::puts("Files in this PFS: ");
         for (const auto &partfile: _mainPfs->ListAllFiles()) {
             std::println("- {}", partfile.string());
         }

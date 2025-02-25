@@ -12,6 +12,7 @@ namespace FastNx {
     using I32 = std::int32_t;
     using U32 = std::uint32_t;
     using U64 = std::uint64_t;
+    using F64 = double;
 
     template<typename T>
     bool Contains(const auto &container, const std::span<T> &values) {

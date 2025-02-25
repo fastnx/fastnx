@@ -9,13 +9,14 @@ namespace FastNx::FsSys::ReFs {
         ~HugeFile() override;
         explicit operator bool() const;
 
+        U64 GetSize() const override;
     protected:
         U64 ReadTypeImpl(U8 *dest, U64 size, U64 offset) override;
 
     private:
-        I32 openedfd{-1};
-        U8 *memory{nullptr};
-        U8 *recorded{nullptr};
+        I32 openedfd{};
+        U8 *memory{};
+        U8 *recorded{};
         U64 mapsize{};
 
         U64 pagemissRec{};

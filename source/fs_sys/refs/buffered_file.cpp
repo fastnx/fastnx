@@ -52,6 +52,10 @@ namespace FastNx::FsSys::ReFs {
         return fileexists > 0;
     }
 
+    U64 BufferedFile::GetSize() const {
+        return GetSizeBySeek(openedfd);
+    }
+
     U64 BufferedFile::ReadTypeImpl(U8 *dest, const U64 size, const U64 offset) {
         if (const auto &_ioBuffering{buffer}; !_ioBuffering.empty()) {
             auto *source{_ioBuffering.data()};
