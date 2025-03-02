@@ -7,12 +7,13 @@ namespace FastNx::FsSys::ReFs {
         explicit EditableDirectory(const FsPath &_path, bool create = {});
         ~EditableDirectory() override;
 
-        std::vector<FsPath> ListAllFiles() override;
+        std::vector<FsPath> ListAllFiles() const override;
         std::vector<FsPath> ListAllTopLevelFiles() const override;
-        U64 GetFilesCount() override;
+        U64 GetFilesCount() const override;
 
         explicit operator bool() const;
 
-        int descriptor;
+        VfsBackingFilePtr OpenFile(const FsPath &_path, AccessModeType mode = AccessModeType::ReadOnly) override;
+        I32 descriptor;
     };
 }

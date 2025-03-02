@@ -21,11 +21,14 @@ target_sources(fastnx PRIVATE
     common/types.h
     common/values.h
     device/processor.cpp
-    device/capabilities.h
     device/syslimits.cpp
+    device/pages.cpp
+    device/capabilities.h
     kernel/kernelctx.cpp
     kernel/kernelctx.h
     crypto/integrity.cpp
+    crypto/hashsum.cpp
+    crypto/hashsum.h
     crypto/types.h
 )
 

@@ -31,13 +31,16 @@ namespace FastNx::FsSys::NxFmt {
 
         explicit PartitionFileSystem(const VfsBackingFilePtr &pfsf);
 
-        std::vector<FsPath> ListAllFiles() override;
-        U64 GetFilesCount() override;
+        std::vector<FsPath> ListAllFiles() const override;
+        U64 GetFilesCount() const override;
 
-        [[nodiscard]] std::vector<FsPath> ListAllTopLevelFiles() const override {
-            return {};
+        std::vector<FsPath> ListAllTopLevelFiles() const override {
+            return ListAllFiles();
         }
+        VfsBackingFilePtr OpenFile(const FsPath &_path, AccessModeType mode = AccessModeType::ReadOnly) override;
         U8 coverage{};
+
+        VfsBackingFilePtr partfs;
     private:
         boost::container::flat_map<std::string, FileEntryMetadata> _files;
         U64 _count{};

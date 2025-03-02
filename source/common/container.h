@@ -36,4 +36,45 @@ namespace FastNx {
     auto ToSpan(const auto &container) {
         return std::span(container.begin(), container.begin());
     }
+
+    template<typename T>
+    bool Contains(const auto &container, const std::span<T> &values) {
+        U64 count{};
+        for (const auto &value: values) {
+            if (std::ranges::contains(container, value))
+                count++;
+        }
+        return count == values.size();
+    }
+
+
+    template<typename T>
+    bool Contains(const auto &container, const std::initializer_list<T> &values) {
+        std::span<const T> _values(values);
+        return Contains(container, _values);
+    }
+    constexpr auto Contains(const auto &first, const auto &second) {
+        return std::ranges::contains(first, second);
+    }
+
+    template<typename T>
+    concept IsFlatArray = IsVectorType<T> or IsArrayType<T>;
+
+    template<class Source, class Dest>
+    U64 Copy(const Source &source, Dest &dest) {
+        if (source.size() < dest.size())
+            throw std::length_error("The source container is smaller than the destination container");
+        U64 count{};
+
+        if constexpr (IsFlatArray<Source> && IsFlatArray<Dest> && std::is_copy_assignable_v<std::decay_t<Source>>) {
+            std::memcpy(dest.data(), source.data(), dest.size());
+            return dest.size();
+        } else {
+            for (const auto &[_, index]: std::views::enumerate(dest)) {
+                dest[index] = source[index];
+                count++;
+            }
+        }
+        return count;
+    }
 }

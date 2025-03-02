@@ -1,7 +1,7 @@
 #include <fs_sys/types.h>
 
 namespace FastNx::FsSys {
-    std::vector<FsPath> VfsReadOnlyDirectory::GlobAllFiles(const std::string &pattern, const bool followTree) {
+    std::vector<FsPath> VfsReadOnlyDirectory::GlobAllFiles(const std::string &pattern, const bool followTree) const {
         auto filter{pattern};
         const bool starts{filter.ends_with('*')};
         if (const auto starfish{filter.find('*')}; starfish != std::string::npos)

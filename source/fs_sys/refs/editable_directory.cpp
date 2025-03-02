@@ -4,6 +4,8 @@
 #include <unistd.h>
 
 #include <common/container.h>
+#include <fs_sys/refs/buffered_file.h>
+#include <fs_sys/refs/huge_file.h>
 #include <fs_sys/refs/editable_directory.h>
 
 namespace FastNx::FsSys::ReFs {
@@ -23,7 +25,7 @@ namespace FastNx::FsSys::ReFs {
             close(descriptor);
     }
 
-    std::vector<FsPath> EditableDirectory::ListAllFiles() {
+    std::vector<FsPath> EditableDirectory::ListAllFiles() const {
         std::vector<FsPath> filepaths;
         for (const auto& folders : ArrayOf<FsPath>("/etc")) {
             if (path == folders)
@@ -66,9 +68,9 @@ namespace FastNx::FsSys::ReFs {
         return files;
     }
 
-    U64 EditableDirectory::GetFilesCount() {
+    U64 EditableDirectory::GetFilesCount() const {
         U64 result{};
-        for (const std::filesystem::recursive_directory_iterator walker{path}; const auto& file : walker)
+        for (const std::filesystem::recursive_directory_iterator walker{path}; const auto &file: walker)
             if (file.is_regular_file())
                 result++;
         return result;
@@ -89,5 +91,17 @@ namespace FastNx::FsSys::ReFs {
             }
         }
         return true;
+    }
+
+    VfsBackingFilePtr EditableDirectory::OpenFile(const FsPath &_path, const AccessModeType mode) {
+        if (!Contains(ListAllFiles(), _path))
+            return nullptr;
+        if (is_directory(_path))
+            return nullptr;
+
+        if (file_size(_path) > 120_MEGAS) {
+            return std::make_shared<HugeFile>(_path, descriptor, mode);
+        }
+        return std::make_shared<BufferedFile>(_path, descriptor, mode);
     }
 }

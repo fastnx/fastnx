@@ -1,3 +1,6 @@
 [submodule "externals/boost"]
 	path = externals/boost
 	url = https://github.com/fastnx/boost.git
+[submodule "externals/mbedtls"]
+	path = externals/mbedtls
+	url = https://github.com/Mbed-TLS/mbedtls.git

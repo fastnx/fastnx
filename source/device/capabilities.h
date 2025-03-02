@@ -9,4 +9,5 @@ namespace FastNx::Device {
     std::pair<std::string, I32> IsArchSuitable();
 
     U64 GetCoresCount();
+    U64 GetHostPageSize();
 }

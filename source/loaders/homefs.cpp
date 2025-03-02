@@ -1,3 +1,4 @@
+#include <common/container.h>
 #include <fs_sys/refs/editable_directory.h>
 #include <loaders/homefs.h>
 

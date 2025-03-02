@@ -5,7 +5,7 @@
 #include <utility>
 
 namespace FastNx {
-    template <typename T> requires (std::is_unsigned_v<T>)
+    template<typename T> requires (std::is_unsigned_v<T>)
     constexpr auto ConstMagicValue(const std::string_view &magic) {
         assert(!magic.empty());
         T value{};

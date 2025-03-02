@@ -7,3 +7,8 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
     target_compile_options(boost_container PRIVATE -Wno-aggressive-loop-optimizations)
 endif ()
 target_link_libraries(boost_dep INTERFACE Boost::regex Boost::container)
+
+set(ENABLE_PROGRAMS CACHE FORCE "Build Mbed TLS programs." OFF)
+set(ENABLE_TESTING CACHE FORCE "Build Mbed TLS tests." OFF)
+add_subdirectory(mbedtls)
+

@@ -1,20 +1,8 @@
 #include <cassert>
 #include <unordered_map>
-#include <fcntl.h>
 
 #include <fs_sys/types.h>
 namespace FastNx::FsSys {
-    I32 ModeToNative(const AccessModeType type) {
-        if (type == AccessModeType::ReadOnly)
-            return O_RDONLY;
-        if (type == AccessModeType::ReadWrite)
-            return O_RDWR;
-        if (type == AccessModeType::WriteOnly)
-            return O_WRONLY;
-
-        std::unreachable();
-    }
-
     bool IsInsideOf(const FsPath &path, const FsPath &is) {
         assert(exists(path) && exists(is));
         auto dir{path.begin()};

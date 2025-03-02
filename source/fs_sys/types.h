@@ -48,14 +48,17 @@ namespace FastNx::FsSys {
         }
         template<typename T>
         U64 ReadSome(std::vector<T> &content, const U64 _offset) {
-            return ReadTypeImpl(reinterpret_cast<U8*>(content.data()), content.size(), _offset) == content.size();
+            return ReadTypeImpl(reinterpret_cast<U8*>(content.data()), content.size(), _offset);
         }
+        std::string ReadLine(U64 offset = {});
+        std::vector<std::string> GetAllLines();
+
+        virtual explicit operator bool() const = 0;
         virtual U64 GetSize() const = 0;
 
         FsPath path;
         AccessModeType mode;
 
-    private:
         U64 ReadType(U8 *dest, const U64 size, const U64 offset) {
             if (mode == AccessModeType::WriteOnly)
                 throw std::runtime_error("Operation not supported on the file");
@@ -63,8 +66,7 @@ namespace FastNx::FsSys {
                 return {};
             return ReadTypeImpl(dest, size, offset);
         }
-
-    protected:
+    private:
         virtual U64 ReadTypeImpl(U8 *dest, U64 size, U64 offset) = 0;
     };
 
@@ -75,11 +77,13 @@ namespace FastNx::FsSys {
         explicit VfsReadOnlyDirectory(const FsPath &_path) : path(_path) {}
 
         virtual ~VfsReadOnlyDirectory() = default;
-        std::vector<FsPath> GlobAllFiles(const std::string &pattern, bool followTree = {});
-        virtual std::vector<FsPath> ListAllFiles() = 0;
+        std::vector<FsPath> GlobAllFiles(const std::string &pattern, bool followTree = {}) const;
+
+        virtual VfsBackingFilePtr OpenFile(const FsPath &_path, AccessModeType = AccessModeType::ReadOnly) = 0;
+        virtual std::vector<FsPath> ListAllFiles() const = 0;
         [[nodiscard]] virtual std::vector<FsPath> ListAllTopLevelFiles() const = 0;
 
-        virtual U64 GetFilesCount() {
+        virtual U64 GetFilesCount() const {
             return {};
         }
         FsPath path;
@@ -90,13 +94,6 @@ namespace FastNx::FsSys {
     public:
         explicit VfsBackingDirectory(const FsPath &_path) : VfsReadOnlyDirectory(_path) {}
     };
-
-    class RegexFile {
-    public:
-        explicit RegexFile(const FsPath &_path, const std::string &pattern);
-        std::vector<std::string> matches;
-    };
-
 
     I32 ModeToNative(AccessModeType type);
     std::optional<FsPath> GetFullPath(const FsPath &_path);

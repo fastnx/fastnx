@@ -1,7 +1,7 @@
 #include <common/container.h>
 #include <fs_sys/refs/editable_directory.h>
-#include <core/assets.h>
 #include <loaders/homefs.h>
+#include <core/assets.h>
 #include <core/games_lists.h>
 
 namespace FastNx::Core {

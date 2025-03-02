@@ -7,45 +7,48 @@
 #include <fs_sys/refs/buffered_file.h>
 
 namespace FastNx::FsSys::ReFs {
-    BufferedFile::BufferedFile(const FsPath &_path, const AccessModeType _mode, const bool create) : VfsBackingFile(_path, _mode) {
+    BufferedFile::BufferedFile(const FsPath &_path, const I32 dirfd, const AccessModeType _mode, const bool create) : VfsBackingFile(_path, _mode) {
         if (!exists(path) && create) {
             if (std::fstream file{_path, std::ios::trunc}; file.is_open())
                 file.close();
         }
-        openedfd = open64(LandingOf(path), ModeToNative(mode));
+        descriptor = [&] {
+            if (dirfd)
+                return openat64(dirfd, LandingOf(path), ModeToNative(mode));
+            return open64(LandingOf(path), ModeToNative(mode));
+        }();
 
-        if (openedfd < 0) {
+        if (descriptor < 0) {
             std::println(std::cerr, "Could not open the file {}", path.string());
             if (create && exists(path))
                 std::filesystem::remove(path);
         } else if (mode == AccessModeType::ReadWrite) {
-            assert(lockf(openedfd, F_LOCK, 0) == 0);
+            assert(lockf(descriptor, F_LOCK, 0) == 0);
         }
     }
 
     BufferedFile::~BufferedFile() {
-        switch (lockf(openedfd, F_LOCK, 0)) {
+        switch (lockf(descriptor, F_LOCK, 0)) {
             case EACCES:
             case EAGAIN:
-                assert(lockf(openedfd, F_UNLCK, 0) == 0);
-            default: {
-            }
+                assert(lockf(descriptor, F_UNLCK, 0) == 0);
+            default: {}
         }
-        if (openedfd > 0)
-            close(openedfd);
+        if (descriptor > 0)
+            close(descriptor);
         auto &&_buffer{std::move(buffer)};
         _buffer.clear();
     }
 
     BufferedFile::operator bool() const {
         I32 fileexists{3};
-        if (!exists(path) || openedfd == -1)
+        if (!exists(path) || descriptor == -1)
             fileexists--;
         if (mode == AccessModeType::None)
             fileexists--;
 
         struct stat64 status;
-        fstat64(openedfd, &status);
+        fstat64(descriptor, &status);
         if (status.st_ino < 0)
             fileexists--;
 
@@ -53,45 +56,45 @@ namespace FastNx::FsSys::ReFs {
     }
 
     U64 BufferedFile::GetSize() const {
-        return GetSizeBySeek(openedfd);
+        return GetSizeBySeek(descriptor);
     }
 
     U64 BufferedFile::ReadTypeImpl(U8 *dest, const U64 size, const U64 offset) {
-        if (const auto &_ioBuffering{buffer}; !_ioBuffering.empty()) {
-            auto *source{_ioBuffering.data()};
-            [[assume(start > offset)]];
-            if (const auto _ioLocally{start - offset}; _ioLocally < offset) {
-                source += _ioLocally;
-                if (_ioLocally <= size)
-                    std::memcpy(dest, source, size);
+        if (const auto &bufopt{buffer}; !bufopt.empty()) {
+            const auto *source{bufopt.data()};
+            [[assume(start >= offset)]];
+            if (start >= offset && start + valid >= offset + size) {
+                if (const auto locally{source + start - offset})
+                    std::memcpy(dest, locally, size);
             }
-            if (*dest == *source)
+            if (dest == source)
                 return size;
         }
 
-        if (buffer.size() < 8 * 4096)
-            buffer.resize(8 * 4096);
-
+        if (buffer.size() < 16_KILOS)
+            buffer.resize(16_KILOS);
         const auto result = [&] -> U64 {
             U64 copied{};
-
-            for (U64 _offset{}; _offset < offset + size;) {
+            for (U64 _offset{offset}; _offset < offset + size;) {
                 const auto iosize{buffer.size() < size - copied ? buffer.size() : size - copied};
-                assert(buffer.size() >= iosize);
-                const auto retrieved{pread64(openedfd, buffer.data(), iosize, offset)};
 
-                if (retrieved != -1) {
+                U64 retrieved{};
+                if (buffer.size() < copied)
+                    buffer.resize(copied);
+                assert(buffer.size() >= copied);
+                if (retrieved = static_cast<U64>(pread64(descriptor, &buffer[copied], iosize, offset)); retrieved == -1) {
                     if (errno == EFAULT)
-                        return openedfd = -1;
+                        return descriptor = 0;
                     return {};
                 }
                 start = offset;
-                std::memcpy(dest, buffer.data(), static_cast<U32>(retrieved));
+                std::memcpy(dest, &buffer[copied], retrieved);
                 _offset += retrieved;
                 copied += retrieved;
-                if (static_cast<U64>(retrieved) != iosize)
+                if (retrieved != iosize)
                     break;
             }
+            valid = copied;
             return copied;
         }();
         return result;

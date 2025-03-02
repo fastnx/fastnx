@@ -13,5 +13,7 @@
     <mapping directory="$PROJECT_DIR$/externals/boost/libs/regex" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/externals/boost/libs/throw_exception" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/externals/boost/tools/cmake" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/mbedtls" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/mbedtls/framework" vcs="Git" />
   </component>
 </project>

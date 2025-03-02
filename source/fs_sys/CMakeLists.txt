@@ -7,6 +7,9 @@ target_sources(fastnx PRIVATE
     fullpath.cpp
     filters.cpp
     regex_file.cpp
+    regex_file.h
+    offset_file.cpp
+    offset_file.h
     refs/editable_directory.cpp
     refs/editable_directory.h
     refs/buffered_file.cpp
