@@ -14,7 +14,7 @@ namespace FastNx::FsSys {
     using FsPath = std::filesystem::path;
     class SolidDirectory;
 
-    enum class AccessModeType {
+    enum class FileModeType {
         ReadOnly,
         WriteOnly,
         ReadWrite,
@@ -24,7 +24,7 @@ namespace FastNx::FsSys {
     public:
         virtual ~VfsBackingFile() = default;
 
-        explicit VfsBackingFile(const FsPath &_path, const AccessModeType _mode = AccessModeType::ReadOnly) : path(_path), mode(_mode) {}
+        explicit VfsBackingFile(const FsPath &_path, const FileModeType _mode = FileModeType::ReadOnly) : path(_path), mode(_mode) {}
 
         template<typename T> requires (std::is_trivial_v<T>)
         T Read(const U64 _offset = {}) {
@@ -57,11 +57,13 @@ namespace FastNx::FsSys {
         virtual U64 GetSize() const = 0;
 
         FsPath path;
-        AccessModeType mode;
+        FileModeType mode;
 
         U64 ReadType(U8 *dest, const U64 size, const U64 offset) {
-            if (mode == AccessModeType::WriteOnly)
-                throw std::runtime_error("Operation not supported on the file");
+            if (mode == FileModeType::WriteOnly) {
+                throw std::runtime_error{"Operation not supported on the file"};
+            }
+
             if (!dest && !size)
                 return {};
             return ReadTypeImpl(dest, size, offset);
@@ -79,7 +81,7 @@ namespace FastNx::FsSys {
         virtual ~VfsReadOnlyDirectory() = default;
         std::vector<FsPath> GlobAllFiles(const std::string &pattern, bool followTree = {}) const;
 
-        virtual VfsBackingFilePtr OpenFile(const FsPath &_path, AccessModeType = AccessModeType::ReadOnly) = 0;
+        virtual VfsBackingFilePtr OpenFile(const FsPath &_path, FileModeType mode = FileModeType::ReadOnly) = 0;
         virtual std::vector<FsPath> ListAllFiles() const = 0;
         [[nodiscard]] virtual std::vector<FsPath> ListAllTopLevelFiles() const = 0;
 
@@ -95,7 +97,7 @@ namespace FastNx::FsSys {
         explicit VfsBackingDirectory(const FsPath &_path) : VfsReadOnlyDirectory(_path) {}
     };
 
-    I32 ModeToNative(AccessModeType type);
+    I32 ModeToNative(FileModeType type);
     std::optional<FsPath> GetFullPath(const FsPath &_path);
 
     bool IsInsideOf(const FsPath &path, const FsPath &is);

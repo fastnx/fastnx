@@ -93,7 +93,7 @@ namespace FastNx::FsSys::ReFs {
         return true;
     }
 
-    VfsBackingFilePtr EditableDirectory::OpenFile(const FsPath &_path, const AccessModeType mode) {
+    VfsBackingFilePtr EditableDirectory::OpenFile(const FsPath &_path, const FileModeType mode) {
         if (!Contains(ListAllFiles(), _path))
             return nullptr;
         if (is_directory(_path))

@@ -7,7 +7,7 @@
 #include <fs_sys/refs/buffered_file.h>
 
 namespace FastNx::FsSys::ReFs {
-    BufferedFile::BufferedFile(const FsPath &_path, const I32 dirfd, const AccessModeType _mode, const bool create) : VfsBackingFile(_path, _mode) {
+    BufferedFile::BufferedFile(const FsPath &_path, const I32 dirfd, const FileModeType _mode, const bool create) : VfsBackingFile(_path, _mode) {
         if (!exists(path) && create) {
             if (std::fstream file{_path, std::ios::trunc}; file.is_open())
                 file.close();
@@ -22,7 +22,7 @@ namespace FastNx::FsSys::ReFs {
             std::println(std::cerr, "Could not open the file {}", GetPathStr(path));
             if (create && exists(path))
                 std::filesystem::remove(path);
-        } else if (mode == AccessModeType::ReadWrite) {
+        } else if (mode == FileModeType::ReadWrite) {
             assert(lockf(descriptor, F_LOCK, 0) == 0);
         }
     }
@@ -44,7 +44,7 @@ namespace FastNx::FsSys::ReFs {
         I32 fileexists{3};
         if (!exists(path) || descriptor == -1)
             fileexists--;
-        if (mode == AccessModeType::None)
+        if (mode == FileModeType::None)
             fileexists--;
 
         struct stat64 status;

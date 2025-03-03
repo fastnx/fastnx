@@ -14,7 +14,7 @@ namespace FastNx::Crypto {
     constexpr std::array<U8, Size> ToArrayOfBytes(const T &string) {
         std::array<U8, Size> result{};
         if (string.size() / 2 != result.size())
-            throw std::bad_cast();
+            throw std::bad_cast{};
 
         thread_local std::vector<U8> bytes;
         if (bytes.size() < result.size())

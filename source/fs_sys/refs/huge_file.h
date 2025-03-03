@@ -5,7 +5,7 @@
 namespace FastNx::FsSys::ReFs {
     class HugeFile final : public VfsBackingFile {
     public:
-        explicit HugeFile(const FsPath &_path, I32 dirfd = {}, AccessModeType _mode = AccessModeType::ReadOnly);
+        explicit HugeFile(const FsPath &_path, I32 dirfd = {}, FileModeType _mode = FileModeType::ReadOnly);
         ~HugeFile() override;
         explicit operator bool() const override;
 

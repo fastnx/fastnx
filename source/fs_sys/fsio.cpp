@@ -34,12 +34,12 @@ namespace FastNx::FsSys {
         return result;
     }
 
-    I32 ModeToNative(const AccessModeType type) {
-        if (type == AccessModeType::ReadOnly)
+    I32 ModeToNative(const FileModeType type) {
+        if (type == FileModeType::ReadOnly)
             return O_RDONLY;
-        if (type == AccessModeType::ReadWrite)
+        if (type == FileModeType::ReadWrite)
             return O_RDWR;
-        if (type == AccessModeType::WriteOnly)
+        if (type == FileModeType::WriteOnly)
             return O_WRONLY;
 
         std::unreachable();

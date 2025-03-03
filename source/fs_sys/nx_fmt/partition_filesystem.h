@@ -37,7 +37,7 @@ namespace FastNx::FsSys::NxFmt {
         std::vector<FsPath> ListAllTopLevelFiles() const override {
             return ListAllFiles();
         }
-        VfsBackingFilePtr OpenFile(const FsPath &_path, AccessModeType mode = AccessModeType::ReadOnly) override;
+        VfsBackingFilePtr OpenFile(const FsPath &_path, FileModeType mode = FileModeType::ReadOnly) override;
         U8 coverage{};
 
         VfsBackingFilePtr partfs;

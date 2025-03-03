@@ -6,7 +6,7 @@
 namespace FastNx::FsSys::ReFs {
     class BufferedFile final : public VfsBackingFile {
     public:
-        explicit BufferedFile(const FsPath &_path, I32 dirfd = {}, AccessModeType _mode = AccessModeType::ReadOnly, bool create = {});
+        explicit BufferedFile(const FsPath &_path, I32 dirfd = {}, FileModeType _mode = FileModeType::ReadOnly, bool create = {});
         ~BufferedFile() override;
 
         explicit operator bool() const override;

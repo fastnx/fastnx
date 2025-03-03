@@ -23,6 +23,8 @@ target_sources(fastnx PRIVATE
     device/processor.cpp
     device/syslimits.cpp
     device/pages.cpp
+    device/memory.cpp
+    device/memory.h
     device/capabilities.h
     kernel/kernelctx.cpp
     kernel/kernelctx.h

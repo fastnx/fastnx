@@ -68,12 +68,12 @@ namespace FastNx::FsSys::NxFmt {
         return std::min(_count, _files.size());
     }
 
-    VfsBackingFilePtr PartitionFileSystem::OpenFile(const FsPath &_path, const AccessModeType mode) {
+    VfsBackingFilePtr PartitionFileSystem::OpenFile(const FsPath &_path, const FileModeType mode) {
         if (_path.has_parent_path())
             return nullptr;
         if (!Contains(ListAllTopLevelFiles(), _path))
             return nullptr;
-        assert(mode == AccessModeType::ReadOnly);
+        assert(mode == FileModeType::ReadOnly);
 
         if (const auto entry{_files.find(_path)}; entry != _files.end())
             return std::make_shared<OffsetFile>(partfs, _path, entry->second.offset, entry->second.size, exists(path));

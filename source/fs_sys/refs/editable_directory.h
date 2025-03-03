@@ -13,7 +13,7 @@ namespace FastNx::FsSys::ReFs {
 
         explicit operator bool() const;
 
-        VfsBackingFilePtr OpenFile(const FsPath &_path, AccessModeType mode = AccessModeType::ReadOnly) override;
+        VfsBackingFilePtr OpenFile(const FsPath &_path, FileModeType mode = FileModeType::ReadOnly) override;
         I32 descriptor;
     };
 }

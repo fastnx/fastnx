@@ -10,10 +10,12 @@
 
 #include <common/container.h>
 #include <device/capabilities.h>
+#include <device/memory.h>
+
 #include <fs_sys/refs/buffered_file.h>
 #include <fs_sys/refs/huge_file.h>
 namespace FastNx::FsSys::ReFs {
-    HugeFile::HugeFile(const FsPath &_path, const I32 dirfd, const AccessModeType _mode) : VfsBackingFile(_path, _mode) {
+    HugeFile::HugeFile(const FsPath &_path, const I32 dirfd, const FileModeType _mode) : VfsBackingFile(_path, _mode) {
         if (!exists(path))
             return;
 
@@ -27,21 +29,17 @@ namespace FastNx::FsSys::ReFs {
             std::println(std::cerr, "Could not open the file {}", GetPathStr(path));
             return;
         }
-        if (mode != AccessModeType::ReadOnly)
+        const auto writable{mode != FileModeType::ReadOnly};
+        if (writable)
             assert(lockf(descriptor, F_LOCK, 0) == 0);
 
-        struct stat64 status{};
-        fstat64(descriptor, &status);
-        if (auto *buffering{mmap(nullptr, status.st_size, PROT_READ, MAP_PRIVATE, descriptor, 0)}; buffering != MAP_FAILED)
-            memory = static_cast<U8 *>(buffering);
-        if (memory)
-            mapsize = status.st_size;
+        memory = static_cast<U8 *>(Device::AllocateMemory(mapsize, nullptr, descriptor, true, writable));
     }
 
     HugeFile::~HugeFile() {
         if (memory)
-            assert(munmap(memory, mapsize) == 0);
-        if (mode != AccessModeType::ReadOnly)
+            Device::FreeMemory(memory, mapsize);
+        if (mode != FileModeType::ReadOnly)
             assert(lockf(descriptor, F_UNLCK, 0) == 0);
         if (descriptor > 0)
             close(descriptor);
@@ -53,16 +51,7 @@ namespace FastNx::FsSys::ReFs {
         if (lockf(descriptor, F_TEST, 0) != 0 && errno != EAGAIN)
             return {};
 
-        bool inpool{};
-        if (BufferedFile pools{"/proc/self/maps"}; pools) {
-            const auto memname{fmt::format("{:x}", reinterpret_cast<U64>(memory))};
-            for (const auto &mapstr: pools.GetAllLines()) {
-                if (mapstr.starts_with(memname))
-                    if ((inpool = true))
-                        break;
-            }
-        }
-        return inpool;
+        return Device::GetMemorySize(memory) == mapsize;
     }
 
     U64 HugeFile::GetSize() const {
@@ -92,7 +81,7 @@ namespace FastNx::FsSys::ReFs {
             if (errno == ENOMEM)
                 pagefaultrec++;
         if (offset + size > mapsize)
-            throw std::bad_alloc();
+            throw std::bad_alloc{};
 
         [[unlikely]] if (size >= 4_MBYTES) {
             std::vector<U8> pages((_size + pagesize - 1) / pagesize);
