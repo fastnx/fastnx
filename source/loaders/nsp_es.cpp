@@ -12,7 +12,7 @@ namespace FastNx::Loaders {
 
         std::puts("Files in this PFS: ");
         for (const auto &partfile: _mainPfs->ListAllFiles()) {
-            std::println("- {}", partfile.string());
+            std::println("- {}", FsSys::GetPathStr(partfile));
         }
 
         subnsp = std::make_shared<FsSys::NxFmt::SubmissionPackage>(_mainPfs);

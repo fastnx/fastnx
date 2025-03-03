@@ -24,7 +24,7 @@ namespace FastNx::FsSys::ReFs {
         }();
 
         if (descriptor < 0) {
-            std::println(std::cerr, "Could not open the file {}", path.string());
+            std::println(std::cerr, "Could not open the file {}", GetPathStr(path));
             return;
         }
         if (mode != AccessModeType::ReadOnly)

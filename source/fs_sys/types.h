@@ -102,6 +102,16 @@ namespace FastNx::FsSys {
     bool IsAPfs0File(const VfsBackingFilePtr &pfs0);
 
     U64 GetSizeBySeek(I32 fd);
+
+    template<typename T>
+    std::string GetPathStr(const T &value) {
+        if constexpr (std::is_same_v<T, FsPath>) {
+            return value.string();
+        } else {
+            [[assume(std::is_same_v<T, VfsBackingFilePtr>)]];
+            return GetPathStr(value->path);
+        }
+    }
 }
 
 constexpr FastNx::FsSys::FsPath operator ""_fs(const char *str, const FastNx::U64 len) {

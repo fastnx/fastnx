@@ -17,7 +17,7 @@ namespace FastNx::FsSys::NxFmt {
         for (const auto &content : files) {
             assert(content.extension() == ".nca");
             if (corrupted) {
-                std::println("The NCA file {} is corrupted, check your ROM", corrupted->path.string());
+                std::println("The NCA file {} is corrupted, check your ROM", GetPathStr(corrupted));
                 return;
             }
             if (const auto ncafile{pfs->OpenFile(content)}) {

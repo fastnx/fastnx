@@ -28,7 +28,7 @@ namespace FastNx::Crypto {
     }
 
     bool CheckNcaIntegrity(const FsSys::VfsBackingFilePtr &file) {
-        const auto &fullpath{file->path.string()};
+        const auto &fullpath{GetPathStr(file)};
         std::vector<U8> buffer(4_MBYTES);
 
         if (!isalnum(*fullpath.begin()))
@@ -50,7 +50,7 @@ namespace FastNx::Crypto {
         }
 
         const auto result(checksum.Finish());
-        fmt::println("SHA256 result of NCA {}, {:x}", file->path.string(), fmt::join(result, ""));
+        fmt::println("SHA256 result of NCA {}, {:x}", GetPathStr(file), fmt::join(result, ""));
         return Contains(hashsum, ToSpan(result));
     }
 }
