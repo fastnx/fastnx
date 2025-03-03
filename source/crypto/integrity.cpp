@@ -1,10 +1,13 @@
 #include <common/traits.h>
 #include <common/container.h>
 
+#include <fmt/format.h>
+#include <fmt/ranges.h>
 #include <boost/algorithm/hex.hpp>
 
 #include <crypto/types.h>
 #include <crypto/hashsum.h>
+
 
 namespace FastNx::Crypto {
     template<U64 Size, typename T> requires (IsStringType<T>)
@@ -26,12 +29,12 @@ namespace FastNx::Crypto {
 
     bool CheckNcaIntegrity(const FsSys::VfsBackingFilePtr &file) {
         const auto &fullpath{file->path.string()};
-        std::vector<U8> buffer(4_MEGAS);
+        std::vector<U8> buffer(4_MBYTES);
 
         if (!isalnum(*fullpath.begin()))
             return {};
 
-        if (fullpath.contains(".cnmt") || file->GetSize() > 64_MEGAS) // Skipping large files for now
+        if (fullpath.contains(".cnmt") || file->GetSize() > 64_MBYTES) // Skipping large files for now
             return true;
         const auto hashsum{ToArrayOfBytes<16>(std::string_view(fullpath).substr(0, fullpath.find_last_of('.')))};
 
@@ -47,6 +50,7 @@ namespace FastNx::Crypto {
         }
 
         const auto result(checksum.Finish());
+        fmt::println("SHA256 result of NCA {}, {:x}", file->path.string(), fmt::join(result, ""));
         return Contains(hashsum, ToSpan(result));
     }
 }

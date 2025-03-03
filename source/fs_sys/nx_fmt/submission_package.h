@@ -8,5 +8,7 @@ namespace FastNx::FsSys::NxFmt {
         explicit SubmissionPackage(const std::shared_ptr<PartitionFileSystem> &pfs);
 
         std::shared_ptr<Loaders::RomDirMkFs> _rfs;
+        VfsBackingFilePtr cnmt{nullptr};
+        VfsBackingFilePtr corrupted{nullptr};
     };
 }

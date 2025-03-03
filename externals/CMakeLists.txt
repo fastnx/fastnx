@@ -12,3 +12,7 @@ set(ENABLE_PROGRAMS CACHE FORCE "Build Mbed TLS programs." OFF)
 set(ENABLE_TESTING CACHE FORCE "Build Mbed TLS tests." OFF)
 add_subdirectory(mbedtls)
 
+set(FMT_INSTALL CACHE FORCE "Generate the install target." OFF)
+add_subdirectory(fmt)
+
+

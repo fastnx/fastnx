@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 
+#include <fmt/format.h>
 #include <boost/align.hpp>
 
 #include <common/container.h>
@@ -54,7 +55,7 @@ namespace FastNx::FsSys::ReFs {
 
         bool inpool{};
         if (BufferedFile pools{"/proc/self/maps"}; pools) {
-            const auto memname{std::format("{:x}", reinterpret_cast<U64>(memory))};
+            const auto memname{fmt::format("{:x}", reinterpret_cast<U64>(memory))};
             for (const auto &mapstr: pools.GetAllLines()) {
                 if (mapstr.starts_with(memname))
                     if ((inpool = true))
@@ -73,7 +74,7 @@ namespace FastNx::FsSys::ReFs {
     U64 HugeFile::ReadTypeFaster(U8 *dest, const U64 size, const U64 offset) {
         U64 copied{};
         for (U64 _offat{offset}; _offat < offset + size; ) {
-            const auto stride{std::min(size - copied, 4_MEGAS)};
+            const auto stride{std::min(size - copied, 4_MBYTES)};
             copied += ReadTypeImpl(dest, stride, _offat);
             _offat += stride;
             dest += stride;
@@ -93,7 +94,7 @@ namespace FastNx::FsSys::ReFs {
         if (offset + size > mapsize)
             throw std::bad_alloc();
 
-        [[unlikely]] if (size >= 4_MEGAS) {
+        [[unlikely]] if (size >= 4_MBYTES) {
             std::vector<U8> pages((_size + pagesize - 1) / pagesize);
             assert(mincore(aligned, _size, pages.data()) == 0);
             std::memcpy(dest, _source, size);

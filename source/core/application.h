@@ -11,7 +11,7 @@ namespace FastNx::Core {
 
         void LoadFirstPickedGame() const;
     private:
-        std::shared_ptr<Assets> filesAm;
+        std::shared_ptr<Assets> assets;
         std::shared_ptr<Horizon::SwitchNs> _switch;
     };
 }

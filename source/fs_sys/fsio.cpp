@@ -46,22 +46,20 @@ namespace FastNx::FsSys {
     }
 
     std::string VfsBackingFile::ReadLine(const U64 offset) {
-        std::vector<char> content;
-        while (!Contains(content, '\n')) {
-            const auto linesize{content.size() + 32};
-            content.resize(linesize);
-
-            const auto size{ReadSome(content, offset)};
-            if (size != linesize)
-                content.resize(size);
-            if (size < linesize)
+        constexpr auto BufferSize{32};
+        std::vector<char> content(BufferSize);
+        for (U64 linesize{}; !Contains(content, '\n'); ) {
+            if (content.size() < linesize)
                 break;
+            linesize += BufferSize;
+
+            content.resize(linesize);
+            if (const auto size{ReadSome(content, offset)}; size != linesize)
+                content.resize(size);
         }
-        std::string result(content.begin(), content.end());
-        if (const auto position{result.find_first_of('\n')}; !result.empty())
-            if (position != std::string::npos)
-                result.erase(position);
-        return result;
+        if (const auto &newline{std::ranges::find(content, '\n')}; newline != content.end())
+            content.erase(newline, content.end());
+        return std::string(content.begin(), content.end());
     }
 
     std::vector<std::string> VfsBackingFile::GetAllLines() {

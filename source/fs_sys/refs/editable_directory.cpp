@@ -99,7 +99,7 @@ namespace FastNx::FsSys::ReFs {
         if (is_directory(_path))
             return nullptr;
 
-        if (file_size(_path) > 120_MEGAS) {
+        if (file_size(_path) > 120_MBYTES) {
             return std::make_shared<HugeFile>(_path, descriptor, mode);
         }
         return std::make_shared<BufferedFile>(_path, descriptor, mode);

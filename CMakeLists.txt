@@ -12,4 +12,4 @@ add_executable(fastnx)
 
 add_subdirectory(externals)
 add_subdirectory(source)
-target_link_libraries(fastnx PRIVATE boost_dep MbedTLS::mbedcrypto)
+target_link_libraries(fastnx PRIVATE boost_dep MbedTLS::mbedcrypto fmt::fmt)

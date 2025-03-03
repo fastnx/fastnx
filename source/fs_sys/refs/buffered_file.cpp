@@ -71,8 +71,8 @@ namespace FastNx::FsSys::ReFs {
                 return size;
         }
 
-        if (buffer.size() < 16_KILOS)
-            buffer.resize(16_KILOS);
+        if (buffer.size() < 16_KBYTES)
+            buffer.resize(16_KBYTES);
         const auto result = [&] -> U64 {
             U64 copied{};
             for (U64 _offset{offset}; _offset < offset + size;) {
@@ -82,7 +82,7 @@ namespace FastNx::FsSys::ReFs {
                 if (buffer.size() < copied)
                     buffer.resize(copied);
                 assert(buffer.size() >= copied);
-                if (retrieved = static_cast<U64>(pread64(descriptor, &buffer[copied], iosize, offset)); retrieved == -1) {
+                if (retrieved = static_cast<U64>(pread64(descriptor, &buffer[copied], iosize, offset)); retrieved == -1ULL) {
                     if (errno == EFAULT)
                         return descriptor = 0;
                     return {};

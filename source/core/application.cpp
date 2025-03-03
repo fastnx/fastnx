@@ -18,35 +18,33 @@ namespace FastNx::Core {
     }
 
     Application::Application() : _switch(std::make_shared<Horizon::SwitchNs>()) {
-        std::optional<std::string> systemsname;
+        std::optional<std::string> osname;
 #if defined(__linux__)
         FsSys::ReFs::EditableDirectory release{"/etc"};
         if (const auto files{release.GlobAllFiles("*-release")}; !files.empty()) {
-            systemsname.emplace(release.OpenFile(files.front())->ReadLine());
+            osname.emplace(release.OpenFile(files.front())->ReadLine());
         }
 #endif
 
         const auto current{std::filesystem::current_path()};
         std::println("FastNx application started on core {} with PID {} in directory {}", GetCoreNumber(), GetProcessId(), LandingOf(current));
 
-        if (const auto sysstr{systemsname.value()}; systemsname)
-            std::println("Operating system name: {}", sysstr);
+        std::println("Operating system name: {}", *osname);
     }
 
     Application::~Application() {
-        if (filesAm)
-            filesAm->Destroy();
+        if (assets)
+            assets->Destroy();
     }
 
     void Application::Initialize() {
-        if (auto fsAssets{std::make_shared<Assets>()})
-            filesAm.swap(fsAssets);
-        filesAm->Initialize();
+        assets = std::make_shared<Assets>();
+        assets->Initialize();
     }
 
     void Application::LoadFirstPickedGame() const {
         const auto gamefile = [&]-> FsSys::VfsBackingFilePtr {
-            const auto &runnable{filesAm->GetAllGames()};
+            const auto &runnable{assets->GetAllGames()};
             if (runnable.empty())
                 return nullptr;
 
