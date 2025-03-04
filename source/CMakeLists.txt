@@ -20,6 +20,7 @@ target_sources(fastnx PRIVATE
     common/traits.h
     common/types.h
     common/values.h
+    common/exception.h
     device/processor.cpp
     device/syslimits.cpp
     device/pages.cpp

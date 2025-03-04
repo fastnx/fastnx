@@ -21,12 +21,14 @@ namespace FastNx::Loaders {
         }
         const FsSys::VfsBackingFilePtr backing;
         const AppType type;
-        LoaderStatus status{LoaderStatus::Undefined};
-
+        LoaderStatus status{};
     protected:
-        bool& isLoaded;
-        void _Finish() const;
+        bool &isLoaded;
+        void Finish() const;
     };
     using AppLoaderPtr = std::shared_ptr<AppLoader>;
     AppType GetApplicationType(const FsSys::VfsBackingFilePtr &file);
+
+    std::string AppTypeToString(AppType type);
+    std::string GetLoaderPrettyString(const std::shared_ptr<AppLoader> &app);
 }

@@ -12,7 +12,7 @@ namespace FastNx::Device {
         auto prots{PROT_READ};
         auto flags{MAP_PRIVATE};
 
-        enbhuge = !file ? enbhuge : 0;
+        enbhuge = !file ? enbhuge : false;
         if (writable)
             prots |= PROT_WRITE;
         if (!file)

@@ -18,7 +18,6 @@ namespace FastNx::Loaders {
         subnsp = std::make_shared<FsSys::NxFmt::SubmissionPackage>(_mainPfs);
 
         status = LoaderStatus::Success;
-        _Finish();
-        assert(isLoaded);
+        Finish();
     }
 }
