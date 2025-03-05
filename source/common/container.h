@@ -1,9 +1,11 @@
 #pragma once
+#include <cassert>
 #include <utility>
 #include <array>
+#include <algorithm>
+
 #include <common/traits.h>
 #include <fs_sys/types.h>
-
 namespace FastNx {
     template<typename... T>
     auto ArrayOf(T &&... list) {
@@ -15,11 +17,12 @@ namespace FastNx {
     }
 
     template<typename T>
-    auto LandingOf(const T &container) {
+    auto GetDataArray(const T &container) {
         if constexpr (IsVectorType<T>) {
             return container.data();
-        }
-        if constexpr (std::is_base_of_v<T, FsSys::FsPath>) {
+        } else if constexpr (IsArrayType<T>) {
+            return container.data();
+        } else if constexpr (std::is_base_of_v<T, FsSys::FsPath>) {
             return container.c_str();
         }
         std::unreachable();
@@ -57,24 +60,20 @@ namespace FastNx {
         return std::ranges::contains(first, second);
     }
 
-    template<typename T>
-    concept IsFlatArray = IsVectorType<T> or IsArrayType<T>;
-
-    template<class Source, class Dest>
+    template<typename Source, typename Dest>
     U64 Copy(const Source &source, Dest &dest) {
-        if (source.size() < dest.size())
-            throw std::length_error("The source container is smaller than the destination container");
-        U64 count{};
+        assert(source.size() <= dest.size()); // The source container is smaller than the destination container
 
-        if constexpr (IsFlatArray<Source> && IsFlatArray<Dest> && std::is_copy_assignable_v<std::decay_t<Source>>) {
+        if constexpr (IsFlatArray<Source> && IsFlatArray<Dest>) {
             std::memcpy(dest.data(), source.data(), dest.size());
             return dest.size();
         } else {
+            U64 count{};
             for (const auto &[_, index]: std::views::enumerate(dest)) {
                 dest[index] = source[index];
                 count++;
             }
+            return count;
         }
-        return count;
     }
 }

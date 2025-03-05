@@ -19,6 +19,6 @@ void FastNx::Horizon::SwitchNs::LoadApplicationFile(const FsSys::VfsBackingFileP
     }();
 
     if (!isLoaded)
-        throw exception("Could not load the ROM due to: {}", GetLoaderPrettyString(application));
+        throw exception{"Could not load the ROM due to: {}", GetLoaderPrettyString(application)};
     assert(isLoaded);
 }

@@ -1,10 +1,8 @@
 #pragma once
 
 #include <cstdint>
-#include <algorithm>
 #include <utility>
 #include <ranges>
-
 namespace FastNx {
     using U8 = std::uint8_t;
 

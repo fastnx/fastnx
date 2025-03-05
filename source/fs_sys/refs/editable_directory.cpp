@@ -17,7 +17,7 @@ namespace FastNx::FsSys::ReFs {
         if (exists(path))
             assert(is_directory(path));
         if (const auto &dirpath{path}; !dirpath.empty())
-            descriptor = open(LandingOf(dirpath), O_DIRECTORY);
+            descriptor = open(GetDataArray(dirpath), O_DIRECTORY);
     }
 
     EditableDirectory::~EditableDirectory() {
@@ -42,7 +42,7 @@ namespace FastNx::FsSys::ReFs {
                  walker) {
                 if (walker->is_regular_file()) {
                     filepaths.emplace_back(walker->path());
-                    if (const auto opened{openat(descriptor, LandingOf(walker->path()), O_RDONLY)}; opened > 0) {
+                    if (const auto opened{openat(descriptor, GetDataArray(walker->path()), O_RDONLY)}; opened > 0) {
                         close(opened);
                     } else {
                         filepaths.pop_back();

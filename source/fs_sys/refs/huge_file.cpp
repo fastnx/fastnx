@@ -21,8 +21,8 @@ namespace FastNx::FsSys::ReFs {
 
         descriptor = [&] {
             if (dirfd)
-                return openat64(dirfd, LandingOf(path), ModeToNative(mode));
-            return open64(LandingOf(path), ModeToNative(mode));
+                return openat64(dirfd, GetDataArray(path), ModeToNative(mode));
+            return open64(GetDataArray(path), ModeToNative(mode));
         }();
 
         if (descriptor < 0) {

@@ -3,7 +3,6 @@
 #include <optional>
 #include <unistd.h>
 
-#include <common/container.h>
 #include <fs_sys/refs/editable_directory.h>
 #include <fs_sys/refs/huge_file.h>
 #include <core/application.h>
@@ -27,7 +26,7 @@ namespace FastNx::Core {
 #endif
 
         const auto current{std::filesystem::current_path()};
-        std::println("FastNx application started on core {} with PID {} in directory {}", GetCoreNumber(), GetProcessId(), LandingOf(current));
+        std::println("FastNx application started on core {} with PID {} in directory {}", GetCoreNumber(), GetProcessId(), FsSys::GetPathStr(current));
 
         std::println("Operating system name: {}", *osname);
     }
