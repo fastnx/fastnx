@@ -6,8 +6,14 @@
 
 namespace FastNx {
     template<typename T> requires (std::is_unsigned_v<T>)
-    constexpr auto ConstMagicValue(const std::string_view &magic) {
+    constexpr auto ConstMagicValue(const std::string_view &magic) -> T {
         assert(!magic.empty());
+        for (const auto _ch: magic) {
+            if (!isalnum(_ch))
+                return {};
+        }
+        if (magic.starts_with(std::string(4, '0')))
+            return {};
         T value{};
         std::memcpy(&value, magic.data(), std::min(magic.size(), sizeof(T)));
         if (value)

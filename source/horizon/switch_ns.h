@@ -9,6 +9,6 @@ namespace FastNx::Horizon {
 
         void LoadApplicationFile(const FsSys::VfsBackingFilePtr &appf);
 
-        Loaders::AppLoaderPtr application;
+        std::shared_ptr<Loaders::AppLoader> application;
     };
 }

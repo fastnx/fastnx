@@ -23,7 +23,7 @@ namespace FastNx::Crypto {
             bytes.clear();
 
         boost::algorithm::unhex(string, std::back_inserter(bytes));
-        assert(Copy(bytes, result) == bytes.size());
+        assert(Copy(result, bytes) == bytes.size());
         return result;
     }
 

@@ -16,6 +16,8 @@ target_sources(fastnx PRIVATE
     loaders/romdir_mkfs.h
     horizon/switch_ns.cpp
     horizon/switch_ns.h
+    horizon/key_set.cpp
+    horizon/key_set.h
     common/container.h
     common/traits.h
     common/types.h
@@ -32,6 +34,8 @@ target_sources(fastnx PRIVATE
     crypto/integrity.cpp
     crypto/hashsum.cpp
     crypto/hashsum.h
+    crypto/safe_aes.cpp
+    crypto/safe_aes.h
     crypto/types.h
 )
 

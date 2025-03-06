@@ -26,7 +26,6 @@ namespace FastNx::Loaders {
         bool &isLoaded;
         void Finish() const;
     };
-    using AppLoaderPtr = std::shared_ptr<AppLoader>;
     AppType GetApplicationType(const FsSys::VfsBackingFilePtr &file);
 
     std::string AppTypeToString(AppType type);

@@ -1,7 +1,8 @@
 #pragma once
 
-#include <core/games_lists.h>
 #include <map>
+#include <core/games_lists.h>
+#include <fs_sys/refs/editable_directory.h>
 namespace FastNx::Core {
     enum class AssetsType {
         Games
@@ -15,8 +16,9 @@ namespace FastNx::Core {
 
         std::vector<FsSys::FsPath> GetAllGames() const;
 
-        FsSys::FsPath directory;
-        FsSys::FsPath games;
+        std::optional<FsSys::ReFs::EditableDirectory> directory;
+        std::optional<FsSys::ReFs::EditableDirectory> games;
+        std::optional<FsSys::ReFs::EditableDirectory> keys;
 
         std::optional<GamesLists> gamesLists;
         std::map<AssetsType, FsSys::FsPath> paths;

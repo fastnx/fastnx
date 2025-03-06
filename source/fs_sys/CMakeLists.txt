@@ -10,6 +10,8 @@ target_sources(fastnx PRIVATE
     regex_file.h
     offset_file.cpp
     offset_file.h
+    xts_file.cpp
+    xts_file.h
     refs/editable_directory.cpp
     refs/editable_directory.h
     refs/buffered_file.cpp
@@ -20,4 +22,6 @@ target_sources(fastnx PRIVATE
     nx_fmt/partition_filesystem.h
     nx_fmt/submission_package.cpp
     nx_fmt/submission_package.h
+    nx_fmt/content_archive.cpp
+    nx_fmt/content_archive.h
 )

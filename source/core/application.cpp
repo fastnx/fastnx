@@ -39,6 +39,8 @@ namespace FastNx::Core {
     void Application::Initialize() {
         assets = std::make_shared<Assets>();
         assets->Initialize();
+
+        keys = std::make_shared<Horizon::KeySet>(*assets->keys);
     }
 
     void Application::LoadFirstPickedGame() const {

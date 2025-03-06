@@ -61,7 +61,7 @@ namespace FastNx {
     }
 
     template<typename Source, typename Dest>
-    U64 Copy(const Source &source, Dest &dest) {
+    U64 Copy(Dest &dest, const Source &source) {
         assert(source.size() <= dest.size()); // The source container is smaller than the destination container
 
         if constexpr (IsFlatArray<Source> && IsFlatArray<Dest>) {
@@ -75,5 +75,14 @@ namespace FastNx {
             }
             return count;
         }
+    }
+
+    template<typename T>
+    auto EraseAllWith(std::vector<T> &values, const T value = {}) {
+        for (auto it{values.begin()}; it != values.end(); ++it) {
+            if (*it == value)
+                it = values.erase(it);
+        }
+        return values;
     }
 }

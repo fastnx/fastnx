@@ -1,7 +1,8 @@
 #pragma once
-#include <horizon/switch_ns.h>
-#include <core/assets.h>
 
+#include <core/assets.h>
+#include <horizon/switch_ns.h>
+#include <horizon/key_set.h>
 namespace FastNx::Core {
     class Application {
     public:
@@ -12,6 +13,7 @@ namespace FastNx::Core {
         void LoadFirstPickedGame() const;
     private:
         std::shared_ptr<Assets> assets;
+        std::shared_ptr<Horizon::KeySet> keys;
         std::shared_ptr<Horizon::SwitchNs> _switch;
     };
 }

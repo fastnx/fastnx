@@ -109,9 +109,11 @@ namespace FastNx::FsSys {
     std::string GetPathStr(const T &value) {
         if constexpr (std::is_same_v<T, FsPath>) {
             return value.string();
-        } else {
-            [[assume(std::is_same_v<T, VfsBackingFilePtr>)]];
+        } else if constexpr (std::is_same_v<T, VfsBackingFilePtr>) {
             return GetPathStr(value->path);
+        } else {
+            [[assume(std::is_same_v<T, VfsBackingDirectory>)]];
+            return GetPathStr(value.path);
         }
     }
 }

@@ -2,6 +2,7 @@
 
 #include <crypto/types.h>
 #include <fs_sys/nx_fmt/submission_package.h>
+#include <fs_sys/nx_fmt/content_archive.h>
 namespace FastNx::FsSys::NxFmt {
     SubmissionPackage::SubmissionPackage(const std::shared_ptr<PartitionFileSystem> &pfs) {
         auto files{pfs->ListAllFiles()};
@@ -23,6 +24,8 @@ namespace FastNx::FsSys::NxFmt {
             if (const auto ncafile{pfs->OpenFile(content)}) {
                 if (Crypto::CheckNcaIntegrity(ncafile) == false)
                     corrupted = ncafile;
+
+                [[maybe_unused]] const auto archive{std::make_shared<ContentArchive>(std::move(ncafile))};
             }
         }
     }

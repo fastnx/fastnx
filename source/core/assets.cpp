@@ -1,7 +1,7 @@
 #include <cassert>
 #include <unistd.h>
 
-#include <fs_sys/refs/editable_directory.h>
+#include <common/exception.h>
 #include <core/assets.h>
 namespace FastNx::Core {
     auto ContainsPath(const FsSys::FsPath &dest, const FsSys::FsPath &src) {
@@ -27,11 +27,6 @@ namespace FastNx::Core {
         if (const auto target{"com/callsvc/fastnx"_fs}; !ContainsPath(_pcwd, target)) {
             MoveProcess(target);
         }
-
-        directory = std::filesystem::current_path();
-        games = directory / "games";
-
-        FsSys::ReFs::EditableDirectory _games{games, true};
     }
 
     void Assets::Destroy() {
@@ -42,7 +37,7 @@ namespace FastNx::Core {
         std::vector<FsSys::FsPath> result;
         assert(EnumRange(GamePathType::HomebrewFs, GamePathType::Card).front());
 
-        for (const auto _type : EnumRange(GamePathType::Homebrew, GamePathType::Shop)) {
+        for (const auto _type: EnumRange(GamePathType::Homebrew, GamePathType::Shop)) {
             if (const auto _titles{gamesLists->GetAllGamesPaths(_type)}; !_titles.empty())
                 std::ranges::copy(_titles, std::back_inserter(result));
         }
@@ -51,6 +46,13 @@ namespace FastNx::Core {
     }
 
     void Assets::Initialize() {
+        directory.emplace(std::filesystem::current_path());
+        games.emplace(directory->path / "games", true);
+        keys.emplace(directory->path / "keys", true);
+
+        if (keys->ListAllFiles().empty())
+            throw exception{"No keys found on the system"};
+
         gamesLists.emplace(shared_from_this());
     }
 }

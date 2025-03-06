@@ -14,8 +14,8 @@ namespace FastNx::Core {
             if (const auto _realPath{FsSys::GetFullPath(hardpath)})
                 _dirs.emplace_back(*_realPath);
         }
-        if (exists(assets->games))
-            _dirs.emplace_back(assets->games);
+        if (exists(assets->games->path))
+            _dirs.emplace_back(assets->games->path);
 
         for (const auto &gameDir: _dirs) {
             FsSys::ReFs::EditableDirectory directory{gameDir};
