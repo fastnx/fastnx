@@ -4,11 +4,13 @@
 #include <crypto/types.h>
 namespace FastNx::Horizon {
     enum class KeyMode {
+        None,
         Dev,
         Prod
     };
 
     enum class KeyType {
+        Unknown,
         Production,
         Title
     };

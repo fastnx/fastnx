@@ -7,6 +7,16 @@
 #include <fs_sys/regex_file.h>
 #include <horizon/key_set.h>
 namespace FastNx::Horizon {
+    std::pair<KeyMode, KeyType> GetKeyModeByName(const FsSys::VfsBackingFilePtr &key) {
+        const auto &keyname{key->path.filename()};
+        if (keyname== "prod.keys")
+            return {KeyMode::Prod, KeyType::Production};
+        if (keyname == "title.keys")
+            return {KeyMode::Prod, KeyType::Title};
+
+        return {};
+    }
+
     KeySet::KeySet(FsSys::ReFs::EditableDirectory &dirKeys) {
         if (dirKeys.GetFilesCount() < 2)
             return;
@@ -15,16 +25,23 @@ namespace FastNx::Horizon {
         bool prod{}, title{};
         for (const auto &keyname: keys) {
             const auto keyfile{dirKeys.OpenFile(keyname)};
-            if (!keyfile)
-                continue;
+            assert(*keyfile);
             std::println("Importing keys from file {}", GetPathStr(keyfile));
+            if (const auto [_, _ktype] = GetKeyModeByName(keyfile); _ktype != KeyType::Unknown) {
+                const auto pattern = [_ktype] -> std::string {
+                    if (_ktype == KeyType::Production)
+                        return "^\\w+\\s*=\\s*[a-fA-F0-9]+$";
+                    return "^[a-fA-F0-9]{32}\\s*=\\s*[a-fA-F0-9]{32}$";
+                }();
 
-            if (!prod && keyname.filename() == "prod.keys")
-                if (const auto prodfile{std::make_shared<FsSys::RegexFile>(std::move(keyfile), "^\\w+\\s*=\\s*[a-fA-F0-9]+$")}; *prodfile)
-                    prod = ParserKeys(prodfile->matches, KeyType::Production);
-            if (!title && keyname.filename() == "title.keys")
-                if (const auto titlefile{std::make_shared<FsSys::RegexFile>(std::move(keyfile), "^[a-fA-F0-9]{32}\\s*=\\s*[a-fA-F0-9]{32}$")}; *titlefile)
-                    title = ParserKeys(titlefile->matches, KeyType::Title);
+                bool result{};
+                if (const auto kfile{std::make_shared<FsSys::RegexFile>(std::move(keyfile), pattern)}; *kfile)
+                    result = ParserKeys(kfile->matches, _ktype);
+                if (_ktype == KeyType::Production)
+                    prod = result;
+                else if (_ktype == KeyType::Title)
+                    title = result;
+            }
         }
 
         if (keys.empty() || !prod || !title)
