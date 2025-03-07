@@ -40,10 +40,10 @@ namespace FastNx::Crypto {
         U64 processed{};
         if (isEcb) {
             U64 outsize{};
-            for (U64 offset{}; offset <= size; offset += 16)
+            for (U64 offset{}; offset <= size; offset += 16) {
                 mbedtls_cipher_update(context, source + offset, 16, destination + offset, &outsize);
-
-            processed = size;
+                processed += size;
+            }
         }
 
         for (U64 offset{}; offset < size; ) {

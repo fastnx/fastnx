@@ -79,9 +79,10 @@ namespace FastNx {
 
     template<typename T>
     auto EraseAllWith(std::vector<T> &values, const T value = {}) {
-        for (auto it{values.begin()}; it != values.end(); ++it) {
+        for (auto it{values.begin()}; it != values.end(); ) {
             if (*it == value)
                 it = values.erase(it);
+            else ++it;
         }
         return values;
     }

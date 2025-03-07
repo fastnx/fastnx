@@ -20,10 +20,10 @@ namespace FastNx::FsSys {
             for (auto forline{lines.begin()}; forline != lines.end(); ++forline) {
                 if (!regex_match(*forline, compile))
                     continue;
-                matches.emplace_back(std::move(*forline));
-                forline = lines.erase(forline);
+                matches.emplace_back(*std::move_iterator(forline));
             }
 
+            EraseAllWith(lines);
             if (!lines.empty())
                 fmt::print("Deleted lines: {}", fmt::join(lines, ", "));
         } catch (const boost::regex_error &except) {

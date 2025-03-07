@@ -5,21 +5,8 @@
 
 #include <algorithm>
 #include <device/capabilities.h>
-template<typename T, FastNx::U64 Size>
-auto SmallVector() {
-    boost::container::small_vector<T, Size> values(Size);
-    return values;
-}
-
 namespace FastNx::Device {
-    boost::container::small_vector<U32, 4> GetCpuValues() {
-        auto values{SmallVector<U32, 4>()};
-        assert(values.size() == 4);
-
-        __cpuid(1, values[0], values[1], values[2], values[3]);
-        return values;
-    }
-    std::pair<std::string, I32> IsArchSuitable() {
+    std::pair<std::string, I32> GetArchAspects() {
         cpu_set_t cpus;
         U64 activated{};
         if (pthread_getconcurrency())
@@ -32,23 +19,24 @@ namespace FastNx::Device {
             if (CPU_ISSET(proc, &cpus))
                 activated++;
         }
-        if (activated != smt)
-            return {};
-        if (const auto vals{GetCpuValues()}; (vals[2] & bit_XSAVE) == 0 || (vals[2] & bit_OSXSAVE) == 0)
-            return {};
-        auto _xcr0{SmallVector<U32, 4>()};
+        std::array<U32, 4> cpuvals;
+        __cpuid(1, cpuvals[0], cpuvals[1], cpuvals[2], cpuvals[3]);
+
+        if (activated == smt)
+            if ((cpuvals[2] & bit_XSAVE) == 0 || (cpuvals[2] & bit_OSXSAVE) == 0)
+                return {};
         // https://www.felixcloutier.com/x86/xgetbv
-        __asm__ volatile("XGETBV" : "=a"(_xcr0[0]), "=d"(_xcr0[1]) : "c"(0));
+        __asm__ volatile("XGETBV" : "=a"(cpuvals[0]), "=d"(cpuvals[1]) : "c"(0));
 
         std::string aspect;
-        if ((_xcr0[0] & 6) == 6)
+        if ((cpuvals[0] & 6) == 6)
             aspect += "OS Saves YMM, ";
-        if (_xcr0[0] & 1 << 7)
+        if (cpuvals[0] & 1 << 7)
             aspect += "CPU Support AVX-512, ";
 
-        const auto rank{std::ranges::count(aspect, ',')};
-        if (rank)
+        const auto ranking{std::ranges::count(aspect, ',')};
+        if (ranking)
             aspect.erase(aspect.find_last_of(','));
-        return std::make_pair(aspect, rank);
+        return {aspect, ranking};
     }
 }

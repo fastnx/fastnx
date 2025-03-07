@@ -17,6 +17,7 @@ namespace FastNx::Horizon {
             const auto keyfile{dirKeys.OpenFile(keyname)};
             if (!keyfile)
                 continue;
+            std::println("Importing keys from file {}", GetPathStr(keyfile));
 
             if (!prod && keyname.filename() == "prod.keys")
                 if (const auto prodfile{std::make_shared<FsSys::RegexFile>(std::move(keyfile), "^\\w+\\s*=\\s*[a-fA-F0-9]+$")}; static_cast<bool>(*prodfile))
@@ -30,11 +31,12 @@ namespace FastNx::Horizon {
             throw exception{"No valid key file was found in the path {}", GetPathStr(dirKeys)};
     }
 
+    // ReSharper disable once CppMemberFunctionMayBeStatic
     bool KeySet::ParserKeys(std::vector<std::string> &pairs, [[maybe_unused]] const KeyType type) const {
         if (pairs.empty())
             return {};
         std::ranges::for_each(pairs, [](const auto &strkey) {
-            std::println("{}", strkey);
+           assert(!strkey.empty());
         });
 
         return true;

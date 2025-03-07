@@ -25,6 +25,7 @@ namespace FastNx::FsSys::NxFmt {
                 if (Crypto::CheckNcaIntegrity(ncafile) == false)
                     corrupted = ncafile;
 
+                std::println("Processing content of NCA {}", GetPathStr(ncafile));
                 [[maybe_unused]] const auto archive{std::make_shared<ContentArchive>(std::move(ncafile))};
             }
         }

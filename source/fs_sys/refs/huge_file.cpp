@@ -9,6 +9,7 @@
 #include <boost/align.hpp>
 
 #include <common/container.h>
+#include <common/exception.h>
 #include <device/capabilities.h>
 #include <device/memory.h>
 
@@ -42,16 +43,14 @@ namespace FastNx::FsSys::ReFs {
         if (mode != FileModeType::ReadOnly)
             assert(lockf(descriptor, F_UNLCK, 0) == 0);
         if (descriptor > 0)
-            close(descriptor);
+            assert(close(descriptor) == 0);
     }
 
     HugeFile::operator bool() const {
-        if (!memory || descriptor < 0)
-            return {};
-        if (lockf(descriptor, F_TEST, 0) != 0 && errno != EAGAIN)
-            return {};
-
-        return Device::GetMemorySize(memory) == mapsize;
+        if (memory || descriptor > 0)
+            if (lockf(descriptor, F_TEST, 0) == 0 && errno != EAGAIN)
+                return Device::GetMemorySize(memory) == mapsize;
+        return {};
     }
 
     U64 HugeFile::GetSize() const {
@@ -73,8 +72,10 @@ namespace FastNx::FsSys::ReFs {
 
     U64 HugeFile::ReadTypeImpl(U8 *dest, const U64 size, const U64 offset) {
         static const auto pagesize{Device::GetHostPageSize()};
-        auto *_source{memory + offset};
-        auto *aligned{boost::alignment::align_down(_source, pagesize)};
+        if (!memory)
+            return {};
+        auto *source{memory + offset};
+        auto *aligned{boost::alignment::align_down(source, pagesize)};
         const auto _size{boost::alignment::align_up(size, pagesize)};
 
         if (msync(aligned, _size, MS_SYNC) != 0)
@@ -86,12 +87,12 @@ namespace FastNx::FsSys::ReFs {
         [[unlikely]] if (size >= 4_MBYTES) {
             std::vector<U8> pages((_size + pagesize - 1) / pagesize);
             assert(mincore(aligned, _size, pages.data()) == 0);
-            std::memcpy(dest, _source, size);
+            std::memcpy(dest, source, size);
             assert(madvise(aligned, _size, MADV_COLD) == 0);
 
             pagefaultrec += std::ranges::count(pages, 0);
         } else {
-            std::memcpy(dest, _source, size);
+            std::memcpy(dest, source, size);
         }
 
         [[unlikely]] if (!recorded) {
@@ -100,13 +101,13 @@ namespace FastNx::FsSys::ReFs {
                 if (hugepages.ReadLine().contains("[always]"))
                     if (madvise(memory, mapsize, MADV_HUGEPAGE))
                         if (errno == EINVAL)
-                            std::terminate();
+                            throw exception{"It is not possible to access the specified range"};
             }
-        } else if (_source < recorded) {
+        } else if (source < recorded) {
             assert(madvise(memory, mapsize, MADV_RANDOM) == 0);
         }
-        if (_source)
-            recorded = _source;
+        if (source)
+            recorded = source;
         return size;
     }
 }
