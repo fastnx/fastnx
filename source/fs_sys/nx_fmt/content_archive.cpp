@@ -7,7 +7,7 @@ namespace FastNx::FsSys::NxFmt {
         static std::vector<U32> magics;
         if (magics.empty()) {
             magics.reserve(3);
-            for (const auto &magic : {"NCA0", "NCA1", "NCA2", "NCA3"})
+            for (const auto &magic: {"NCA0", "NCA1", "NCA2", "NCA3"})
                 magics.emplace_back(ConstMagicValue<U32>(magic));
         }
         return Contains(magics, value);

@@ -1,7 +1,7 @@
-#include <cassert>
 #include <pwd.h>
 #include <unistd.h>
 
+#include <iostream>
 #include <print>
 #include <boost/program_options.hpp>
 
@@ -22,25 +22,34 @@ using namespace FastNx;
 bool disableSwap;
 
 int main(const I32 argc, const char **argv) {
-    fastopts.add_options()("disable-disk-swap", "Block all future memory mappings in RAM");
+    fastopts.add_options()
+        ("help", "Display this table")
+        ("disable-disk-swap", "Block all future memory mappings in RAM");
 
     boost_po::variables_map vm;
     store(parse_command_line(argc, argv, fastopts), vm);
     notify(vm);
 
+    if (vm.contains("help")) {
+        fastopts.print(std::cerr);
+        return 0;
+    }
     disableSwap = vm.contains("disable-disk-swap");
 
     if (disableSwap)
         Device::LockAllMapping();
 
-    assert(FastNx::FsSys::IsInsideOf(std::filesystem::current_path(), GetUserDir()));
+    if (!FsSys::IsInsideOf(std::filesystem::current_path(), GetUserDir()))
+        return -1;
 
-    [[maybe_unused]] const auto isPrivileged = [] {
+    const auto isPrivileged = [] {
         const auto uid{getuid()};
         return !uid || geteuid() != uid;
-    };
-    assert(!isPrivileged());
-    assert(pthread_self() && getpid());
+    }();
+    if (isPrivileged)
+        return -1;
+    if (pthread_self() == 0 && getpid() == 0)
+        return -1;
 
     if (const auto &[aspects, ranking] = Device::GetArchAspects(); !aspects.empty()) {
         std::println("Features supported by the Host system: {}, Your rank {}", aspects, ranking);
@@ -51,4 +60,5 @@ int main(const I32 argc, const char **argv) {
         application->LoadFirstPickedGame();
     }
 
+    return 0;
 }
