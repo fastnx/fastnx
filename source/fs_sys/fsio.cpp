@@ -25,12 +25,12 @@ namespace FastNx::FsSys {
         if (fsn && sizes.contains(fsn)) // The `strace` output was being flooded with seeks
             return sizes[fsn];
 
-        const auto _current{lseek(fd, 0, SEEK_CUR)};
+        const auto curoff{lseek(fd, 0, SEEK_CUR)};
         const auto result{lseek64(fd, 0, SEEK_END)};
         if (fsn)
             sizes[fsn] = result;
 
-        lseek64(fd, _current, SEEK_SET);
+        lseek64(fd, curoff, SEEK_SET);
         return result;
     }
 
@@ -47,19 +47,21 @@ namespace FastNx::FsSys {
 
     std::string VfsBackingFile::ReadLine(const U64 offset) {
         constexpr auto BufferSize{32};
-        std::vector<char> content(BufferSize);
+        std::string content;
+        content.resize(BufferSize);
+
         for (U64 linesize{}; !Contains(content, '\n'); ) {
             if (content.size() < linesize)
                 break;
             linesize += BufferSize;
 
             content.resize(linesize);
-            if (const auto size{ReadSome(content, offset)}; size != linesize)
+            if (const auto size{ReadType(content.begin().base(), content.size(), offset)}; size != linesize)
                 content.resize(size);
         }
         if (const auto &newline{std::ranges::find(content, '\n')}; newline != content.end())
             content.erase(newline, content.end());
-        return std::string(content.begin(), content.end());
+        return content;
     }
 
     std::vector<std::string> VfsBackingFile::GetAllLines() {

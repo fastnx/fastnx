@@ -1,5 +1,4 @@
 #include <cassert>
-#include <ranges>
 #include <algorithm>
 
 #include <fmt/format.h>
@@ -22,10 +21,11 @@ namespace FastNx::FsSys {
                     continue;
                 matches.emplace_back(*std::move_iterator(forline));
             }
-
-            EraseAllWith(lines);
-            if (!lines.empty())
-                fmt::print("Deleted lines: {}", fmt::join(lines, ", "));
+            if (matches.size() != lines.size()) {
+                EraseAllWith(lines);
+                if (!lines.empty())
+                    fmt::print("Deleted lines: {}", fmt::join(lines, ", "));
+            }
         } catch (const boost::regex_error &except) {
             throw exception{"The regex due to: {}", except.what()};
         }

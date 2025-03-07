@@ -59,14 +59,15 @@ namespace FastNx::FsSys {
         FsPath path;
         FileModeType mode;
 
-        U64 ReadType(U8 *dest, const U64 size, const U64 offset) {
+        template<typename T> requires (sizeof(T) == 1)
+        U64 ReadType(T *dest, const U64 size, const U64 offset) {
             if (mode == FileModeType::WriteOnly) {
                 throw std::runtime_error{"Operation not supported on the file"};
             }
 
             if (!dest && !size)
                 return {};
-            return ReadTypeImpl(dest, size, offset);
+            return ReadTypeImpl(reinterpret_cast<U8*>(dest), size, offset);
         }
     private:
         virtual U64 ReadTypeImpl(U8 *dest, U64 size, U64 offset) = 0;

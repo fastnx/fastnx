@@ -20,10 +20,10 @@ namespace FastNx::Horizon {
             std::println("Importing keys from file {}", GetPathStr(keyfile));
 
             if (!prod && keyname.filename() == "prod.keys")
-                if (const auto prodfile{std::make_shared<FsSys::RegexFile>(std::move(keyfile), "^\\w+\\s*=\\s*[a-fA-F0-9]+$")}; static_cast<bool>(*prodfile))
+                if (const auto prodfile{std::make_shared<FsSys::RegexFile>(std::move(keyfile), "^\\w+\\s*=\\s*[a-fA-F0-9]+$")}; *prodfile)
                     prod = ParserKeys(prodfile->matches, KeyType::Production);
             if (!title && keyname.filename() == "title.keys")
-                if (const auto titlefile{std::make_shared<FsSys::RegexFile>(std::move(keyfile), "^[a-fA-F0-9]{32}\\s*=\\s*[a-fA-F0-9]{32}$")}; static_cast<bool>(*titlefile))
+                if (const auto titlefile{std::make_shared<FsSys::RegexFile>(std::move(keyfile), "^[a-fA-F0-9]{32}\\s*=\\s*[a-fA-F0-9]{32}$")}; *titlefile)
                     title = ParserKeys(titlefile->matches, KeyType::Title);
         }
 

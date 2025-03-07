@@ -4,7 +4,7 @@
 #include <loaders/nsp_es.h>
 #include <horizon/switch_ns.h>
 void FastNx::Horizon::SwitchNs::LoadApplicationFile(const FsSys::VfsBackingFilePtr &appf) {
-    if (!static_cast<bool>(*appf))
+    if (!*appf)
         return;
 
     bool isLoaded{};
