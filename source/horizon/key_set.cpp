@@ -13,7 +13,7 @@ namespace FastNx::Horizon {
         const auto keys{dirKeys.GlobAllFiles("*.keys")};
 
         bool prod{}, title{};
-        for (const auto &keyname : keys) {
+        for (const auto &keyname: keys) {
             const auto keyfile{dirKeys.OpenFile(keyname)};
             if (!keyfile)
                 continue;

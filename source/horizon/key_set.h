@@ -21,7 +21,7 @@ namespace FastNx::Horizon {
     public:
         explicit KeySet(FsSys::ReFs::EditableDirectory &dirKeys);
 
-        bool ParserKeys(std::vector<std::string>& pairs, KeyType type) const;
+        bool ParserKeys(std::vector<std::string> &pairs, KeyType type) const;
         std::optional<KeyContainer> mainKey;
     };
 }

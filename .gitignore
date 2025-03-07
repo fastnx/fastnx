@@ -1,5 +1,4 @@
-cmake-debug-arm
-cmake-debug-clang
-cmake-release-arm
-cmake-release-clang
-cmake-relwithdebinfo-bundle
+cmake-build-debug
+cmake-build-release
+cmake-build-relwithdebinfo
+

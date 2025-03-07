@@ -8,7 +8,7 @@ namespace FastNx::Crypto {
 
         context = new mbedtls_cipher_context_t;
         assert(mbedtls_cipher_setup(context, mbedtls_cipher_info_from_type(static_cast<mbedtls_cipher_type_t>(_type))) == 0);
-        if (mbedtls_cipher_get_key_bitlen(context) != key.size() * 8)
+        if (mbedtls_cipher_get_key_bitlen(context) != static_cast<I32>(key.size() * 8))
             return;
         assert(mbedtls_cipher_setkey(context, key.data(), key.size() * 8, _mode == AesMode::Decryption ? MBEDTLS_DECRYPT : MBEDTLS_ENCRYPT) == 0);
 
