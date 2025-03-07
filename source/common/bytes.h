@@ -19,7 +19,8 @@ namespace FastNx {
             bytes.clear();
 
         boost::algorithm::unhex(string, std::back_inserter(bytes));
-        assert(Copy(result, bytes) == bytes.size());
+        if (Copy(result, bytes) != bytes.size())
+            throw std::bad_cast{};
         return result;
     }
 
@@ -27,7 +28,8 @@ namespace FastNx {
     constexpr T ToObjectOf(const auto &string) {
         T value;
         const auto bytes{ToArrayOfBytes<sizeof(T)>(string)};
-        assert(bytes.size() == sizeof(value));
+        if (bytes.size() != sizeof(value))
+            throw std::bad_cast{};
         std::memcpy(&value, bytes.data(), sizeof(T));
         return value;
     }

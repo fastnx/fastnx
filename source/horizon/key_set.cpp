@@ -2,6 +2,7 @@
 #include <print>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/container/small_vector.hpp>
 #include <fmt/format.h>
 
 #include <common/exception.h>
@@ -42,7 +43,7 @@ namespace FastNx::Horizon {
         std::println("Total keys read and stored: {}", prods.size() + titles.size());
 
         if (!keys.empty())
-            if (!prods.empty())
+            if (!prods.empty() || !saveall)
                 if (!titles.empty())
                     return;
         throw exception{"No valid key file was found in the path {}", GetPathStr(dirKeys)};
@@ -86,19 +87,22 @@ namespace FastNx::Horizon {
 
     bool KeySet::AddProdKey(const std::string_view &keyname, const std::string_view &keyvalue) {
         const auto _type = [&] -> KeyIndexType {
-            if (keyname.starts_with("header_key"))
+            if (keyname == "header_key")
                 return KeyIndexType::HeaderKey;
+            if (keyname.starts_with("titlekek"))
+                return KeyIndexType::Titlekek;
             return {};
         }();
 
-        if (_type == KeyIndexType::Unknown) {
-            prods.emplace(keyname, keyvalue);
-            return prods.size();
+        if (_type == KeyIndexType::Undefined) {
+            if (saveall)
+                prods.emplace(keyname, keyvalue);
+            return saveall;
         }
-        std::vector<std::string_view> indexstr;
+        boost::container::small_vector<std::string_view, 2> indexstr;
         split(indexstr, keyname, boost::is_any_of("_"));
 
-        bool persistent{};
+        bool persistent{saveall};
         if (GetKeyResidence(_type) == ProductionTaste::Named) {
             const auto _key256{ToObjectOf<Crypto::Key256>(keyvalue)};
 
@@ -106,8 +110,8 @@ namespace FastNx::Horizon {
                 namedkeys256.emplace(_type, _key256);
             if (_type == KeyIndexType::HeaderKey)
                 headerKey.emplace(&namedkeys256.find(_type)->second);
-        } else {
-            const auto keyindex{static_cast<U32>(strtoll(indexstr.back().begin(), nullptr, 16))};
+        } else if (std::isdigit(*indexstr.back().begin())) {
+            const auto keyindex{strtoll(indexstr.back().begin(), nullptr, 16)};
             if (const auto idkey{KeyIdentifier(_type, keyindex)}; !indexablekeys.contains(idkey))
                 indexablekeys.emplace(idkey, keyvalue);
 

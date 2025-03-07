@@ -18,8 +18,9 @@ namespace FastNx::Horizon {
     };
 
     enum class KeyIndexType : U64 {
-        Unknown,
+        Undefined,
         HeaderKey,
+        Titlekek
     };
     struct KeyIdentifier {
         KeyIndexType type;
@@ -52,13 +53,15 @@ namespace FastNx::Horizon {
         bool AddTitleKey(const std::string_view &keyname, const std::string_view &keyvalue);
         bool AddProdKey(const std::string_view &keyname, const std::string_view &keyvalue);
 
+        std::optional<Crypto::Key256*> headerKey;
+        bool saveall{};
+    private:
         std::vector<std::pair<Crypto::Key128, Crypto::Key128>> titles;
         std::unordered_map<std::string_view, std::string_view> prods;
 
         std::unordered_map<KeyIndexType, Crypto::Key256> namedkeys256;
         std::unordered_map<KeyIdentifier, std::string_view, KeyIndexableHash> indexablekeys;
 
-        std::optional<Crypto::Key256*> headerKey;
         std::vector<std::string> keyring; // <- Store the keys to avoid unnecessary allocations
     };
 }
