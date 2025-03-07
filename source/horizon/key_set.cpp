@@ -1,9 +1,11 @@
 #include <algorithm>
 #include <print>
 
+#include <boost/algorithm/string.hpp>
 #include <fmt/format.h>
 
 #include <common/exception.h>
+#include <common/bytes.h>
 #include <fs_sys/regex_file.h>
 #include <horizon/key_set.h>
 namespace FastNx::Horizon {
@@ -22,7 +24,6 @@ namespace FastNx::Horizon {
             return;
         const auto keys{dirKeys.GlobAllFiles("*.keys")};
 
-        bool prod{}, title{};
         for (const auto &keyname: keys) {
             const auto keyfile{dirKeys.OpenFile(keyname)};
             assert(*keyfile);
@@ -34,28 +35,84 @@ namespace FastNx::Horizon {
                     return "^[a-fA-F0-9]{32}\\s*=\\s*[a-fA-F0-9]{32}$";
                 }();
 
-                bool result{};
                 if (const auto kfile{std::make_shared<FsSys::RegexFile>(std::move(keyfile), pattern)}; *kfile)
-                    result = ParserKeys(kfile->matches, _ktype);
-                if (_ktype == KeyType::Production)
-                    prod = result;
-                else if (_ktype == KeyType::Title)
-                    title = result;
+                    ParserKeys(kfile->GetAllMatches(), _ktype);
             }
         }
+        std::println("Total keys read and stored: {}", prods.size() + titles.size());
 
-        if (keys.empty() || !prod || !title)
-            throw exception{"No valid key file was found in the path {}", GetPathStr(dirKeys)};
+        if (!keys.empty())
+            if (!prods.empty())
+                if (!titles.empty())
+                    return;
+        throw exception{"No valid key file was found in the path {}", GetPathStr(dirKeys)};
     }
 
-    // ReSharper disable once CppMemberFunctionMayBeStatic
-    bool KeySet::ParserKeys(std::vector<std::string> &pairs, [[maybe_unused]] const KeyType type) const {
-        if (pairs.empty())
-            return {};
-        std::ranges::for_each(pairs, [](const auto &strkey) {
-           assert(!strkey.empty());
-        });
+    void KeySet::ParserKeys(std::vector<std::string> &&pairs, const KeyType type) {
+        const auto callback = [&] {
+            if (type == KeyType::Production)
+                return &KeySet::AddProdKey;
+            return &KeySet::AddTitleKey;
+        }();
 
-        return true;
+        for (auto &&key: pairs) {
+            std::vector<std::string_view> keyview;
+
+            split(keyview, key, boost::is_any_of("="));
+            keyview.front().remove_suffix(1);
+            keyview.back().remove_prefix(1);
+
+            if ((this->*callback)(keyview.front(), keyview.back()))
+                keyring.emplace_back(std::move(key));
+        }
+    }
+
+    bool KeySet::AddTitleKey(const std::string_view &keyname, const std::string_view &keyvalue) {
+        const auto keyid{ToObjectOf<Crypto::Key128>(keyname)};
+        const auto keyval{ToObjectOf<Crypto::Key128>(keyvalue)};
+
+        titles.emplace_back(keyid, keyval);
+        return {}; // Since we copy the key, there's no need to store it
+    }
+
+    ProductionTaste GetKeyResidence(const KeyIndexType _type) {
+        switch (_type) {
+            case KeyIndexType::HeaderKey:
+                return ProductionTaste::Named;
+            default:
+                return ProductionTaste::Indexable;
+        }
+    }
+
+    bool KeySet::AddProdKey(const std::string_view &keyname, const std::string_view &keyvalue) {
+        const auto _type = [&] -> KeyIndexType {
+            if (keyname.starts_with("header_key"))
+                return KeyIndexType::HeaderKey;
+            return {};
+        }();
+
+        if (_type == KeyIndexType::Unknown) {
+            prods.emplace(keyname, keyvalue);
+            return prods.size();
+        }
+        std::vector<std::string_view> indexstr;
+        split(indexstr, keyname, boost::is_any_of("_"));
+
+        bool persistent{};
+        if (GetKeyResidence(_type) == ProductionTaste::Named) {
+            const auto _key256{ToObjectOf<Crypto::Key256>(keyvalue)};
+
+            if (!namedkeys256.contains(_type))
+                namedkeys256.emplace(_type, _key256);
+            if (_type == KeyIndexType::HeaderKey)
+                headerKey.emplace(&namedkeys256.find(_type)->second);
+        } else {
+            const auto keyindex{static_cast<U32>(strtoll(indexstr.back().begin(), nullptr, 16))};
+            if (const auto idkey{KeyIdentifier(_type, keyindex)}; !indexablekeys.contains(idkey))
+                indexablekeys.emplace(idkey, keyvalue);
+
+            persistent = true;
+        }
+        return persistent;
     }
 }

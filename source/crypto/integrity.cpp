@@ -1,32 +1,13 @@
 #include <common/traits.h>
-#include <common/container.h>
+#include <common/bytes.h>
 
 #include <fmt/format.h>
 #include <fmt/ranges.h>
-#include <boost/algorithm/hex.hpp>
 
 #include <crypto/types.h>
 #include <crypto/hashsum.h>
 
-
 namespace FastNx::Crypto {
-    template<U64 Size, typename T> requires (IsStringType<T>)
-    constexpr std::array<U8, Size> ToArrayOfBytes(const T &string) {
-        std::array<U8, Size> result{};
-        if (string.size() / 2 != result.size())
-            throw std::bad_cast{};
-
-        thread_local std::vector<U8> bytes;
-        if (bytes.size() < result.size())
-            bytes.reserve(result.size());
-        else
-            bytes.clear();
-
-        boost::algorithm::unhex(string, std::back_inserter(bytes));
-        assert(Copy(result, bytes) == bytes.size());
-        return result;
-    }
-
     bool CheckNcaIntegrity(const FsSys::VfsBackingFilePtr &file) {
         const auto &fullpath{GetPathStr(file)};
         std::vector<U8> buffer(4_MBYTES);

@@ -9,8 +9,12 @@ namespace FastNx::FsSys {
         explicit operator bool() const override;
         U64 GetSize() const override;
 
-        std::vector<std::string> matches;
+        auto GetAllMatches() {
+            file = nullptr;
+            return std::move(matches);
+        }
     private:
+        std::vector<std::string> matches;
         U64 ReadTypeImpl(U8 *dest, U64 size, U64 offset) override;
 
         VfsBackingFilePtr file{};
