@@ -1,6 +1,9 @@
 #include <common/container.h>
+#include <common/exception.h>
+#include <horizon/key_set.h>
 #include <fs_sys/xts_file.h>
 #include <fs_sys/nx_fmt/content_archive.h>
+
 
 namespace FastNx::FsSys::NxFmt {
     auto CheckNcaMagic(const U32 value) {
@@ -12,19 +15,22 @@ namespace FastNx::FsSys::NxFmt {
         }
         return Contains(magics, value);
     }
-    ContentArchive::ContentArchive(const VfsBackingFilePtr &nca) {
+    ContentArchive::ContentArchive(const VfsBackingFilePtr &nca, const std::shared_ptr<Horizon::KeySet> &ks) : keys(ks) {
         if (nca->GetSize() < sizeof(NcaHeader))
             return;
-        auto _archive{nca->Read<NcaHeader>()};
-        if (const auto magic{_archive.magic})
+        auto archive{nca->Read<NcaHeader>()};
+        if (const auto magic{archive.magic})
             encrypted = !CheckNcaMagic(magic);
 
         if (encrypted) {
-            _nca = std::make_shared<XtsFile>(std::move(nca), Crypto::SourceKey<256>{});
-            _archive = _nca->Read<NcaHeader>();
+            if (!keys->headerKey)
+                throw exception{"Header key not found"};
+            _nca = std::make_shared<XtsFile>(std::move(nca), *keys->headerKey.value());
+            archive = _nca->Read<NcaHeader>();
         } else {
             _nca = std::move(nca);
         }
-        type = _archive.type;
+        assert(archive.contentSize == nca->GetSize());
+        type = archive.type;
     }
 }

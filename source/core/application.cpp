@@ -16,7 +16,7 @@ namespace FastNx::Core {
         return getpid();
     }
 
-    Application::Application() : _switch(std::make_shared<Horizon::SwitchNs>()) {
+    Application::Application() {
         std::optional<std::string> osname;
 #if defined(__linux__)
         FsSys::ReFs::EditableDirectory release{"/etc"};
@@ -38,9 +38,12 @@ namespace FastNx::Core {
 
     void Application::Initialize() {
         assets = std::make_shared<Assets>();
+        if (!assets)
+            return;
         assets->Initialize();
 
         keys = std::make_shared<Horizon::KeySet>(*assets->keys);
+        _switch = std::make_shared<Horizon::SwitchNs>(keys);
     }
 
     void Application::LoadFirstPickedGame() const {

@@ -4,7 +4,7 @@
 #include <fs_sys/nx_fmt/submission_package.h>
 #include <fs_sys/nx_fmt/content_archive.h>
 namespace FastNx::FsSys::NxFmt {
-    SubmissionPackage::SubmissionPackage(const std::shared_ptr<PartitionFileSystem> &pfs) {
+    SubmissionPackage::SubmissionPackage(const std::shared_ptr<PartitionFileSystem> &pfs, const std::shared_ptr<Horizon::KeySet> &keys) {
         auto files{pfs->ListAllFiles()};
 
         for (auto subit{files.begin()}; subit != files.end() && !cnmt; ++subit) {
@@ -26,7 +26,7 @@ namespace FastNx::FsSys::NxFmt {
                     corrupted = ncafile;
 
                 std::println("Processing content of NCA {}", GetPathStr(ncafile));
-                [[maybe_unused]] const auto archive{std::make_shared<ContentArchive>(std::move(ncafile))};
+                [[maybe_unused]] const auto archive{std::make_shared<ContentArchive>(std::move(ncafile), keys)};
             }
         }
     }

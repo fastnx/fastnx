@@ -37,53 +37,52 @@ namespace FastNx::Crypto {
         }();
 
         const bool isEcb{mbedtls_cipher_get_type(context) == MBEDTLS_CIPHER_AES_128_ECB};
+        assert(mbedtls_cipher_reset(context) == 0);
+
         U64 processed{};
-        if (isEcb) {
+        for (U64 offset{}; offset <= size && isEcb; offset += 16) {
             U64 outsize{};
-            for (U64 offset{}; offset <= size; offset += 16) {
-                mbedtls_cipher_update(context, source + offset, 16, destination + offset, &outsize);
-                processed += size;
-            }
+            mbedtls_cipher_update(context, source + offset, 16, destination + offset, &outsize);
+            processed += outsize;
         }
 
         for (U64 offset{}; offset < size; ) {
-            const U64 pick{isEcb ? 16 : std::min(size - processed, 512_KBYTES)};
+            const U64 stride{std::min(size - processed, auxbuffer.size())};
             U64 output{};
-            mbedtls_cipher_update(context, source + offset, pick, destination + offset, &output);
-            assert(output == pick);
+            mbedtls_cipher_update(context, source + offset, stride, destination + offset, &output);
 
-            offset += pick;
-            processed += pick;
+            offset += output;
+            processed += output;
         }
 
         if (destination != dest)
-            std::memcpy(destination, dest, size);
+            std::memcpy(dest, destination, size);
         return processed;
     }
 
+    // https://gist.github.com/SciresM/fe8a631d13c069bd66e9c656ab5b3f7f
     auto GetNintendoTweak(U64 tweak) {
         std::array<U8, 16> iv;
         std::memset(iv.data(), 0, iv.size());
-        tweak = boost::endian::native_to_little(tweak);
+        tweak = boost::endian::native_to_big(tweak);
         std::memcpy(iv.data() + 8, &tweak, sizeof(tweak));
         return iv;
     }
 
     U64 SafeAes::ProcessXts(U8 *dest, const U8 *source, const U64 size, const U64 starts) {
         U64 count{};
-        U64 storage{starts / sectorsz};
-        std::vector<U8> thisiv(16);
+        tweak = starts / sectorsz;
+        std::array<U8, 16> thisiv;
         for (U64 offset{}; offset < size; offset += sectorsz) {
             {
-                Copy(thisiv, GetNintendoTweak(storage));
+                Copy(thisiv, GetNintendoTweak(tweak));
             }
             Setup(sectorsz, thisiv);
             if (const auto result{Process(dest + offset, source + offset, sectorsz)})
                 count += result;
             else break;
-            storage++;
+            tweak++;
         }
-        tweak = storage;
         return count;
     }
 }

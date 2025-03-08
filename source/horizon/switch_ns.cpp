@@ -11,7 +11,7 @@ void FastNx::Horizon::SwitchNs::LoadApplicationFile(const FsSys::VfsBackingFileP
     application = [&] -> std::shared_ptr<Loaders::AppLoader> {
         switch (Loaders::GetApplicationType(appf)) {
             case Loaders::AppType::NspEs:
-                return std::make_shared<Loaders::NspEs>(appf, isLoaded);
+                return std::make_shared<Loaders::NspEs>(appf, keys, isLoaded);
             default:
                 return nullptr;
         }

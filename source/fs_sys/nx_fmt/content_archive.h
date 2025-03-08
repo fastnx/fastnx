@@ -30,8 +30,7 @@ namespace FastNx::FsSys::NxFmt {
         System
     };
 
-#pragma pack(push, 1)
-    struct NcaHeader {
+    struct alignas(0x200) NcaHeader {
         Crypto::Rsa2048 headerSignature; // Signature over the data from offset 0x200 to 0x400
         Crypto::Rsa2048 npdmSignature;
         // The same, but only valid if using the key found in the NPDM, 0 if the NCA is not of type Application
@@ -49,17 +48,17 @@ namespace FastNx::FsSys::NxFmt {
         std::array<U8, 0xE> reserved;
         Crypto::RightsId rights;
     };
-#pragma pack(pop)
-    static_assert(IsSizeMatch<NcaHeader, 0x240>);
+    static_assert(IsSizeMatch<NcaHeader, 0x400>);
 
     class ContentArchive {
     public:
-        explicit ContentArchive(const VfsBackingFilePtr &nca);
+        explicit ContentArchive(const VfsBackingFilePtr &nca, const std::shared_ptr<Horizon::KeySet> &ks);
 
         bool encrypted{};
         ContentType type;
         U32 version{};
 
+        std::shared_ptr<Horizon::KeySet> keys;
         VfsBackingFilePtr _nca;
     };
 }

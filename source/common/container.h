@@ -60,7 +60,7 @@ namespace FastNx {
         return std::ranges::contains(first, second);
     }
 
-    template<typename Source, typename Dest>
+    template<typename Dest, typename Source>
     U64 Copy(Dest &dest, const Source &source) {
         assert(source.size() <= dest.size()); // The source container is smaller than the destination container
 
@@ -69,7 +69,7 @@ namespace FastNx {
             return dest.size();
         } else {
             U64 count{};
-            for (const auto &[_, index]: std::views::enumerate(dest)) {
+            for (const auto &[index, _]: std::views::enumerate(dest)) {
                 dest[index] = source[index];
                 count++;
             }

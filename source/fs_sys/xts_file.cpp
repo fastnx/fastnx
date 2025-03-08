@@ -3,15 +3,15 @@
 
 namespace FastNx::FsSys {
     XtsFile::XtsFile(const VfsBackingFilePtr &file, const Crypto::SourceKey<256> &key) : VfsBackingFile(file->path), encfile(file) {
-        std::vector<U8> _twk(32);
-        Copy(_twk, key);
+        std::vector<U8> _tweakbytes(sizeof(key));
+        Copy(_tweakbytes, key);
 
         using Mode = Crypto::AesMode;
         constexpr auto AesType{Crypto::AesType::AesXts128};
 
         if (file->mode != FileModeType::ReadOnly)
-            encrypt.emplace(std::span(_twk), Mode::Encryption, AesType);
-        decrypt.emplace(std::span(_twk), Mode::Decryption, AesType);
+            encrypt.emplace(std::span(_tweakbytes), Mode::Encryption, AesType);
+        decrypt.emplace(std::span(_tweakbytes), Mode::Decryption, AesType);
     }
 
     XtsFile::operator bool() const {
