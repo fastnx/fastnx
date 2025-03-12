@@ -1,10 +1,12 @@
-#include <cassert>
 #include <unordered_map>
 
+#include <common/exception.h>
 #include <fs_sys/types.h>
 namespace FastNx::FsSys {
-    bool IsInsideOf(const FsPath &path, const FsPath &is) {
-        assert(exists(path) && exists(is));
+    bool IsInsideOf(const FsPath &path, const FsPath &is, const bool check) {
+        if (check)
+            if (!exists(path) || !exists(is))
+                throw exception{"The target file or directory does not exist"};
         auto dir{path.begin()};
         for (auto it{is.begin()}; dir != path.end() && it != is.end(); ++dir, ++it) {
             if (*it != *dir)

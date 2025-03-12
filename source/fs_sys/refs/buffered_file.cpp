@@ -9,7 +9,7 @@
 namespace FastNx::FsSys::ReFs {
     BufferedFile::BufferedFile(const FsPath &_path, const I32 dirfd, const FileModeType _mode, const bool create) : VfsBackingFile(_path, _mode) {
         if (!exists(path) && create) {
-            if (std::fstream file{_path, std::ios::trunc}; file.is_open())
+            if (std::fstream file{_path, std::ios::out}; file.is_open())
                 file.close();
         }
         descriptor = [&] {

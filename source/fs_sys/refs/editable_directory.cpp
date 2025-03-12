@@ -94,8 +94,18 @@ namespace FastNx::FsSys::ReFs {
     }
 
     VfsBackingFilePtr EditableDirectory::OpenFile(const FsPath &_path, const FileModeType mode) {
-        if (!Contains(ListAllFiles(), _path))
-            return nullptr;
+        try {
+            if (!Contains(ListAllFiles(), _path))
+                return nullptr;
+        } catch (std::filesystem::filesystem_error &_) {
+            bool accessible{};
+            for (const auto &subpath: ListAllTopLevelFiles()) {
+                if (IsInsideOf(_path, subpath, false))
+                    accessible = true;
+            }
+            if (!accessible)
+                return nullptr;
+        }
         if (is_directory(_path))
             return nullptr;
 

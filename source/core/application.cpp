@@ -3,9 +3,13 @@
 #include <optional>
 #include <unistd.h>
 
+#include <common/exception.h>
+#include <common/container.h>
 #include <fs_sys/refs/editable_directory.h>
 #include <fs_sys/refs/huge_file.h>
+#include <fs_sys/refs/buffered_file.h>
 #include <core/application.h>
+
 
 namespace FastNx::Core {
     U64 GetCoreNumber() {
@@ -37,6 +41,23 @@ namespace FastNx::Core {
     }
 
     void Application::Initialize() {
+        std::vector<std::pair<I32, std::string>> _procs;
+        _procs.reserve(200);
+        if (const FsSys::ReFs::EditableDirectory procsdir{"/proc"}) {
+            for (const auto &proc: procsdir.ListAllTopLevelFiles()) {
+                const auto &_pathpid{FsSys::GetPathStr(proc)};
+                if (const auto &pidstr{_pathpid.substr(_pathpid.find_last_of('/') + 1)}; isdigit(pidstr.front()))
+                    if (FsSys::ReFs::BufferedFile status{proc / "status"})
+                        _procs.emplace_back(strtoul(GetDataArray(pidstr), nullptr, 10), status.ReadLine());
+            }
+        }
+
+        for (const auto &[_pid, _program]: _procs) {
+            static const auto fastpid{getpid()};
+            if (_pid != fastpid && _program.contains("fastnx"))
+                throw exception{"More than one instance of Fastnx cannot coexist at the same time"};
+        }
+
         assets = std::make_shared<Assets>();
         if (!assets)
             return;

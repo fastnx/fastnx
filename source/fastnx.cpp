@@ -4,9 +4,12 @@
 #include <iostream>
 #include <print>
 #include <boost/program_options.hpp>
+#include <boost/interprocess/sync/file_lock.hpp>
 
 #include <core/application.h>
 #include <device/capabilities.h>
+
+#include <fs_sys/refs/buffered_file.h>
 
 FastNx::FsSys::FsPath GetUserDir() {
     if (const auto *const user{getpwuid(getuid())})
@@ -19,7 +22,7 @@ boost_po::options_description fastopts("Allowed options");
 
 using namespace FastNx;
 
-bool disableSwap;
+bool disableswap;
 
 int main(const I32 argc, const char **argv) {
     fastopts.add_options()
@@ -34,11 +37,14 @@ int main(const I32 argc, const char **argv) {
         fastopts.print(std::cerr);
         return 0;
     }
-    disableSwap = vm.contains("disable-disk-swap");
-
-    if (disableSwap)
+    disableswap = vm.contains("disable-disk-swap");
+    if (disableswap)
         Device::LockAllMapping();
 
+    {
+        assert(FsSys::ReFs::BufferedFile("app_lock", 0, FsSys::FileModeType::WriteOnly, true));
+    }
+    boost::interprocess::file_lock flock("app_lock");
     if (!FsSys::IsInsideOf(std::filesystem::current_path(), GetUserDir()))
         return -1;
 

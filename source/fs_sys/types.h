@@ -101,7 +101,7 @@ namespace FastNx::FsSys {
     I32 ModeToNative(FileModeType type);
     std::optional<FsPath> GetFullPath(const FsPath &_path);
 
-    bool IsInsideOf(const FsPath &path, const FsPath &is);
+    bool IsInsideOf(const FsPath &path, const FsPath &is, bool check = true);
     bool IsAPfs0File(const VfsBackingFilePtr &pfs0);
 
     U64 GetSizeBySeek(I32 fd);

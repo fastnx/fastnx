@@ -17,13 +17,13 @@ namespace FastNx {
     }
 
     template<typename T>
-    auto GetDataArray(const T &container) {
-        if constexpr (IsVectorType<T>) {
-            return container.data();
-        } else if constexpr (IsArrayType<T>) {
-            return container.data();
+    auto GetDataArray(const T &value) {
+        if constexpr (IsVectorType<T> || IsArrayType<T>) {
+            return value.data();
+        } else if constexpr (IsStringType<T>) {
+            return value.data();
         } else if constexpr (std::is_base_of_v<T, FsSys::FsPath>) {
-            return container.c_str();
+            return value.c_str();
         }
         std::unreachable();
     }
