@@ -70,7 +70,7 @@ int main(const I32 argc, const char **argv) {
         application->LoadFirstPickedGame();
     }
 
-    _logger->FlushBuffers();
+    logger->FlushBuffers();
 
     return 0;
 }

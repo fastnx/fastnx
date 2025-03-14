@@ -10,22 +10,22 @@ namespace FastNx {
     std::shared_ptr<AsyncLogger> BuildAsyncLogger(std::optional<FsSys::ReFs::EditableDirectory> logdir) {
         std::optional<fmt::memory_buffer> logs;
         U64 count{};
-        if (_logger) {
-            logs.emplace(std::move(_logger->fmtlists));
-            count = _logger->count;
+        if (logger) {
+            logs.emplace(std::move(logger->fmtlists));
+            count = logger->count;
         }
         if (!logdir) {
-            _logger = std::make_shared<AsyncLogger>(std::cout); // Only streams valid for the lifetime of the process are valid here
-            _logger->threshold = 4;
+            logger = std::make_shared<AsyncLogger>(std::cout); // Only streams valid for the lifetime of the process are valid here
+            logger->threshold = 4;
         } else {
             const auto filename{logdir->path / std::format("fastnx-{:%m-%d-%y}.log", std::chrono::system_clock::now())};
             if (const auto logfile{logdir->OpenFile(filename, FsSys::FileModeType::WriteOnly)})
-                _logger = std::make_shared<AsyncLogger>(logfile);
+                logger = std::make_shared<AsyncLogger>(logfile);
         }
         if (logs)
-            _logger->fmtlists.append(std::move(*logs));
-        _logger->count = count;
-        return _logger;
+            logger->fmtlists.append(std::move(*logs));
+        logger->count = count;
+        return logger;
     }
 
     AsyncLogger::AsyncLogger(std::ostream &output) :
@@ -36,7 +36,8 @@ namespace FastNx {
     void AsyncLogger::FlushBuffers() {
         std::shared_lock guard(lock);
         for (U64 _offset{}; _offset < fmtlists.size() && count; count--) {
-            const std::string_view line(&fmtlists[_offset], strchr(&fmtlists[_offset], '\n') + 1);
+            const auto *begin{fmtlists.begin() + _offset};
+            const std::string_view line(begin, strchr(begin, '\n') + 1);
             outback->WriteType(line.data(), line.size(), _offset);
             _offset += line.size();
         }
@@ -72,8 +73,7 @@ namespace FastNx {
             static std::string result;
             result.clear();
 
-            U32 count{};
-            for (auto last{lists.rbegin()}; last != lists.rend() && count < 2; count++, ++last) {
+            for (auto last{lists.rbegin()}; last != lists.rend() && *last != "source"; ++last) {
                 if (!result.empty())
                     result.insert(0, "/");
                 result.insert(0, *last);

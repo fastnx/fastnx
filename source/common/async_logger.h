@@ -17,7 +17,7 @@ namespace FastNx {
     };
 
     class AsyncLogger;
-    inline std::shared_ptr<AsyncLogger> _logger;
+    inline std::shared_ptr<AsyncLogger> logger;
 
     struct FormatWrapper {
         template<typename T>
@@ -36,23 +36,23 @@ namespace FastNx {
         void FlushBuffers();
         template<typename ...Args>
         static void Puts(const fmt::format_string<Args...> &fmt, Args &&...args) {
-            _logger->Log(fmt::format(fmt, std::forward<Args>(args)...));
+            logger->Log(fmt::format(fmt, std::forward<Args>(args)...));
         }
         static void Puts(const std::string &format) {
-            _logger->Puts("{}", format);
+            logger->Puts("{}", format);
         }
 
         template<typename ...Args>
         static void Success(const FormatWrapper &fmt, Args &&...args) {
-            _logger->Log(LogType::Success, fmt.location, fmt::format(fmt::runtime(fmt.format), std::forward<Args>(args)...));
+            logger->Log(LogType::Success, fmt.location, fmt::format(fmt::runtime(fmt.format), std::forward<Args>(args)...));
         }
         template<typename ...Args>
         static void Info(const FormatWrapper &fmt, Args &&...args) {
-            _logger->Log(LogType::Info, fmt.location, fmt::format(fmt::runtime(fmt.format), std::forward<Args>(args)...));
+            logger->Log(LogType::Info, fmt.location, fmt::format(fmt::runtime(fmt.format), std::forward<Args>(args)...));
         }
         template<typename ...Args>
         static void Error(const FormatWrapper &fmt, Args &&...args) {
-            _logger->Log(LogType::Error, fmt.location, fmt::format(fmt::runtime(fmt.format), std::forward<Args>(args)...));
+            logger->Log(LogType::Error, fmt.location, fmt::format(fmt::runtime(fmt.format), std::forward<Args>(args)...));
         }
 
         U64 threshold{32};

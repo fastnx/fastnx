@@ -86,7 +86,7 @@ namespace FastNx::FsSys {
             if (!data && !size)
                 return {};
             if constexpr (Read)
-                return ReadTypeImpl(reinterpret_cast<U8*>(data), size, offset);
+                return ReadTypeImpl(data, size, offset);
             else
                 return WriteTypeImpl(data, size, offset);
         }

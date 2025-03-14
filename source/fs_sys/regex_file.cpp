@@ -27,7 +27,7 @@ namespace FastNx::FsSys {
             if (matches.size() != lines.size()) {
                 EraseAllWith(lines);
                 if (!lines.empty())
-                    AsyncLogger::Success("Deleted lines: {}", fmt::join(lines, ", "));
+                    AsyncLogger::Info("Deleted lines: {}", fmt::join(lines, ", "));
             }
         } catch (const boost::regex_error &except) {
             throw exception{"The regex due to: {}", except.what()};
