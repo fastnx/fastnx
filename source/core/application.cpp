@@ -8,8 +8,8 @@
 #include <fs_sys/refs/editable_directory.h>
 #include <fs_sys/refs/huge_file.h>
 #include <fs_sys/refs/buffered_file.h>
+#include <common/async_logger.h>
 #include <core/application.h>
-
 
 namespace FastNx::Core {
     U64 GetCoreNumber() {
@@ -30,9 +30,9 @@ namespace FastNx::Core {
 #endif
 
         const auto current{std::filesystem::current_path()};
-        std::println("FastNx application started on core {} with PID {} in directory {}", GetCoreNumber(), GetProcessId(), FsSys::GetPathStr(current));
+        AsyncLogger::Success("FastNx application started on core {} with PID {} in directory {}", GetCoreNumber(), GetProcessId(), FsSys::GetPathStr(current));
 
-        std::println("Operating system name: {}", *osname);
+        AsyncLogger::Success("Operating system name: {}", *osname);
     }
 
     Application::~Application() {
@@ -75,7 +75,7 @@ namespace FastNx::Core {
 
             const auto &_gamePath{runnable.front()};
             if (const auto _filename{_gamePath.filename()}; _gamePath.has_filename())
-                std::println("Loading the game from path: {}", FsSys::GetPathStr(_filename));
+                AsyncLogger::Info("Loading the game from path: {}", FsSys::GetPathStr(_filename));
             return std::make_shared<FsSys::ReFs::HugeFile>(_gamePath);
         }();
         if (gamefile != nullptr)

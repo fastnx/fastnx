@@ -10,6 +10,8 @@
 #include <device/capabilities.h>
 
 #include <fs_sys/refs/buffered_file.h>
+#include <common/async_logger.h>
+
 
 FastNx::FsSys::FsPath GetUserDir() {
     if (const auto *const user{getpwuid(getuid())})
@@ -57,14 +59,18 @@ int main(const I32 argc, const char **argv) {
     if (pthread_self() == 0 && getpid() == 0)
         return -1;
 
+    BuildAsyncLogger();
+
     if (const auto &[aspects, ranking] = Device::GetArchAspects(); !aspects.empty()) {
-        std::println("Features supported by the Host system: {}, Your rank {}", aspects, ranking);
+        AsyncLogger::Success("Features supported by the Host system: {}, Your rank {}", aspects, ranking);
     }
 
     if (const auto application{std::make_shared<Core::Application>()}) {
         application->Initialize();
         application->LoadFirstPickedGame();
     }
+
+    _logger->FlushBuffers();
 
     return 0;
 }

@@ -1,5 +1,4 @@
-#include <cassert>
-#include <print>
+#include <common/async_logger.h>
 #include <loaders/nsp_es.h>
 
 namespace FastNx::Loaders {
@@ -10,9 +9,9 @@ namespace FastNx::Loaders {
             return;
         }
 
-        std::puts("Files in this PFS: ");
+        AsyncLogger::Puts("Files in this PFS: \n");
         for (const auto &partfile: _mainPfs->ListAllFiles()) {
-            std::println("- {}", FsSys::GetPathStr(partfile));
+            AsyncLogger::Puts("- {}\n", FsSys::GetPathStr(partfile));
         }
 
         subnsp = std::make_shared<FsSys::NxFmt::SubmissionPackage>(_mainPfs, keys);

@@ -18,6 +18,7 @@ namespace FastNx::Core {
 
         std::optional<FsSys::ReFs::EditableDirectory> directory;
         std::optional<FsSys::ReFs::EditableDirectory> games;
+        std::optional<FsSys::ReFs::EditableDirectory> logs;
         std::optional<FsSys::ReFs::EditableDirectory> keys;
 
         std::optional<GamesLists> gamesLists;

@@ -9,6 +9,9 @@
 #include <common/bytes.h>
 #include <fs_sys/regex_file.h>
 #include <horizon/key_set.h>
+
+#include <common/async_logger.h>
+
 namespace FastNx::Horizon {
     std::pair<KeyMode, KeyType> GetKeyModeByName(const FsSys::VfsBackingFilePtr &key) {
         const auto &keyname{key->path.filename()};
@@ -28,7 +31,7 @@ namespace FastNx::Horizon {
         for (const auto &keyname: keys) {
             const auto keyfile{dirKeys.OpenFile(keyname)};
             assert(*keyfile);
-            std::println("Importing keys from file {}", GetPathStr(keyfile));
+            AsyncLogger::Success("Importing keys from file {}", GetPathStr(keyfile));
             if (const auto [_, _ktype] = GetKeyModeByName(keyfile); _ktype != KeyType::Unknown) {
                 const auto pattern = [_ktype] -> std::string {
                     if (_ktype == KeyType::Production)
@@ -40,7 +43,7 @@ namespace FastNx::Horizon {
                     ParserKeys(kfile->GetAllMatches(), _ktype);
             }
         }
-        std::println("Total keys read and stored: {}", prods.size() + titles.size());
+        AsyncLogger::Info("Total keys read and stored: {}", prods.size() + titles.size());
 
         if (!keys.empty())
             if (!prods.empty() || !saveall)

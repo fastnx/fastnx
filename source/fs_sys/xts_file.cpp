@@ -37,4 +37,8 @@ namespace FastNx::FsSys {
             decrypt->ProcessXts(_bytes, _bytes, size);
         return size;
     }
+
+    U64 XtsFile::WriteTypeImpl(const U8 *source, U64 size, U64 offset) {
+        std::unreachable(); std::terminate();
+    }
 }

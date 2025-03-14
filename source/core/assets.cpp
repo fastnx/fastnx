@@ -1,8 +1,10 @@
 #include <cassert>
 #include <unistd.h>
 
+#include <common/async_logger.h>
 #include <common/exception.h>
 #include <core/assets.h>
+
 namespace FastNx::Core {
     auto ContainsPath(const FsSys::FsPath &dest, const FsSys::FsPath &src) {
         bool result{};
@@ -49,6 +51,9 @@ namespace FastNx::Core {
         directory.emplace(std::filesystem::current_path());
         games.emplace(directory->path / "games", true);
         keys.emplace(directory->path / "keys", true);
+        logs.emplace(directory->path / "logs", true);
+
+        BuildAsyncLogger(logs);
 
         if (keys->ListAllFiles().empty())
             throw exception{"No keys found on the system"};

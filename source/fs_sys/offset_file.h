@@ -8,10 +8,11 @@ namespace FastNx::FsSys {
     public:
         OffsetFile(const VfsBackingFilePtr &backing, const FsPath &_path, U64 offset, U64 size, bool isHuge = {});
 
-        operator bool() const override;
+        explicit operator bool() const override;
         U64 GetSize() const override;
     private:
         U64 ReadTypeImpl(U8 *dest, U64 size, U64 offset) override;
+        U64 WriteTypeImpl(const U8 *source, U64 size, U64 offset) override;
 
         U64 size{};
         U64 begin{};

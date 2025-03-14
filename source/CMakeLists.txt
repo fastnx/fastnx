@@ -24,6 +24,8 @@ target_sources(fastnx PRIVATE
     common/types.h
     common/values.h
     common/exception.h
+    common/async_logger.cpp
+    common/async_logger.h
     device/processor.cpp
     device/syslimits.cpp
     device/pages.cpp

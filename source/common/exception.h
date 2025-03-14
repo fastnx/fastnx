@@ -6,6 +6,6 @@ namespace FastNx {
     public:
         template<typename... Args>
         explicit exception(const fmt::format_string<Args...> &format, Args &&...args) : std::runtime_error(
-            fmt::format(std::move(format), std::forward<Args>(args)...)) {}
+            fmt::format(format, std::forward<Args>(args)...)) {}
     };
 }

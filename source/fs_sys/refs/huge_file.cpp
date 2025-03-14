@@ -11,10 +11,12 @@
 #include <common/container.h>
 #include <common/exception.h>
 #include <device/capabilities.h>
+#include <common/async_logger.h>
 #include <device/memory.h>
 
 #include <fs_sys/refs/buffered_file.h>
 #include <fs_sys/refs/huge_file.h>
+
 namespace FastNx::FsSys::ReFs {
     HugeFile::HugeFile(const FsPath &_path, const I32 dirfd, const FileModeType _mode) : VfsBackingFile(_path, _mode) {
         if (!exists(path))
@@ -27,7 +29,7 @@ namespace FastNx::FsSys::ReFs {
         }();
 
         if (descriptor < 0) {
-            std::println(std::cerr, "Could not open the file {}", GetPathStr(path));
+            AsyncLogger::Error("Could not open the file {}", GetPathStr(path));
             return;
         }
         const auto writable{mode != FileModeType::ReadOnly};
@@ -108,6 +110,19 @@ namespace FastNx::FsSys::ReFs {
         }
         if (source)
             recorded = source;
+        return size;
+    }
+
+    U64 HugeFile::WriteTypeImpl(const U8 *source, const U64 size, const U64 offset) {
+        const auto _size{offset + size};
+        if (_size > mapsize)
+            if (ftruncate(descriptor, _size) == 0)
+                mapsize = _size;
+
+        if (mapsize < _size)
+            throw std::bad_alloc{};
+        std::memcpy(&memory[offset], source, size);
+
         return size;
     }
 }

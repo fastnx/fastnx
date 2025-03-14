@@ -33,6 +33,10 @@ namespace FastNx::FsSys {
             ReadType(reinterpret_cast<U8 *>(&value), sizeof(T), _offset);
             return value;
         }
+        template<typename T> requires (std::is_trivial_v<T>)
+        void Write(T& value, const U64 _offset = {}) {
+            WriteType(reinterpret_cast<U8 *>(&value), sizeof(T), _offset);
+        }
 
         template<typename T> requires (std::is_trivial_v<T>)
         U64 Read(T &object, const U64 _offset = {}) {
@@ -50,6 +54,10 @@ namespace FastNx::FsSys {
         U64 ReadSome(std::vector<T> &content, const U64 _offset) {
             return ReadTypeImpl(reinterpret_cast<U8*>(content.data()), content.size(), _offset);
         }
+        template<typename T>
+        U64 WriteSome(const std::vector<T> &content, const U64 _offset) {
+            return WriteTypeImpl(reinterpret_cast<const U8*>(content.data()), content.size(), _offset);
+        }
         std::string ReadLine(U64 offset = {});
         std::vector<std::string> GetAllLines();
 
@@ -59,18 +67,40 @@ namespace FastNx::FsSys {
         FsPath path;
         FileModeType mode;
 
+        template<bool Read>
+        U64 PerformSafeIo(auto *data, const U64 size, const U64 offset) {
+            const auto priviledge = [&] -> bool {
+                if (mode == FileModeType::ReadWrite)
+                    return true;
+
+                if (mode == FileModeType::ReadOnly && Read)
+                    return true;
+                if (mode == FileModeType::WriteOnly && !Read)
+                    return true;
+
+                throw std::logic_error("Unsupported file access mode");
+            }();
+            if (!priviledge)
+                return {};
+
+            if (!data && !size)
+                return {};
+            if constexpr (Read)
+                return ReadTypeImpl(reinterpret_cast<U8*>(data), size, offset);
+            else
+                return WriteTypeImpl(data, size, offset);
+        }
         template<typename T> requires (sizeof(T) == 1)
         U64 ReadType(T *dest, const U64 size, const U64 offset) {
-            if (mode == FileModeType::WriteOnly) {
-                throw std::runtime_error{"Operation not supported on the file"};
-            }
-
-            if (!dest && !size)
-                return {};
-            return ReadTypeImpl(reinterpret_cast<U8*>(dest), size, offset);
+            return PerformSafeIo<true>(reinterpret_cast<U8*>(dest), size, offset);
+        }
+        template<typename T> requires (sizeof(T) == 1)
+        U64 WriteType(const T *source, const U64 size, const U64 offset) {
+            return PerformSafeIo<false>(reinterpret_cast<const U8*>(source), size, offset);
         }
     private:
         virtual U64 ReadTypeImpl(U8 *dest, U64 size, U64 offset) = 0;
+        virtual U64 WriteTypeImpl(const U8* source, U64 size, U64 offset) = 0;
     };
 
     using VfsBackingFilePtr = std::shared_ptr<VfsBackingFile>;

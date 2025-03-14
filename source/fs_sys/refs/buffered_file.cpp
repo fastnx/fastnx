@@ -6,6 +6,8 @@
 #include <common/container.h>
 #include <fs_sys/refs/buffered_file.h>
 
+#include <common/async_logger.h>
+
 namespace FastNx::FsSys::ReFs {
     BufferedFile::BufferedFile(const FsPath &_path, const I32 dirfd, const FileModeType _mode, const bool create) : VfsBackingFile(_path, _mode) {
         if (!exists(path) && create) {
@@ -19,7 +21,7 @@ namespace FastNx::FsSys::ReFs {
         }();
 
         if (descriptor < 0) {
-            std::println(std::cerr, "Could not open the file {}", GetPathStr(path));
+            AsyncLogger::Error("Could not open the file {}", GetPathStr(path));
             if (create && exists(path))
                 std::filesystem::remove(path);
         } else if (mode == FileModeType::ReadWrite) {
@@ -71,8 +73,8 @@ namespace FastNx::FsSys::ReFs {
                 return size;
         }
 
-        if (buffer.size() < 16_KBYTES)
-            buffer.resize(16_KBYTES);
+        if (const auto _size{std::min(size, 64_KBYTES)}; buffer.size() < _size)
+            buffer.resize(_size);
         const auto result = [&] -> U64 {
             U64 copied{};
             for (U64 _offset{offset}; _offset < offset + size;) {
@@ -98,5 +100,23 @@ namespace FastNx::FsSys::ReFs {
             return copied;
         }();
         return result;
+    }
+
+    U64 BufferedFile::WriteTypeImpl(const U8 *source, const U64 size, const U64 offset) {
+        if (offset >= valid && start + valid < offset + size) {
+            valid = start = {};
+            std::ranges::fill(buffer, '\0'); // Invalidation of our internal buffer
+        }
+        if (size > buffer.size()) {
+            buffer.resize(size);
+        }
+        std::memcpy(buffer.data(), source, size);
+        const auto copied{pwrite64(descriptor, buffer.data(), size, offset)};
+
+        if (!valid && copied != -1) {
+            start = offset;
+            valid = copied;
+        }
+        return copied;
     }
 }

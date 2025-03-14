@@ -1,5 +1,6 @@
 #include <common/traits.h>
 #include <common/bytes.h>
+#include <common/async_logger.h>
 
 #include <fmt/format.h>
 #include <fmt/ranges.h>
@@ -31,7 +32,7 @@ namespace FastNx::Crypto {
         }
 
         const auto result(checksum.Finish());
-        fmt::println("SHA256 result of NCA {}, {:x}", GetPathStr(file), fmt::join(result, ""));
+        AsyncLogger::Success("SHA256 result of NCA {}, {:x}", GetPathStr(file), fmt::join(result, ""));
         return Contains(hashsum, ToSpan(result));
     }
 }

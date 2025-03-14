@@ -7,7 +7,10 @@
 
 #include <common/container.h>
 #include <common/exception.h>
+#include <common/async_logger.h>
 #include <fs_sys/regex_file.h>
+
+
 namespace FastNx::FsSys {
     RegexFile::RegexFile(const VfsBackingFilePtr &_file, const std::string &pattern): VfsBackingFile(_file->path), file(_file) {
         assert(file && !pattern.empty());
@@ -24,7 +27,7 @@ namespace FastNx::FsSys {
             if (matches.size() != lines.size()) {
                 EraseAllWith(lines);
                 if (!lines.empty())
-                    fmt::print("Deleted lines: {}", fmt::join(lines, ", "));
+                    AsyncLogger::Success("Deleted lines: {}", fmt::join(lines, ", "));
             }
         } catch (const boost::regex_error &except) {
             throw exception{"The regex due to: {}", except.what()};
@@ -50,5 +53,8 @@ namespace FastNx::FsSys {
         if (_size)
             std::memcpy(dest, line->begin().base() + lastoff, _size);
         return _size;
+    }
+    U64 RegexFile::WriteTypeImpl(const U8 *source, U64 size, U64 offset) {
+        std::unreachable(); std::terminate();
     }
 }

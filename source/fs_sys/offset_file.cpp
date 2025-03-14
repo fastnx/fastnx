@@ -30,4 +30,8 @@ namespace FastNx::FsSys {
         }();
         return result;
     }
+
+    U64 OffsetFile::WriteTypeImpl(const U8 *source, U64 size, U64 offset) {
+        std::unreachable(); std::terminate();
+    }
 }

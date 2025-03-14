@@ -16,6 +16,7 @@ namespace FastNx::FsSys {
     private:
         std::vector<std::string> matches;
         U64 ReadTypeImpl(U8 *dest, U64 size, U64 offset) override;
+        U64 WriteTypeImpl(const U8 *source, U64 size, U64 offset) override;
 
         VfsBackingFilePtr file{};
     };
