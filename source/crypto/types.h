@@ -5,10 +5,12 @@ namespace FastNx::Crypto {
     using RightsId = std::array<U8, 0x10>;
 
     template<U64 Bits>
-    struct SourceKey : std::array<U8, Bits / 8> {};
+    struct SourceKey : std::array<U8, Bits / 8> {
+    };
 
     using Key128 = SourceKey<128>;
     using Key256 = SourceKey<256>;
 
     bool CheckNcaIntegrity(const FsSys::VfsBackingFilePtr &file);
+    bool VerifyNcaSignature(const void *content, U64 size, const Rsa2048 &signature);
 }

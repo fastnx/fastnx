@@ -3,16 +3,6 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/externals/boost" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/externals/boost/libs/align" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/externals/boost/libs/assert" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/externals/boost/libs/config" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/externals/boost/libs/container" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/externals/boost/libs/intrusive" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/externals/boost/libs/move" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/externals/boost/libs/predef" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/externals/boost/libs/regex" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/externals/boost/libs/throw_exception" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/externals/boost/tools/cmake" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/externals/fmt" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/externals/mbedtls" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/externals/mbedtls/framework" vcs="Git" />

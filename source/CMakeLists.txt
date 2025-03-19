@@ -35,10 +35,13 @@ target_sources(fastnx PRIVATE
     kernel/kernelctx.cpp
     kernel/kernelctx.h
     crypto/integrity.cpp
-    crypto/hashsum.cpp
-    crypto/hashsum.h
+    crypto/checksum.cpp
+    crypto/checksum.h
     crypto/safe_aes.cpp
     crypto/safe_aes.h
+    crypto/pki_nca.cpp
+    crypto/ticket.cpp
+    crypto/ticket.h
     crypto/types.h
 )
 

@@ -1,9 +1,11 @@
 #include <common/container.h>
 #include <common/exception.h>
+#include <common/async_logger.h>
 #include <horizon/key_set.h>
 #include <fs_sys/xts_file.h>
-#include <fs_sys/nx_fmt/content_archive.h>
 
+#include <crypto/types.h>
+#include <fs_sys/nx_fmt/content_archive.h>
 
 namespace FastNx::FsSys::NxFmt {
     auto CheckNcaMagic(const U32 value) {
@@ -22,15 +24,24 @@ namespace FastNx::FsSys::NxFmt {
         if (const auto magic{archive.magic})
             encrypted = !CheckNcaMagic(magic);
 
-        if (encrypted) {
+        _nca = [&] -> VfsBackingFilePtr {
+            if (!encrypted)
+                return std::move(nca);
             if (!keys->headerKey)
                 throw exception{"Header key not found"};
-            _nca = std::make_shared<XtsFile>(std::move(nca), *keys->headerKey.value());
-            archive = _nca->Read<NcaHeader>();
-        } else {
-            _nca = std::move(nca);
-        }
+            auto xts = std::make_shared<XtsFile>(std::move(nca), *keys->headerKey.value());
+            xts->doublebuf = true;
+            archive = xts->Read<NcaHeader>();
+            return xts;
+        }();
+
+        assert(CheckNcaMagic(archive.magic));
         assert(archive.contentSize == nca->GetSize());
+
+        if (!Crypto::VerifyNcaSignature(&archive.magic, 0x200, archive.signature.header))
+            AsyncLogger::Info("Header signature verification failed");
+
+        size = archive.contentSize;
         type = archive.type;
     }
 }

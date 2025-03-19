@@ -43,9 +43,8 @@ int main(const I32 argc, const char **argv) {
     if (disableswap)
         Device::LockAllMapping();
 
-    {
-        assert(FsSys::ReFs::BufferedFile("app_lock", 0, FsSys::FileModeType::WriteOnly, true));
-    }
+    assert(FsSys::ReFs::BufferedFile("app_lock", 0, FsSys::FileModeType::WriteOnly, true));
+
     boost::interprocess::file_lock flock("app_lock");
     if (!FsSys::IsInsideOf(std::filesystem::current_path(), GetUserDir()))
         return -1;

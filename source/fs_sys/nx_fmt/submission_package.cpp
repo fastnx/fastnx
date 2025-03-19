@@ -1,6 +1,7 @@
 #include <print>
 
 #include <crypto/types.h>
+#include <crypto/ticket.h>
 #include <common/async_logger.h>
 #include <fs_sys/nx_fmt/submission_package.h>
 #include <fs_sys/nx_fmt/content_archive.h>
@@ -11,26 +12,34 @@ namespace FastNx::FsSys::NxFmt {
         auto files{pfs->ListAllFiles()};
 
         for (auto subit{files.begin()}; subit != files.end() && !cnmt; ++subit) {
-            if (!subit->stem().has_extension())
-                continue;
-            if ((cnmt = pfs->OpenFile(*subit)))
+            bool erase{};
+            if (subit->extension() == ".tik") {
+                Crypto::Ticket title(pfs->OpenFile(*subit));
+                erase = true;
+            }
+            if (const auto &subpath{subit->stem()}; subit->has_stem())
+                if (subpath.has_extension() && subpath.extension() == ".cnmt")
+                    if ((cnmt = pfs->OpenFile(*subit)))
+                        erase = true;
+
+            if (erase)
                 files.erase(subit);
         }
 
         assert(cnmt && cnmt->GetSize() > 0);
-        for (const auto &content : files) {
-            assert(content.extension() == ".nca");
-            if (corrupted) {
-                AsyncLogger::Error("The NCA file {} is corrupted, check your ROM", GetPathStr(corrupted));
-                return;
-            }
+        for (const auto &content: files) {
+            if (content.extension() != ".nca")
+                continue;
             if (const auto ncafile{pfs->OpenFile(content)}) {
                 if (Crypto::CheckNcaIntegrity(ncafile) == false)
                     corrupted = ncafile;
 
                 AsyncLogger::Info("Processing content of NCA {}", GetPathStr(ncafile));
-                [[maybe_unused]] const auto archive{std::make_shared<ContentArchive>(std::move(ncafile), keys)};
+                const auto archive{std::make_shared<ContentArchive>(std::move(ncafile), keys)};
+                assert(archive->size);
             }
         }
+        if (corrupted)
+            AsyncLogger::Error("The NCA file {} is corrupted, check your ROM", GetPathStr(corrupted));
     }
 }

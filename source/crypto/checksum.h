@@ -5,13 +5,13 @@
 
 #include <common/types.h>
 namespace FastNx::Crypto {
-    enum class HashMode {
+    enum class ChecksumType {
         None,
         Sha256
     };
-    class HashSum {
+    class Checksum {
     public:
-        explicit HashSum(HashMode mode = HashMode::Sha256);
+        explicit Checksum(ChecksumType type = ChecksumType::Sha256);
 
         U64 Update(const U8 *source, U64 size);
         U64 Finish(const std::span<U8> &result);
@@ -21,8 +21,12 @@ namespace FastNx::Crypto {
         auto Update(const std::vector<T> &content) {
             return Update(reinterpret_cast<const U8 *>(content.data()), content.size() * sizeof(T));
         }
-        HashMode GetMode() const;
-        ~HashSum();
+        template<typename T>
+        auto Update(const std::span<T> &content) {
+            return Update(reinterpret_cast<const U8 *>(content.data()), content.size() * sizeof(T));
+        }
+        ChecksumType GetType() const;
+        ~Checksum();
 
     private:
         bool done{true};

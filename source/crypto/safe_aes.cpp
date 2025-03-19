@@ -47,7 +47,7 @@ namespace FastNx::Crypto {
         }
 
         for (U64 offset{}; offset < size; ) {
-            const U64 stride{std::min(size - processed, auxbuffer.size())};
+            const U64 stride{std::min(size - processed, 2048UL)};
             U64 output{};
             mbedtls_cipher_update(context, source + offset, stride, destination + offset, &output);
 

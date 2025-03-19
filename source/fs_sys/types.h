@@ -45,17 +45,17 @@ namespace FastNx::FsSys {
         }
 
         template<typename T = U8> requires (!IsVectorType<T>)
-        std::vector<T> ReadSome(const U64 _offset, const U64 size) {
+        std::vector<T> ReadSome(const U64 size, const U64 _offset) {
             std::vector<T> _content(size);
             assert(ReadTypeImpl(reinterpret_cast<U8*>(_content.data()), size, _offset) == size);
             return _content;
         }
         template<typename T>
-        U64 ReadSome(std::vector<T> &content, const U64 _offset) {
+        U64 ReadSome(const std::span<T> &content, const U64 _offset) {
             return ReadTypeImpl(reinterpret_cast<U8*>(content.data()), content.size(), _offset);
         }
         template<typename T>
-        U64 WriteSome(const std::vector<T> &content, const U64 _offset) {
+        U64 WriteSome(const std::span<T> &content, const U64 _offset) {
             return WriteTypeImpl(reinterpret_cast<const U8*>(content.data()), content.size(), _offset);
         }
         std::string ReadLine(U64 offset = {});

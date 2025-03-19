@@ -27,7 +27,7 @@ namespace FastNx::FsSys::NxFmt {
             _count++;
         }
         _files.reserve(_count);
-        const auto namestable{partfs->ReadSome<char>(_nextOffset, pfs0hd.strTableSize)};
+        const auto namestable{partfs->ReadSome<char>(pfs0hd.strTableSize, _nextOffset)};
         const auto filedata{_nextOffset + namestable.size()};
 
         for (const auto &file: pents) {

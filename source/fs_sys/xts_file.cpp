@@ -33,8 +33,8 @@ namespace FastNx::FsSys {
         if (!output.size())
             return {};
 
-        if (auto *_bytes{output.data()})
-            decrypt->ProcessXts(_bytes, _bytes, size);
+        if (const auto *_bytes{output.data()})
+            decrypt->ProcessXts(dest, _bytes, size);
         return size;
     }
 
