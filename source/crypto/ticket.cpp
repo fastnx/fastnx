@@ -3,6 +3,15 @@
 
 #include <crypto/ticket.h>
 namespace FastNx::Crypto {
+
+    U64 GetSignatureSize(const std::vector<U8> &signature) {
+        const auto result{signature.size()};
+        if (result >= 0x100 || result <= 0x200)
+            return result + 0x3C;
+        if (result == 0x3C)
+            return result + 0x40;
+        return result + 0x14;
+    }
     Ticket::Ticket(const FsSys::VfsBackingFilePtr &tik) {
         if (tik->GetSize() < sizeof(TicketData))
             return;
@@ -26,14 +35,7 @@ namespace FastNx::Crypto {
             }
         }();
         signature = tik->ReadSome(size, offset);
-
-        offset += signature.size();
-        if (signature.size() == 0x3C)
-            offset += 0x40;
-        else if (signature.size() == 0x14)
-            offset += 0x14;
-        else
-            offset += 0x3C;
+        offset += GetSignatureSize(signature);
 
         std::span ticket{reinterpret_cast<char* >(&content), sizeof(content) - offset};
         if (tik->ReadSome(ticket, offset) != ticket.size())
@@ -47,8 +49,11 @@ namespace FastNx::Crypto {
         file->Write(type);
         file->WriteSome(std::span(signature), 0x4);
 
-        const auto offset{signature.size() + 0x4};
+        auto offset{signature.size() + 0x4};
         const std::span ticket{reinterpret_cast<U8 *>(&content), sizeof(content) - offset};
+
+        offset += GetSignatureSize(signature) - signature.size();
         file->WriteSome(ticket, offset);
+        assert(file->GetSize() == sizeof(content));
     }
 }
