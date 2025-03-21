@@ -7,9 +7,9 @@
 
 namespace FastNx {
     template<U64 Size, typename T> requires (IsStringType<T>)
-    constexpr std::array<U8, Size> ToArrayOfBytes(const T &string) {
+    constexpr std::array<U8, Size> ToArrayOfBytes(const T &string, bool checksize = true) {
         std::array<U8, Size> result{};
-        if (string.size() / 2 != result.size())
+        if (string.size() / 2 != result.size() && checksize)
             throw std::bad_cast{};
 
         thread_local std::vector<U8> bytes;

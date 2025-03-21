@@ -1,7 +1,6 @@
 #include <print>
 
 #include <crypto/types.h>
-#include <crypto/ticket.h>
 #include <common/async_logger.h>
 #include <fs_sys/nx_fmt/submission_package.h>
 #include <fs_sys/nx_fmt/content_archive.h>
@@ -14,7 +13,7 @@ namespace FastNx::FsSys::NxFmt {
         for (auto subit{files.begin()}; subit != files.end() && !cnmt; ++subit) {
             bool erase{};
             if (subit->extension() == ".tik") {
-                Crypto::Ticket title(pfs->OpenFile(*subit));
+                keys->AddTicket(pfs->OpenFile(*subit));
                 erase = true;
             }
             if (const auto &subpath{subit->stem()}; subit->has_stem())

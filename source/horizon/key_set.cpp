@@ -23,7 +23,7 @@ namespace FastNx::Horizon {
         return {};
     }
 
-    KeySet::KeySet(FsSys::ReFs::EditableDirectory &dirKeys) {
+    KeySet::KeySet(FsSys::ReFs::EditableDirectory &dirKeys, FsSys::ReFs::EditableDirectory &dirTiks) : tiks(dirTiks) {
         if (dirKeys.GetFilesCount() < 2)
             return;
         const auto keys{dirKeys.GlobAllFiles("*.keys")};
@@ -44,6 +44,11 @@ namespace FastNx::Horizon {
             }
         }
         AsyncLogger::Info("Total keys read and stored: {}", prods.size() + titles.size());
+
+        for (const auto &ticks: tiks.ListAllFiles()) {
+            AsyncLogger::Info("Loading ticket: {}", FsSys::GetPathStr(ticks));
+            AddTicket(tiks.OpenFile(ticks));
+        }
 
         if (!keys.empty())
             if (!prods.empty() || !saveall)
@@ -121,5 +126,17 @@ namespace FastNx::Horizon {
             persistent = true;
         }
         return persistent;
+    }
+
+    void KeySet::AddTicket(const FsSys::VfsBackingFilePtr &tik) {
+        const auto ticketid{tik->path.stem()};
+        const auto pfstikhash{ToArrayOfBytes<16>(ticketid.string(), false)};
+        if (tickets.contains(pfstikhash))
+            return;
+
+        Crypto::Ticket ticket{tik};
+        if (tiks.OpenFile(tik->path) == nullptr)
+            ticket.Export(tiks.OpenFile(tik->path, FsSys::FileModeType::ReadWrite));
+        tickets.emplace(pfstikhash, std::move(ticket));
     }
 }

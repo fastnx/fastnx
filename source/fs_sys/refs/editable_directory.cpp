@@ -95,26 +95,32 @@ namespace FastNx::FsSys::ReFs {
 
     VfsBackingFilePtr EditableDirectory::OpenFile(const FsPath &_path, const FileModeType mode) {
         const auto create{mode != FileModeType::ReadOnly};
+        const FsPath openpath = [&] {
+            if (_path.has_parent_path())
+                return _path;
+            return path / _path;
+        }();
+
         try {
-            if (!Contains(ListAllFiles(), _path) && !create)
+            if (!Contains(ListAllFiles(), openpath) && !create)
                 return nullptr;
         } catch (std::filesystem::filesystem_error &_) {
             bool accessible{};
             for (const auto &subpath: ListAllTopLevelFiles()) {
-                if (IsInsideOf(_path, subpath, false))
+                if (IsInsideOf(openpath, subpath, false))
                     accessible = true;
             }
             if (!accessible && !create)
                 return nullptr;
         }
-        if (is_directory(_path))
+        if (is_directory(openpath))
             return nullptr;
-        if (create && is_regular_file(_path))
-            remove(_path);
+        if (create && is_regular_file(openpath))
+            remove(openpath);
 
-        if (exists(_path) && file_size(_path) > 120_MBYTES) {
-            return std::make_shared<HugeFile>(_path, descriptor, mode);
+        if (exists(openpath) && file_size(openpath) > 120_MBYTES) {
+            return std::make_shared<HugeFile>(openpath, descriptor, mode);
         }
-        return std::make_shared<BufferedFile>(_path, descriptor, mode, create);
+        return std::make_shared<BufferedFile>(openpath, descriptor, mode, create);
     }
 }

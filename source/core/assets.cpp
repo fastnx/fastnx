@@ -52,6 +52,7 @@ namespace FastNx::Core {
         games.emplace(directory->path / "games", true);
         keys.emplace(directory->path / "keys", true);
         logs.emplace(directory->path / "logs", true);
+        tiks.emplace(directory->path / "tiks", true);
 
         BuildAsyncLogger(logs);
 

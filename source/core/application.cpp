@@ -63,7 +63,7 @@ namespace FastNx::Core {
             return;
         assets->Initialize();
 
-        keys = std::make_shared<Horizon::KeySet>(*assets->keys);
+        keys = std::make_shared<Horizon::KeySet>(*assets->keys, *assets->tiks);
         _switch = std::make_shared<Horizon::SwitchNs>(keys);
     }
 

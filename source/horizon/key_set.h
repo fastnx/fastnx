@@ -1,8 +1,8 @@
 #pragma once
 #include <unordered_map>
-#include <boost/container_hash/hash.hpp>
 #include <fs_sys/refs/editable_directory.h>
 
+#include <crypto/ticket.h>
 #include <crypto/types.h>
 namespace FastNx::Horizon {
     enum class KeyMode {
@@ -46,16 +46,18 @@ namespace FastNx::Horizon {
 
     class KeySet {
     public:
-        explicit KeySet(FsSys::ReFs::EditableDirectory &dirKeys);
+        explicit KeySet(FsSys::ReFs::EditableDirectory &dirKeys, FsSys::ReFs::EditableDirectory &dirTiks);
 
         void ParserKeys(std::vector<std::string> &&pairs, KeyType type);
 
         bool AddTitleKey(const std::string_view &keyname, const std::string_view &keyvalue);
         bool AddProdKey(const std::string_view &keyname, const std::string_view &keyvalue);
 
+        void AddTicket(const FsSys::VfsBackingFilePtr &tik);
         std::optional<Crypto::Key256*> headerKey;
         bool saveall{};
     private:
+        std::unordered_map<std::array<U8, 16>, Crypto::Ticket, Crypto::ArrayHash<U8, 16>> tickets;
         std::vector<std::pair<Crypto::Key128, Crypto::Key128>> titles;
         std::unordered_map<std::string_view, std::string_view> prods;
 
@@ -63,5 +65,7 @@ namespace FastNx::Horizon {
         std::unordered_map<KeyIdentifier, std::string_view, KeyIndexableHash> indexablekeys;
 
         std::vector<std::string> keyring; // <- Store the keys to avoid unnecessary allocations
+
+        FsSys::ReFs::EditableDirectory &tiks;
     };
 }
