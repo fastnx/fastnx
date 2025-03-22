@@ -21,7 +21,7 @@ namespace FastNx::FsSys {
             offset += size;
         }
         std::array<std::array<U8, 32>, 2> hashes;
-        for (const auto [hasher, result]: std::views::zip(checkers, hashes)) {
+        for (const auto& [hasher, result]: std::views::zip(checkers, hashes)) {
             hasher.Finish(result);
         }
 

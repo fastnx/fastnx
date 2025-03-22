@@ -25,7 +25,8 @@ namespace FastNx::Loaders {
         switch (type) {
             case AppType::NspEs:
                 return "NSP";
-            default: {}
+            default:
+                break;
         }
         std::unreachable();
     }

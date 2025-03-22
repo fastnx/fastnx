@@ -14,6 +14,8 @@ namespace FastNx::FsSys::ReFs {
             if (std::fstream file{_path, std::ios::out}; file.is_open())
                 file.close();
         }
+        if (create)
+            assert(mode != FileModeType::ReadOnly);
         descriptor = [&] {
             if (dirfd)
                 return openat64(dirfd, GetDataArray(path), ModeToNative(mode));
@@ -24,22 +26,19 @@ namespace FastNx::FsSys::ReFs {
             AsyncLogger::Error("Could not open the file {}", GetPathStr(path));
             if (create && exists(path))
                 std::filesystem::remove(path);
-        } else if (mode == FileModeType::ReadWrite) {
+        } else if (mode != FileModeType::ReadOnly) {
             assert(lockf(descriptor, F_LOCK, 0) == 0);
         }
     }
 
     BufferedFile::~BufferedFile() {
-        switch (lockf(descriptor, F_LOCK, 0)) {
-            case EACCES:
-            case EAGAIN:
-                assert(lockf(descriptor, F_UNLCK, 0) == 0);
-            default: {}
+        if (mode != FileModeType::ReadOnly)
+            if (lockf(descriptor, F_TLOCK, 0) != 0) {
+                if (errno == EACCES || errno == EAGAIN)
+                    assert(lockf(descriptor, F_UNLCK, 0) == 0);
         }
         if (descriptor > 0)
-            close(descriptor);
-        auto &&_buffer{std::move(buffer)};
-        _buffer.clear();
+            assert(close(descriptor) == 0);
     }
 
     BufferedFile::operator bool() const {
