@@ -57,7 +57,7 @@ namespace FastNx::Horizon {
         std::optional<Crypto::Key256*> headerKey;
         bool saveall{};
     private:
-        std::unordered_map<std::array<U8, 16>, Crypto::Ticket, Crypto::ArrayHash<U8, 16>> tickets;
+        std::unordered_map<std::array<U8, 16>, std::pair<FsSys::VfsBackingFilePtr, Crypto::Ticket>, Crypto::ArrayHash<U8, 16>> tickets;
         std::vector<std::pair<Crypto::Key128, Crypto::Key128>> titles;
         std::unordered_map<std::string_view, std::string_view> prods;
 

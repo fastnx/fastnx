@@ -6,11 +6,11 @@
 #include <fmt/format.h>
 
 #include <common/exception.h>
+#include <common/async_logger.h>
 #include <common/bytes.h>
 #include <fs_sys/regex_file.h>
 #include <horizon/key_set.h>
 
-#include <common/async_logger.h>
 
 namespace FastNx::Horizon {
     std::pair<KeyMode, KeyType> GetKeyModeByName(const FsSys::VfsBackingFilePtr &key) {
@@ -131,12 +131,16 @@ namespace FastNx::Horizon {
     void KeySet::AddTicket(const FsSys::VfsBackingFilePtr &tik) {
         const auto ticketid{tik->path.stem()};
         const auto pfstikhash{ToArrayOfBytes<16>(ticketid.string(), false)};
-        if (tickets.contains(pfstikhash))
-            return;
+
+        if (tickets.contains(pfstikhash)) {
+            if (const auto ticket{tickets.find(pfstikhash)}; MatchFiles(tik, ticket->second.first))
+                return;
+            AsyncLogger::Error("Invalid ticket file in cache, updating...");
+        }
 
         Crypto::Ticket ticket{tik};
         if (tiks.OpenFile(tik->path) == nullptr)
             ticket.Export(tiks.OpenFile(tik->path, FsSys::FileModeType::ReadWrite));
-        tickets.emplace(pfstikhash, std::move(ticket));
+        tickets.insert_or_assign(pfstikhash, std::make_pair(tik, std::move(ticket)));
     }
 }

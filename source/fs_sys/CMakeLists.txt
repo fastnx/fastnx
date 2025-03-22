@@ -6,6 +6,7 @@ target_sources(fastnx PRIVATE
     fsio.cpp
     fullpath.cpp
     filters.cpp
+    match.cpp
     regex_file.cpp
     regex_file.h
     offset_file.cpp

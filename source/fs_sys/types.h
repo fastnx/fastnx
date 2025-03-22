@@ -135,6 +135,7 @@ namespace FastNx::FsSys {
     bool IsAPfs0File(const VfsBackingFilePtr &pfs0);
 
     U64 GetSizeBySeek(I32 fd);
+    bool MatchFiles(const VfsBackingFilePtr &first, const VfsBackingFilePtr &second);
 
     template<typename T>
     std::string GetPathStr(const T &value) {

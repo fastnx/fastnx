@@ -25,7 +25,7 @@ namespace FastNx::Core {
 #if defined(__linux__)
         FsSys::ReFs::EditableDirectory release{"/etc"};
         if (const auto files{release.GlobAllFiles("*-release")}; !files.empty()) {
-            osname.emplace(release.OpenFile(files.front())->ReadLine());
+            osname.emplace(release.OpenFile(files.back())->ReadLine());
         }
 #endif
 

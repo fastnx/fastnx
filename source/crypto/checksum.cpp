@@ -26,7 +26,8 @@ namespace FastNx::Crypto {
             if (mbedtls_md_starts(context) == 0)
                 done = {};
 
-        mbedtls_md_update(context, source, size);
+        if (mbedtls_md_update(context, source, size) != 0)
+            return {};
         return size;
     }
 
