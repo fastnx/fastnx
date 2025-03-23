@@ -35,8 +35,8 @@ namespace FastNx::FsSys::NxFmt {
             return xts;
         }();
 
-        assert(CheckNcaMagic(archive.magic));
-        assert(archive.contentSize == nca->GetSize());
+        NX_ASSERT(CheckNcaMagic(archive.magic));
+        NX_ASSERT(archive.contentSize == nca->GetSize());
 
         if (!Crypto::VerifyNcaSignature(&archive.magic, 0x200, archive.signature.header))
             AsyncLogger::Info("Header signature verification failed");

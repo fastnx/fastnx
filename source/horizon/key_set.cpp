@@ -15,7 +15,7 @@
 namespace FastNx::Horizon {
     std::pair<KeyMode, KeyType> GetKeyModeByName(const FsSys::VfsBackingFilePtr &key) {
         const auto &keyname{key->path.filename()};
-        if (keyname== "prod.keys")
+        if (keyname == "prod.keys")
             return {KeyMode::Prod, KeyType::Production};
         if (keyname == "title.keys")
             return {KeyMode::Prod, KeyType::Title};
@@ -30,7 +30,7 @@ namespace FastNx::Horizon {
 
         for (const auto &keyname: keys) {
             const auto keyfile{dirKeys.OpenFile(keyname)};
-            assert(*keyfile);
+            NX_ASSERT(*keyfile);
             AsyncLogger::Success("Importing keys from file {}", GetPathStr(keyfile));
             if (const auto [_, _ktype] = GetKeyModeByName(keyfile); _ktype != KeyType::Unknown) {
                 const auto pattern = [_ktype] -> std::string {
@@ -131,7 +131,6 @@ namespace FastNx::Horizon {
     void KeySet::AddTicket(const FsSys::VfsBackingFilePtr &tik) {
         const auto ticketid{tik->path.stem()};
         const auto pfstikhash{ToArrayOfBytes<16>(ticketid.string(), false)};
-
         if (tickets.contains(pfstikhash)) {
             if (const auto ticket{tickets.find(pfstikhash)}; MatchFiles(tik, ticket->second.first))
                 return;

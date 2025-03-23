@@ -38,7 +38,7 @@ namespace FastNx::Crypto {
         mbedtls_mpi_read_binary(&mpis[1], expoent.data(), expoent.size());
 
         mbedtls_rsa_import(&rsa, &mpis[0], nullptr, nullptr, nullptr, &mpis[1]);
-        assert(mbedtls_rsa_check_pubkey(&rsa) == 0);
+        NX_ASSERT(mbedtls_rsa_check_pubkey(&rsa) == 0);
         const auto result{mbedtls_rsa_rsassa_pss_verify(&rsa, MBEDTLS_MD_SHA256, sumchunk.size(), sumchunk.data(), signature.data())};
 
         mbedtls_rsa_free(&rsa);
@@ -47,7 +47,7 @@ namespace FastNx::Crypto {
         }
 
         if (result != 0)
-            assert(result == MBEDTLS_ERR_RSA_VERIFY_FAILED);
+            NX_ASSERT(result == MBEDTLS_ERR_RSA_VERIFY_FAILED);
         return result == 0;
     }
 }

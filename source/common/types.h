@@ -3,6 +3,10 @@
 #include <cstdint>
 #include <utility>
 #include <ranges>
+#include <boost/assert.hpp>
+
+#define NX_ASSERT BOOST_VERIFY
+
 namespace FastNx {
     using U8 = std::uint8_t;
     using U16 = std::uint16_t;
@@ -16,9 +20,11 @@ namespace FastNx {
         return std::views::iota(std::to_underlying(front), std::to_underlying(back) + 1) | std::views::transform([](std::underlying_type_t<decltype(front)> _val) -> decltype(auto) { return static_cast<decltype(front)>(_val); });
     }
     constexpr U64 operator"" _KBYTES(const long long unsigned size) {
+        NX_ASSERT(size);
         return size * 1024;
     }
     constexpr U64 operator"" _MBYTES(const long long unsigned size) {
+        NX_ASSERT(size);
         return size * 1024 * 1024;
     }
 }

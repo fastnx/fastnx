@@ -15,7 +15,7 @@ namespace FastNx::FsSys::ReFs {
                 file.close();
         }
         if (create)
-            assert(mode != FileModeType::ReadOnly);
+            NX_ASSERT(mode != FileModeType::ReadOnly);
         descriptor = [&] {
             if (dirfd)
                 return openat64(dirfd, GetDataArray(path), ModeToNative(mode));
@@ -27,7 +27,7 @@ namespace FastNx::FsSys::ReFs {
             if (create && exists(path))
                 std::filesystem::remove(path);
         } else if (mode != FileModeType::ReadOnly) {
-            assert(lockf(descriptor, F_LOCK, 0) == 0);
+            NX_ASSERT(lockf(descriptor, F_LOCK, 0) == 0);
         }
     }
 
@@ -35,10 +35,10 @@ namespace FastNx::FsSys::ReFs {
         if (mode != FileModeType::ReadOnly)
             if (lockf(descriptor, F_TLOCK, 0) != 0) {
                 if (errno == EACCES || errno == EAGAIN)
-                    assert(lockf(descriptor, F_UNLCK, 0) == 0);
+                    NX_ASSERT(lockf(descriptor, F_UNLCK, 0) == 0);
         }
         if (descriptor > 0)
-            assert(close(descriptor) == 0);
+            NX_ASSERT(close(descriptor) == 0);
     }
 
     BufferedFile::operator bool() const {
@@ -82,7 +82,7 @@ namespace FastNx::FsSys::ReFs {
                 U64 retrieved{};
                 if (buffer.size() < copied)
                     buffer.resize(copied);
-                assert(buffer.size() >= copied);
+                NX_ASSERT(buffer.size() >= copied);
                 if (retrieved = static_cast<U64>(pread64(descriptor, &buffer[copied], iosize, offset)); retrieved == -1ULL) {
                     if (errno == EFAULT)
                         return descriptor = 0;

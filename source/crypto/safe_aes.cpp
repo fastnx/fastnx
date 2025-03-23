@@ -4,13 +4,13 @@
 
 namespace FastNx::Crypto {
     SafeAes::SafeAes(const std::span<U8> &key, const AesMode _mode, AesType _type) {
-        assert(!key.empty());
+        NX_ASSERT(!key.empty());
 
         context = new mbedtls_cipher_context_t;
-        assert(mbedtls_cipher_setup(context, mbedtls_cipher_info_from_type(static_cast<mbedtls_cipher_type_t>(_type))) == 0);
+        NX_ASSERT(mbedtls_cipher_setup(context, mbedtls_cipher_info_from_type(static_cast<mbedtls_cipher_type_t>(_type))) == 0);
         if (mbedtls_cipher_get_key_bitlen(context) != static_cast<I32>(key.size() * 8))
             return;
-        assert(mbedtls_cipher_setkey(context, key.data(), key.size() * 8, _mode == AesMode::Decryption ? MBEDTLS_DECRYPT : MBEDTLS_ENCRYPT) == 0);
+        NX_ASSERT(mbedtls_cipher_setkey(context, key.data(), key.size() * 8, _mode == AesMode::Decryption ? MBEDTLS_DECRYPT : MBEDTLS_ENCRYPT) == 0);
 
     }
 
@@ -37,7 +37,7 @@ namespace FastNx::Crypto {
         }();
 
         const bool isEcb{mbedtls_cipher_get_type(context) == MBEDTLS_CIPHER_AES_128_ECB};
-        assert(mbedtls_cipher_reset(context) == 0);
+        NX_ASSERT(mbedtls_cipher_reset(context) == 0);
 
         U64 processed{};
         for (U64 offset{}; offset <= size && isEcb; offset += 16) {

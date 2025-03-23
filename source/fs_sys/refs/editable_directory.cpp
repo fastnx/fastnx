@@ -1,5 +1,4 @@
 #include <functional>
-#include <cassert>
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -15,7 +14,7 @@ namespace FastNx::FsSys::ReFs {
             if (!create_directories(path))
                 return;
         if (exists(path))
-            assert(is_directory(path));
+            NX_ASSERT(is_directory(path));
         if (const auto &dirpath{path}; !dirpath.empty())
             descriptor = open(GetDataArray(dirpath), O_DIRECTORY);
     }
@@ -86,7 +85,7 @@ namespace FastNx::FsSys::ReFs {
         using std::filesystem::perms;
         if (const auto _perms{_directory.permissions()}; _perms != perms{}) {
             if ((_perms & perms::others_exec) != perms::others_exec) {
-                assert(descriptor == -1);
+                NX_ASSERT(descriptor == -1);
                 return {};
             }
         }

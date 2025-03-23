@@ -20,7 +20,7 @@ namespace FastNx::FsSys::NxFmt {
         for (U64 _pei{}; _pei < pfs0hd.fileCount; ++_pei) {
             pents.emplace_back(partfs->Read<PartitionEntry>(_nextOffset));
 
-            assert(_nextOffset - sizeof(pfs0hd) < _partsSize);
+            NX_ASSERT(_nextOffset - sizeof(pfs0hd) < _partsSize);
             _nextOffset += sizeof(PartitionEntry);
             if (_count >= MaxEntriesCount)
                 break;
@@ -37,7 +37,7 @@ namespace FastNx::FsSys::NxFmt {
 
             std::string filename;
             filename.resize_and_overwrite(strlen(fileentry), [&](auto *dest, const U64 size) {
-                assert(strlen(fileentry) <= pfs0hd.strTableSize);
+                NX_ASSERT(strlen(fileentry) <= pfs0hd.strTableSize);
                 std::strncpy(dest, fileentry, size);
 
                 return size;
@@ -73,7 +73,7 @@ namespace FastNx::FsSys::NxFmt {
             return nullptr;
         if (!Contains(ListAllTopLevelFiles(), _path))
             return nullptr;
-        assert(mode == FileModeType::ReadOnly);
+        NX_ASSERT(mode == FileModeType::ReadOnly);
 
         if (const auto entry{_files.find(_path)}; entry != _files.end())
             return std::make_shared<OffsetFile>(partfs, _path, entry->second.offset, entry->second.size, exists(path));

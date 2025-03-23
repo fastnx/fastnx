@@ -25,7 +25,7 @@ namespace FastNx::FsSys::NxFmt {
                 files.erase(subit);
         }
 
-        assert(cnmt && cnmt->GetSize() > 0);
+        NX_ASSERT(cnmt && cnmt->GetSize() > 0);
         for (const auto &content: files) {
             if (content.extension() != ".nca")
                 continue;
@@ -35,7 +35,7 @@ namespace FastNx::FsSys::NxFmt {
 
                 AsyncLogger::Info("Processing content of NCA {}", GetPathStr(ncafile));
                 const auto archive{std::make_shared<ContentArchive>(std::move(ncafile), keys)};
-                assert(archive->size);
+                NX_ASSERT(archive->size);
             }
         }
         if (corrupted)

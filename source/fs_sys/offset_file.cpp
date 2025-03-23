@@ -6,7 +6,7 @@ namespace FastNx::FsSys {
         if (isHuge)
             hugefs = std::dynamic_pointer_cast<ReFs::HugeFile>(backing);
 
-        assert(*this);
+        NX_ASSERT(*this);
     }
 
     OffsetFile::operator bool() const {

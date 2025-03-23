@@ -1,4 +1,3 @@
-#include <cassert>
 #include <algorithm>
 
 #include <fmt/format.h>
@@ -13,7 +12,7 @@
 
 namespace FastNx::FsSys {
     RegexFile::RegexFile(const VfsBackingFilePtr &_file, const std::string &pattern): VfsBackingFile(_file->path), file(_file) {
-        assert(file && !pattern.empty());
+        NX_ASSERT(file && !pattern.empty());
         try {
             const boost::regex compile{pattern};
             auto lines{file->GetAllLines()};

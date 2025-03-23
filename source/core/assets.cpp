@@ -1,4 +1,3 @@
-#include <cassert>
 #include <unistd.h>
 
 #include <common/async_logger.h>
@@ -20,12 +19,12 @@ namespace FastNx::Core {
 
     void MoveProcess(const FsSys::FsPath &target) {
         const FsSys::ReFs::EditableDirectory directory{target, true};
-        assert(fchdir(directory.descriptor) == 0);
+        NX_ASSERT(fchdir(directory.descriptor) == 0);
     }
 
     Assets::Assets() {
         const auto _pcwd{std::filesystem::current_path()};
-        assert(!_pcwd.empty());
+        NX_ASSERT(!_pcwd.empty());
         if (const auto target{"com/callsvc/fastnx"_fs}; !ContainsPath(_pcwd, target)) {
             MoveProcess(target);
         }
@@ -37,7 +36,7 @@ namespace FastNx::Core {
 
     std::vector<FsSys::FsPath> Assets::GetAllGames() const {
         std::vector<FsSys::FsPath> result;
-        assert(EnumRange(GamePathType::HomebrewFs, GamePathType::Card).front());
+        NX_ASSERT(EnumRange(GamePathType::HomebrewFs, GamePathType::Card).front());
 
         for (const auto _type: EnumRange(GamePathType::Homebrew, GamePathType::Shop)) {
             if (const auto _titles{gamesLists->GetAllGamesPaths(_type)}; !_titles.empty())

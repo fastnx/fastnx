@@ -1,4 +1,3 @@
-#include <cassert>
 #include <cstring>
 #include <crypto/checksum.h>
 
@@ -15,7 +14,7 @@ namespace FastNx::Crypto {
                     return nullptr;
             }
         }();
-        assert(mbedtls_md_setup(context, digest, 0) == 0);
+        NX_ASSERT(mbedtls_md_setup(context, digest, 0) == 0);
         info = mbedtls_md_info_from_ctx(context);
     }
 
@@ -44,7 +43,7 @@ namespace FastNx::Crypto {
 
     std::vector<U8> Checksum::Finish() {
         std::vector<U8> result(mbedtls_md_get_size(info));
-        assert(Finish(std::span(result)) == result.size());
+        NX_ASSERT(Finish(std::span(result)) == result.size());
         return result;
     }
 

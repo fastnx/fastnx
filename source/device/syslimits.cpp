@@ -20,7 +20,7 @@ FastNx::U64 FastNx::Device::GetCoresCount() {
         if (smt.Read<char>() == '1')
             count *= 2;
     }
-    assert(count == threads);
+    NX_ASSERT(count == threads);
 
     if (const FsSys::ReFs::EditableDirectory cores{"/sys/devices/system/cpu"}) {
         const auto cpus{cores.GlobAllFiles("cpu*")};
@@ -39,8 +39,8 @@ FastNx::U64 FastNx::Device::GetCoresCount() {
         count = CPU_COUNT(&cpus);
 #else
     std::vector<U64> _maskCount(32 / sizeof(U64)); // Possible with the AMD EPYC Genoa 9004 Series Processor Family
-    assert(SizeofVector(_maskCount) == 32);
-    assert(sched_getaffinity(getpid(), SizeofVector(_maskCount), reinterpret_cast<cpu_set_t *>(_maskCount.data())) == 0);
+    NX_ASSERT(SizeofVector(_maskCount) == 32);
+    NX_ASSERT(sched_getaffinity(getpid(), SizeofVector(_maskCount), reinterpret_cast<cpu_set_t *>(_maskCount.data())) == 0);
     if (I32 result{}; std::ranges::fold_left(_maskCount, 0, std::plus())) {
         for (const auto &_mask: _maskCount) {
             if (_mask)

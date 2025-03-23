@@ -1,5 +1,4 @@
 #pragma once
-#include <cassert>
 #include <utility>
 #include <array>
 #include <algorithm>
@@ -62,7 +61,7 @@ namespace FastNx {
 
     template<typename Dest, typename Source>
     U64 Copy(Dest &dest, const Source &source) {
-        assert(source.size() <= dest.size()); // The source container is smaller than the destination container
+        NX_ASSERT(source.size() <= dest.size()); // The source container is smaller than the destination container
 
         if constexpr (IsFlatArray<Source> && IsFlatArray<Dest>) {
             std::memcpy(dest.data(), source.data(), dest.size());

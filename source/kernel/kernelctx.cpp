@@ -1,4 +1,3 @@
-#include <cassert>
 #include <mutex>
 #include <ranges>
 #include <vector>
@@ -17,11 +16,11 @@ FastNx::I32 FastNx::Kernel::KernelContext::GetPid(const U64 prnde) {
         if (_itPid->first == 0)
             if ((_itPid->second = prnde))
                 pid = processId = nxBasePid + std::distance(std::begin(pids), _itPid);
-        assert(_itPid->second > 0);
+        NX_ASSERT(_itPid->second > 0);
         if (pid)
             if ((_itPid->first = pid))
                 break;
     }
-    assert(pid);
+    NX_ASSERT(pid);
     return pid;
 }

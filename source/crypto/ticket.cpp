@@ -54,6 +54,6 @@ namespace FastNx::Crypto {
         offset += GetSignatureSize(signature);
         const std::span ticket{reinterpret_cast<U8 *>(&content), sizeof(content) - offset};
         file->WriteSome(ticket, offset);
-        assert(file->GetSize() == sizeof(content));
+        NX_ASSERT(file->GetSize() == sizeof(content));
     }
 }

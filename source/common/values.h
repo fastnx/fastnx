@@ -1,5 +1,4 @@
 #pragma once
-#include <cassert>
 #include <cstring>
 #include <string_view>
 #include <utility>
@@ -7,7 +6,7 @@
 namespace FastNx {
     template<typename T> requires (std::is_unsigned_v<T>)
     constexpr auto ConstMagicValue(const std::string_view &magic) -> T {
-        assert(!magic.empty());
+        NX_ASSERT(!magic.empty());
         for (const auto _ch: magic) {
             if (!isalnum(_ch))
                 return {};

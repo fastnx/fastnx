@@ -22,11 +22,11 @@ namespace FastNx::Core {
             if (!directory)
                 continue;
 
-            assert(is_directory(gameDir));
+            NX_ASSERT(is_directory(gameDir));
             if (!AddTypedGame(gameDir)) {
                 if (const auto &_roms{directory.ListAllFiles()}; !_roms.empty()) {
                     for ([[maybe_unused]] const auto &_gameFiles: _roms)
-                        assert(AddTypedGame(_gameFiles) == true);
+                        NX_ASSERT(AddTypedGame(_gameFiles) == true);
                 }
             }
         }

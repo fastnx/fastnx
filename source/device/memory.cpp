@@ -40,7 +40,7 @@ namespace FastNx::Device {
         size = boost::alignment::align_up(size, GetHostPageSize());
 
         if (const auto rsize{GetMemorySize(allocated)}; rsize != size) {
-            assert(madvise(allocated, size, MADV_REMOVE) == 0);
+            NX_ASSERT(madvise(allocated, size, MADV_REMOVE) == 0);
         } else if (munmap(allocated, size))
             switch (errno) {
                 case EINVAL:

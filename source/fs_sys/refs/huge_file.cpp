@@ -34,7 +34,7 @@ namespace FastNx::FsSys::ReFs {
         }
         const auto writable{mode != FileModeType::ReadOnly};
         if (writable)
-            assert(lockf(descriptor, F_LOCK, 0) == 0);
+            NX_ASSERT(lockf(descriptor, F_LOCK, 0) == 0);
 
         memory = static_cast<U8 *>(Device::AllocateMemory(mapsize, nullptr, descriptor, true, writable));
     }
@@ -43,9 +43,9 @@ namespace FastNx::FsSys::ReFs {
         if (memory)
             Device::FreeMemory(memory, mapsize);
         if (mode != FileModeType::ReadOnly)
-            assert(lockf(descriptor, F_UNLCK, 0) == 0);
+            NX_ASSERT(lockf(descriptor, F_UNLCK, 0) == 0);
         if (descriptor > 0)
-            assert(close(descriptor) == 0);
+            NX_ASSERT(close(descriptor) == 0);
     }
 
     HugeFile::operator bool() const {
@@ -88,9 +88,9 @@ namespace FastNx::FsSys::ReFs {
 
         [[unlikely]] if (size >= 4_MBYTES) {
             std::vector<U8> pages((_size + pagesize - 1) / pagesize);
-            assert(mincore(aligned, _size, pages.data()) == 0);
+            NX_ASSERT(mincore(aligned, _size, pages.data()) == 0);
             std::memcpy(dest, source, size);
-            assert(madvise(aligned, _size, MADV_COLD) == 0);
+            NX_ASSERT(madvise(aligned, _size, MADV_COLD) == 0);
 
             pagefaultrec += std::ranges::count(pages, 0);
         } else {
@@ -98,7 +98,7 @@ namespace FastNx::FsSys::ReFs {
         }
 
         [[unlikely]] if (!recorded) {
-            assert(madvise(memory, mapsize, MADV_SEQUENTIAL) == 0);
+            NX_ASSERT(madvise(memory, mapsize, MADV_SEQUENTIAL) == 0);
             if (BufferedFile hugepages{"/sys/kernel/mm/transparent_hugepage/enabled"}) {
                 if (hugepages.ReadLine().contains("[always]"))
                     if (madvise(memory, mapsize, MADV_HUGEPAGE))
@@ -106,7 +106,7 @@ namespace FastNx::FsSys::ReFs {
                             throw exception{"It is not possible to access the specified range"};
             }
         } else if (source < recorded) {
-            assert(madvise(memory, mapsize, MADV_RANDOM) == 0);
+            NX_ASSERT(madvise(memory, mapsize, MADV_RANDOM) == 0);
         }
         if (source)
             recorded = source;

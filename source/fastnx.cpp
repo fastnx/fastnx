@@ -18,11 +18,14 @@ FastNx::FsSys::FsPath GetUserDir() {
         return user->pw_dir;
     return {};
 }
+bool isPrivileged() {
+    const auto uid{getuid()};
+    return !uid || geteuid() != uid;
+}
 
 namespace boost_po = boost::program_options;
-boost_po::options_description fastopts("Allowed options");
-
 using namespace FastNx;
+boost_po::options_description fastopts("Allowed options");
 
 bool disableswap;
 
@@ -43,23 +46,18 @@ int main(const I32 argc, const char **argv) {
     if (disableswap)
         Device::LockAllMapping();
 
-    assert(FsSys::ReFs::BufferedFile("app_lock", 0, FsSys::FileModeType::WriteOnly, true));
+    NX_ASSERT(FsSys::ReFs::BufferedFile("app_lock", 0, FsSys::FileModeType::WriteOnly, true));
 
     boost::interprocess::file_lock flock("app_lock");
     if (!FsSys::IsInsideOf(std::filesystem::current_path(), GetUserDir()))
         return -1;
 
-    const auto isPrivileged = [] {
-        const auto uid{getuid()};
-        return !uid || geteuid() != uid;
-    }();
-    if (isPrivileged)
+    if (isPrivileged())
         return -1;
     if (pthread_self() == 0 && getpid() == 0)
         return -1;
 
     BuildAsyncLogger();
-
     if (const auto &[aspects, ranking] = Device::GetArchAspects(); !aspects.empty()) {
         AsyncLogger::Success("Features supported by the Host system: {}, Your rank {}", aspects, ranking);
     }
@@ -70,6 +68,4 @@ int main(const I32 argc, const char **argv) {
     }
 
     logger->FlushBuffers();
-
-    return 0;
 }

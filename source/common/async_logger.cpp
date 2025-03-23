@@ -41,7 +41,7 @@ namespace FastNx {
             outback->WriteType(line.data(), line.size(), _offset);
             _offset += line.size();
         }
-        assert(count == 0);
+        NX_ASSERT(count == 0);
         fmtlists.clear();
     }
 

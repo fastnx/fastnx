@@ -4,7 +4,7 @@
 
 namespace FastNx::Loaders {
     bool IsHomebrewFsDirectory(const FsSys::FsPath &dirfs) {
-        assert(is_directory(dirfs));
+        NX_ASSERT(is_directory(dirfs));
         const FsSys::ReFs::EditableDirectory directory{dirfs};
 
         const auto _content{directory.ListAllFiles()};

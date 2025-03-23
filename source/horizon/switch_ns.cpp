@@ -1,4 +1,3 @@
-#include <cassert>
 
 #include <common/exception.h>
 #include <loaders/nsp_es.h>
@@ -19,5 +18,5 @@ void FastNx::Horizon::SwitchNs::LoadApplicationFile(const FsSys::VfsBackingFileP
 
     if (!isLoaded)
         throw exception{"Could not load the ROM due to: {}", GetLoaderPrettyString(application)};
-    assert(isLoaded);
+    NX_ASSERT(isLoaded);
 }
