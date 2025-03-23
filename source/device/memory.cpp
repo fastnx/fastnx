@@ -12,10 +12,10 @@ namespace FastNx::Device {
         auto prots{PROT_READ};
         auto flags{MAP_PRIVATE};
 
-        enbhuge = !file ? enbhuge : false;
+        enbhuge = file == -1 ? enbhuge : false;
         if (writable)
             prots |= PROT_WRITE;
-        if (!file)
+        if (file == -1)
             flags |= MAP_ANONYMOUS;
 
         if (enbhuge)
@@ -24,7 +24,7 @@ namespace FastNx::Device {
             flags |= MAP_FIXED;
             if (GetMemorySize(fixed) == size)
                 return fixed;
-        } else if (file) {
+        } else if (file != -1) {
             fixed = {};
             size = FsSys::GetSizeBySeek(file);
         }
@@ -40,7 +40,11 @@ namespace FastNx::Device {
         size = boost::alignment::align_up(size, GetHostPageSize());
 
         if (const auto rsize{GetMemorySize(allocated)}; rsize != size) {
+#if 0
             NX_ASSERT(madvise(allocated, size, MADV_REMOVE) == 0);
+#else
+            NX_ASSERT(munmap(allocated, size) == 0);
+#endif
         } else if (munmap(allocated, size))
             switch (errno) {
                 case EINVAL:

@@ -44,19 +44,19 @@ namespace FastNx::FsSys::ReFs {
             Device::FreeMemory(memory, mapsize);
         if (mode != FileModeType::ReadOnly)
             NX_ASSERT(lockf(descriptor, F_UNLCK, 0) == 0);
-        if (descriptor > 0)
+        if (descriptor != -1)
             NX_ASSERT(close(descriptor) == 0);
     }
 
     HugeFile::operator bool() const {
-        if (memory || descriptor > 0)
+        if (memory || descriptor != -1)
             if (lockf(descriptor, F_TEST, 0) == 0 && errno != EAGAIN)
                 return Device::GetMemorySize(memory) == mapsize;
         return {};
     }
 
     U64 HugeFile::GetSize() const {
-        if (descriptor)
+        if (descriptor != -1)
             return std::max(GetSizeBySeek(descriptor), mapsize);
         return mapsize;
     }

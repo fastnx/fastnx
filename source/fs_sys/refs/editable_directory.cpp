@@ -20,7 +20,7 @@ namespace FastNx::FsSys::ReFs {
     }
 
     EditableDirectory::~EditableDirectory() {
-        if (descriptor > 0)
+        if (descriptor != -1)
             close(descriptor);
     }
 

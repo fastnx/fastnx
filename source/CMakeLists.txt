@@ -32,8 +32,13 @@ target_sources(fastnx PRIVATE
     device/memory.cpp
     device/memory.h
     device/capabilities.h
-    kernel/kernelctx.cpp
-    kernel/kernelctx.h
+    kernel/kernel.cpp
+    kernel/kernel.h
+    kernel/pid.cpp
+    kernel/dram/device_lpddr4.cpp
+    kernel/dram/device_lpddr4.h
+    kernel/types/kprocess.cpp
+    kernel/types/kprocess.h
     crypto/integrity.cpp
     crypto/checksum.cpp
     crypto/checksum.h

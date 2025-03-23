@@ -14,11 +14,11 @@
 
 
 FastNx::FsSys::FsPath GetUserDir() {
-    if (const auto *const user{getpwuid(getuid())})
+    if (const auto *user{getpwuid(getuid())})
         return user->pw_dir;
     return {};
 }
-bool isPrivileged() {
+bool IsProcessPrivileged() {
     const auto uid{getuid()};
     return !uid || geteuid() != uid;
 }
@@ -52,7 +52,7 @@ int main(const I32 argc, const char **argv) {
     if (!FsSys::IsInsideOf(std::filesystem::current_path(), GetUserDir()))
         return -1;
 
-    if (isPrivileged())
+    if (IsProcessPrivileged())
         return -1;
     if (pthread_self() == 0 && getpid() == 0)
         return -1;

@@ -37,23 +37,20 @@ namespace FastNx::FsSys::ReFs {
                 if (errno == EACCES || errno == EAGAIN)
                     NX_ASSERT(lockf(descriptor, F_UNLCK, 0) == 0);
         }
-        if (descriptor > 0)
+        if (descriptor != -1)
             NX_ASSERT(close(descriptor) == 0);
     }
 
     BufferedFile::operator bool() const {
-        I32 fileexists{3};
+        I32 attempts{3};
         if (!exists(path) || descriptor == -1)
-            fileexists--;
+            attempts--;
         if (mode == FileModeType::None)
-            fileexists--;
+            attempts--;
 
-        struct stat64 status;
-        fstat64(descriptor, &status);
-        if (status.st_ino < 0)
-            fileexists--;
-
-        return fileexists > 0;
+        if (!GetSizeBySeek(descriptor))
+            attempts--;
+        return attempts > 1;
     }
 
     U64 BufferedFile::GetSize() const {
@@ -85,7 +82,7 @@ namespace FastNx::FsSys::ReFs {
                 NX_ASSERT(buffer.size() >= copied);
                 if (retrieved = static_cast<U64>(pread64(descriptor, &buffer[copied], iosize, offset)); retrieved == -1ULL) {
                     if (errno == EFAULT)
-                        return descriptor = 0;
+                        return descriptor = -1;
                     return {};
                 }
                 start = offset;
