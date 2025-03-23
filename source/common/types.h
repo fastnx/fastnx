@@ -1,11 +1,22 @@
 #pragma once
 
 #include <cstdint>
+#include <limits>
 #include <utility>
 #include <ranges>
 #include <boost/assert.hpp>
 
 #define NX_ASSERT BOOST_VERIFY
+
+static_assert(sizeof(void*) == sizeof(size_t));
+static_assert(sizeof(std::uintptr_t) == sizeof(void*));
+
+static_assert(std::endian::native == std::endian::little);
+
+static_assert(std::numeric_limits<float>::is_iec559);
+static_assert(std::numeric_limits<double>::is_iec559);
+static_assert(sizeof(double) > sizeof(float));
+static_assert(sizeof(int) == sizeof(float));
 
 namespace FastNx {
     using U8 = std::uint8_t;
@@ -15,6 +26,8 @@ namespace FastNx {
     using U32 = std::uint32_t;
     using U64 = std::uint64_t;
     using F64 = double;
+
+    constexpr std::string process{"fastnx"};
 
     constexpr auto EnumRange(const auto front, const auto back) {
         return std::views::iota(std::to_underlying(front), std::to_underlying(back) + 1) | std::views::transform([](std::underlying_type_t<decltype(front)> _val) -> decltype(auto) { return static_cast<decltype(front)>(_val); });

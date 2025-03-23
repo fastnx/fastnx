@@ -10,7 +10,7 @@ namespace FastNx::FsSys {
         if (first->Read<U64>() != second->Read<U64>())
             return {};
         const auto flatsize{first->GetSize()};
-        std::vector<U8> buffer(std::min(flatsize, 128_KBYTES));
+        std::vector<U8> buffer(std::min(flatsize, 512_KBYTES));
 
         // The heavy part comes here
         std::array<Crypto::Checksum, 2> checkers;
@@ -28,7 +28,7 @@ namespace FastNx::FsSys {
             offset += size;
         }
         std::array<std::array<U8, 32>, 2> hashes;
-        for (const auto& [hasher, result]: std::views::zip(checkers, hashes)) {
+        for (const auto &[hasher, result]: std::views::zip(checkers, hashes)) {
             hasher.Finish(result);
         }
 

@@ -5,7 +5,7 @@
 namespace FastNx::FsSys {
     class StandardFile final : public VfsBackingFile {
     public:
-        explicit StandardFile(std::ostream& _stream);
+        explicit StandardFile(std::ostream& stream);
 
         explicit operator bool() const override;
 

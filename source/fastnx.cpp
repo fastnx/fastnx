@@ -11,25 +11,27 @@
 
 #include <fs_sys/refs/buffered_file.h>
 #include <common/async_logger.h>
+namespace FastNx {
+    FsSys::FsPath GetUserDir() {
+        if (const auto *user{getpwuid(getuid())})
+            return user->pw_dir;
+        return {};
+    }
 
-
-FastNx::FsSys::FsPath GetUserDir() {
-    if (const auto *user{getpwuid(getuid())})
-        return user->pw_dir;
-    return {};
-}
-bool IsProcessPrivileged() {
-    const auto uid{getuid()};
-    return !uid || geteuid() != uid;
+    bool IsProcessPrivileged() {
+        const auto uid{getuid()};
+        return !uid || geteuid() != uid;
+    }
 }
 
 namespace boost_po = boost::program_options;
-using namespace FastNx;
 boost_po::options_description fastopts("Allowed options");
 
 bool disableswap;
 
-int main(const I32 argc, const char **argv) {
+using namespace FastNx;
+
+I32 main(const I32 argc, const char **argv) {
     fastopts.add_options()
         ("help", "Display this table")
         ("disable-disk-swap", "Block all future memory mappings in RAM");
@@ -46,16 +48,16 @@ int main(const I32 argc, const char **argv) {
     if (disableswap)
         Device::LockAllMapping();
 
-    NX_ASSERT(FsSys::ReFs::BufferedFile("app_lock", 0, FsSys::FileModeType::WriteOnly, true));
+    NX_ASSERT(FastNx::FsSys::ReFs::BufferedFile("app_lock", 0, FastNx::FsSys::FileModeType::WriteOnly, true));
 
     boost::interprocess::file_lock flock("app_lock");
     if (!FsSys::IsInsideOf(std::filesystem::current_path(), GetUserDir()))
-        return -1;
+        return EXIT_FAILURE;
 
     if (IsProcessPrivileged())
-        return -1;
+        return EXIT_FAILURE;
     if (pthread_self() == 0 && getpid() == 0)
-        return -1;
+        return EXIT_FAILURE;
 
     BuildAsyncLogger();
     if (const auto &[aspects, ranking] = Device::GetArchAspects(); !aspects.empty()) {
@@ -67,5 +69,7 @@ int main(const I32 argc, const char **argv) {
         application->LoadFirstPickedGame();
     }
 
-    logger->FlushBuffers();
+    std::atexit([] {
+        logger->FlushBuffers();
+    });
 }

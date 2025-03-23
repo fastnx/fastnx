@@ -54,7 +54,7 @@ namespace FastNx::Core {
 
         for (const auto &[_pid, _program]: _procs) {
             static const auto fastpid{getpid()};
-            if (_pid != fastpid && _program.contains("fastnx"))
+            if (_pid != fastpid && _program.contains(process))
                 throw exception{"More than one instance of Fastnx cannot coexist at the same time"};
         }
 
@@ -73,10 +73,10 @@ namespace FastNx::Core {
             if (runnable.empty())
                 return nullptr;
 
-            const auto &_gamePath{runnable.front()};
-            if (const auto _filename{_gamePath.filename()}; _gamePath.has_filename())
-                AsyncLogger::Info("Loading the game from path: {}", FsSys::GetPathStr(_filename));
-            return std::make_shared<FsSys::ReFs::HugeFile>(_gamePath);
+            const auto &pathdir{runnable.front()};
+            if (const auto filename{pathdir.filename()}; pathdir.has_filename())
+                AsyncLogger::Info("Loading the game from path: {}", FsSys::GetPathStr(filename));
+            return std::make_shared<FsSys::ReFs::HugeFile>(pathdir);
         }();
         if (gamefile != nullptr)
             _switch->LoadApplicationFile(gamefile);

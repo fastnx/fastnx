@@ -1,7 +1,7 @@
 #include <fs_sys/standard_file.h>
 
 namespace FastNx::FsSys {
-    StandardFile::StandardFile(std::ostream &_stream) : VfsBackingFile("vfs", FileModeType::WriteOnly), outstr(_stream) {}
+    StandardFile::StandardFile(std::ostream &stream) : VfsBackingFile("vfs", FileModeType::WriteOnly), outstr(stream) {}
 
     StandardFile::operator bool() const {
         return static_cast<bool>(outstr);
@@ -13,7 +13,7 @@ namespace FastNx::FsSys {
         std::unreachable(); std::terminate();
     }
     U64 StandardFile::WriteTypeImpl(const U8 *source, const U64 size, const U64 offset) {
-        outstr << std::string_view(reinterpret_cast<const char*>(source), size);
+        outstr << std::string_view(reinterpret_cast<const char *>(source), size);
         return size;
     }
 }
