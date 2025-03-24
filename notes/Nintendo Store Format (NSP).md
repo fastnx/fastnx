@@ -2,4 +2,4 @@
 
 - Nintendo Submission Package
 - Downloadable
-- Contains a lot of files inside of a PartFS
+- Contains a lot of files inside a PartFS

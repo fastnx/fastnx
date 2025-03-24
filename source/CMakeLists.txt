@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.28)
-target_include_directories(fastnx PUBLIC
+target_include_directories(fastnx PRIVATE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
     $<INSTALL_INTERFACE:>
 )
 
 target_sources(fastnx PRIVATE
-    fastnx.cpp
+    common/main.cpp
     loaders/nsp_es.cpp
     loaders/nsp_es.h
     loaders/app_types.cpp
