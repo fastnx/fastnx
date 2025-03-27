@@ -24,24 +24,39 @@ namespace FastNx::FsSys::NxFmt {
         if (const auto magic{archive.magic})
             encrypted = !CheckNcaMagic(magic);
 
-        _nca = [&] -> VfsBackingFilePtr {
+        ncavfs = [&] -> VfsBackingFilePtr {
             if (!encrypted)
                 return std::move(nca);
             if (!keys->headerKey)
                 throw exception{"Header key not found"};
             auto xts = std::make_shared<XtsFile>(std::move(nca), *keys->headerKey.value());
-            xts->doublebuf = true;
             archive = xts->Read<NcaHeader>();
             return xts;
         }();
 
         NX_ASSERT(CheckNcaMagic(archive.magic));
-        NX_ASSERT(archive.contentSize == nca->GetSize());
+        NX_ASSERT(archive.contentSize == ncavfs->GetSize());
 
-        if (!Crypto::VerifyNcaSignature(&archive.magic, 0x200, archive.signature.header))
+        if (!Crypto::VerifyNcaSignature(&archive.magic, 0x200, archive.rsaheader))
             AsyncLogger::Info("Header signature verification failed");
 
         size = archive.contentSize;
         type = archive.type;
+
+        LoadAllContent(archive);
+    }
+
+    void ContentArchive::LoadAllContent(const NcaHeader &nch) const {
+        U64 entries{};
+        for (const auto &entry: nch.fsent) {
+            if (const auto notzero{!IsZeroes(entry)})
+                entries += notzero;
+            else break;
+        }
+
+        std::vector<std::pair<FsEntry, FsHeader>> fshdrs;
+        for (U64 fsindex{}; fsindex < entries; fsindex++) {
+            fshdrs.emplace_back(nch.fsent[fsindex], ncavfs->Read<FsHeader>(0x400 + fsindex * 0x200));
+        }
     }
 }

@@ -85,4 +85,9 @@ namespace FastNx {
         }
         return values;
     }
+    template<typename T> requires(std::is_trivial_v<T>)
+    auto IsZeroes(const T &value) {
+        const std::span bytes(reinterpret_cast<const U8 *>(&value), sizeof(value));
+        return std::ranges::all_of(bytes, [](const auto &eval) { return eval == 0; });
+    }
 }

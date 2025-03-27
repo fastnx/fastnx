@@ -24,7 +24,7 @@ namespace FastNx::FsSys {
 
     U64 XtsFile::ReadTypeImpl(U8 *dest, const U64 size, const U64 offset) {
         std::optional<std::vector<U8>> ebuffer;
-        auto output = [&] -> std::span<U8> {
+        const auto output = [&] -> std::span<U8> {
             if (!doublebuf)
                 return {dest, encfile->ReadType(dest, size, offset)};
             ebuffer.emplace(encfile->ReadSome(size, offset));
@@ -34,7 +34,7 @@ namespace FastNx::FsSys {
             return {};
 
         if (const auto *_bytes{output.data()})
-            decrypt->ProcessXts(dest, _bytes, size);
+            decrypt->ProcessXts(dest, _bytes, size, offset);
         return size;
     }
 

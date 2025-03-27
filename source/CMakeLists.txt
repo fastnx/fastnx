@@ -35,6 +35,8 @@ target_sources(fastnx PRIVATE
     kernel/kernel.cpp
     kernel/kernel.h
     kernel/pid.cpp
+    kernel/kauto_object.cpp
+    kernel/kauto_object.h
     kernel/dram/device_lpddr4.cpp
     kernel/dram/device_lpddr4.h
     kernel/types/kprocess.cpp

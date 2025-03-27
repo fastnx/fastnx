@@ -1,3 +1,4 @@
+#include <atomic>
 #include <pwd.h>
 #include <unistd.h>
 
@@ -51,6 +52,12 @@ I32 main(const I32 argc, const char **argv) {
     NX_ASSERT(FastNx::FsSys::ReFs::BufferedFile("app_lock", 0, FastNx::FsSys::FileModeType::WriteOnly, true));
 
     boost::interprocess::file_lock flock("app_lock");
+
+    {
+        const std::atomic<bool> test;
+        NX_ASSERT(test.is_lock_free());
+    }
+
     if (!FsSys::IsInsideOf(std::filesystem::current_path(), GetUserDir()))
         return EXIT_FAILURE;
 
