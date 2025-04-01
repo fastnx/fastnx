@@ -14,6 +14,8 @@ namespace FastNx::Kernel {
     // This class stores the runtime type information of the object, including a reference count associated with it
     class KAutoObject {
     public:
+        virtual ~KAutoObject() = default;
+
         explicit KAutoObject(const KObjectType _type, Kernel &kernel) : type(_type), context(kernel) {}
 
         void AddReference(U64 value);

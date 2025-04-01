@@ -31,8 +31,8 @@ namespace FastNx::Loaders {
     using ContentClassifier = std::pair<ContentType, ContentMetaType>;
     using ContentEnumerate = std::pair<FsSys::FsPath, ContentClassifier>;
 
-    class RomDirMkFs {
+    class GameFileSystem {
     public:
-        RomDirMkFs(FsSys::VfsReadOnlyDirectoryPtr &romdir, std::vector<ContentEnumerate> &enums);
+        GameFileSystem(const FsSys::VfsReadOnlyDirectoryPtr &romdir, const std::vector<ContentEnumerate> &enums);
     };
 }

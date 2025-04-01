@@ -1,8 +1,12 @@
 #pragma once
-#include <fs_sys/types.h>
+#include <list>
+#include <boost/container/small_vector.hpp>
 
+#include <fs_sys/types.h>
 #include <common/traits.h>
 #include <crypto/types.h>
+#include <fs_sys/nx_fmt/partition_filesystem.h>
+
 
 namespace FastNx::FsSys::NxFmt {
     // https://switchbrew.org/wiki/NCA
@@ -65,14 +69,61 @@ namespace FastNx::FsSys::NxFmt {
         RomFs,
         PartitionFs
     };
+    enum class HashType : U8 {
+        Auto,
+        None,
+        HierarchicalSha256Hash,
+        HierarchicalIntegrityHash, // [14.0.0+]
+        AutoSha3,
+        HierarchicalSha3256Hash,
+        HierarchicalIntegritySha3Hash
+    };
+    enum class EncryptionType : U8 {
+        Auto,
+        None,
+        AesXts,
+        AesCtr,
+        AesCtrEx,
+        AesCtrSkipLayerHash, // [14.0.0+]
+        AesCtrExSkipLayerHash
+    };
+    enum class MetaDataHashType : U8 {
+        None,
+        HierarchicalIntegrity
+    };
+
+#pragma pack(push, 1)
+    struct IntegrityMetaInfo {
+        U32 magic; // Magic ("IVFC")
+        U32 version;
+        U32 masterhashsz;
+        struct InfoLevelHash {
+            U32 maxlayers;
+            struct Level {
+                U64 logical;
+                U64 hashdatasz;
+                U32 blocksize; // (in log2)
+                U32 reserved0;
+            };
+
+            std::array<Level, 6> levels;
+            std::array<U8, 0x20> salt;
+        } infolevelhash;
+        std::array<U8, 0x20> masterhash;
+        std::array<U8, 0x18> reserved1;
+    };
+    static_assert(IsSizeMatch<IntegrityMetaInfo, 0xE0 + 0x18>);
+
     struct FsHeader {
         U16 version;
         FsType type;
-        U8 hashType;
-        U8 encryptionType;
-        U8 metadataHashType;
+        HashType hashType;
+        EncryptionType encryptionType;
+        MetaDataHashType metadataHashType;
         U16 reserved;
-        std::array<U8, 0xF8> hashdata;
+        union {
+            IntegrityMetaInfo integrity;
+        };
         std::array<U8, 0x40> patchinfo;
         U32 generation;
         U32 securevalue;
@@ -82,16 +133,22 @@ namespace FastNx::FsSys::NxFmt {
         std::array<U8, 0x30> reserved1;
     };
     static_assert(IsSizeMatch<FsHeader, 0x200>);
+#pragma pack(pop)
+
 
     class ContentArchive {
     public:
         explicit ContentArchive(const VfsBackingFilePtr &nca, const std::shared_ptr<Horizon::KeySet> &ks);
-        void LoadAllContent(const NcaHeader &nch) const;
+        void LoadAllContent(const NcaHeader &nch);
+        VfsBackingFilePtr GetFile(const FsEntry &fscursor, const FsHeader &fsheader);
 
         bool encrypted{};
         ContentType type;
         U32 version{};
         U64 size{};
+
+        boost::container::small_vector<std::pair<FsType, VfsBackingFilePtr>, 4> files;
+        std::list<std::shared_ptr<PartitionFileSystem>> pfslist;
 
         std::shared_ptr<Horizon::KeySet> keys;
         VfsBackingFilePtr ncavfs;

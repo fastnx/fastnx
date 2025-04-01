@@ -12,8 +12,8 @@ target_sources(fastnx PRIVATE
     loaders/types.h
     loaders/homefs.cpp
     loaders/homefs.h
-    loaders/romdir_mkfs.cpp
-    loaders/romdir_mkfs.h
+    loaders/gamefs.cpp
+    loaders/gamefs.h
     horizon/switch_ns.cpp
     horizon/switch_ns.h
     horizon/key_set.cpp
