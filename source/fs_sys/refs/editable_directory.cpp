@@ -26,47 +26,42 @@ namespace FastNx::FsSys::ReFs {
 
     std::vector<FsPath> EditableDirectory::ListAllFiles() const {
         std::vector<FsPath> filepaths;
-        for (const auto& folders : ArrayOf<FsPath>("/etc")) {
+        for (const auto &folders: ArrayOf<FsPath>("/etc")) {
             if (path == folders)
                 filepaths.reserve(1024);
         }
         if (!filepaths.capacity())
             filepaths.reserve(GetFilesCount());
-
-        std::function<void(const std::filesystem::directory_entry &)> FindAllFiles = [&](const std::filesystem::directory_entry &entry) {
+        using FsDir = std::filesystem::directory_entry;
+        std::function<void(const FsDir &)> ForeachAllFiles = [&](const FsDir &entry) {
             if (const EditableDirectory directory{entry}; !directory)
                 return;
 
-            for (std::filesystem::directory_iterator walker{entry}; walker != std::filesystem::directory_iterator{}; ++
-                 walker) {
-                if (walker->is_regular_file()) {
-                    filepaths.emplace_back(walker->path());
-                    if (const auto opened{openat(descriptor, GetDataArray(walker->path()), O_RDONLY)}; opened > 0) {
-                        close(opened);
-                    } else {
+            for (std::filesystem::directory_iterator treewalk{entry}; treewalk != decltype(treewalk){}; ++treewalk) {
+                if (treewalk->is_regular_file()) {
+                    filepaths.emplace_back(treewalk->path());
+                    if (const auto result{faccessat(descriptor, GetDataArray(treewalk->path()), 0, AT_EACCESS)}; result == -1) {
                         filepaths.pop_back();
                     }
-                } else if (walker->is_directory()) {
-                    FindAllFiles(*walker);
+                } else if (treewalk->is_directory()) {
+                    ForeachAllFiles(*treewalk);
                 }
             }
         };
-        FindAllFiles(std::filesystem::directory_entry{path});
+        ForeachAllFiles(FsDir{path});
         return filepaths;
     }
 
     std::vector<FsPath> EditableDirectory::ListAllTopLevelFiles() const {
-        std::filesystem::directory_iterator walker{path};
+        std::filesystem::directory_iterator treewalk{path};
         std::vector<FsPath> files;
 
-        while (walker != std::filesystem::directory_iterator{}) {
-            files.emplace_back(walker->path());
-            ++walker;
+        while (treewalk != std::filesystem::directory_iterator{}) {
+            files.emplace_back(treewalk->path());
+            ++treewalk;
         }
-
         return files;
     }
-
     U64 EditableDirectory::GetFilesCount() const {
         U64 result{};
         for (const std::filesystem::recursive_directory_iterator walker{path}; const auto &file: walker)
