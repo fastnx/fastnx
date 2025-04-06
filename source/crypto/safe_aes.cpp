@@ -40,18 +40,14 @@ namespace FastNx::Crypto {
         NX_ASSERT(mbedtls_cipher_reset(context) == 0);
 
         U64 processed{};
-        for (U64 offset{}; offset <= size && isEcb; offset += 16) {
-            U64 outsize{};
-            mbedtls_cipher_update(context, source + offset, 16, destination + offset, &outsize);
+        for (U64 outsize{}; processed < size && isEcb; ) {
+            mbedtls_cipher_update(context, source + processed, 16, destination + processed, &outsize);
             processed += outsize;
         }
 
-        for (U64 offset{}; offset < size; ) {
+        for (U64 output{}; processed < size; ) {
             const U64 stride{std::min(size - processed, 2048UL)};
-            U64 output{};
-            mbedtls_cipher_update(context, source + offset, stride, destination + offset, &output);
-
-            offset += output;
+            mbedtls_cipher_update(context, source + processed, stride, destination + processed, &output);
             processed += output;
         }
 

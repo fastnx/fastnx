@@ -20,4 +20,6 @@ namespace FastNx::FsSys::ReFs {
         U64 start{};
         U64 valid{}; // Determine the size corresponding to the valid bytes in the buffer
     };
+
+    std::string GetLine(const std::string &filename, const std::string &starts);
 }

@@ -10,8 +10,8 @@ namespace FastNx::FsSys {
         constexpr auto AesType{Crypto::AesType::AesXts128};
 
         if (file->mode != FileModeType::ReadOnly)
-            encrypt.emplace(std::span(_tweakbytes), Mode::Encryption, AesType);
-        decrypt.emplace(std::span(_tweakbytes), Mode::Decryption, AesType);
+            encrypt.emplace(ToSpan(_tweakbytes), Mode::Encryption, AesType);
+        decrypt.emplace(ToSpan(_tweakbytes), Mode::Decryption, AesType);
     }
 
     XtsFile::operator bool() const {

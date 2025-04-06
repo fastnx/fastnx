@@ -17,14 +17,14 @@ namespace FastNx::Crypto {
         ~SafeAes();
 
         void Setup(U64 sector, const std::span<U8> &vector);
-        U64 Process(U8* dest, const U8* source, U64 size);
-        U64 ProcessXts(U8* dest, const U8* source, U64 size, U64 starts = 0);
+        U64 Process(U8 *dest, const U8 *source, U64 size);
+        U64 ProcessXts(U8 *dest, const U8 *source, U64 size, U64 starts = 0);
 
         std::vector<U8> auxbuffer;
     private:
         U64 sectorsz{0x200};
 
-        mbedtls_cipher_context_t* context;
+        mbedtls_cipher_context_t *context;
         U64 tweak{};
     };
 }

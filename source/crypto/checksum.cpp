@@ -1,4 +1,5 @@
 #include <cstring>
+#include <common/container.h>
 #include <crypto/checksum.h>
 
 namespace FastNx::Crypto {
@@ -43,7 +44,7 @@ namespace FastNx::Crypto {
 
     std::vector<U8> Checksum::Finish() {
         std::vector<U8> result(mbedtls_md_get_size(info));
-        NX_ASSERT(Finish(std::span(result)) == result.size());
+        NX_ASSERT(Finish(ToSpan(result)) == result.size());
         return result;
     }
 

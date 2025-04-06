@@ -18,11 +18,11 @@ namespace FastNx::FsSys {
             if (const auto bufsz{std::min(buffer.size(), flatsize - offset)})
                 if (bufsz != buffer.size())
                     buffer.resize(bufsz);
-            const auto size{first->ReadSome(std::span(buffer), offset)};
+            const auto size{first->ReadSome(ToSpan(buffer), offset)};
             if (size)
                 checkers.front().Update(buffer);
             else break;
-            if (second->ReadSome(std::span(buffer), offset) == size)
+            if (second->ReadSome(ToSpan(buffer), offset) == size)
                 checkers.back().Update(buffer);
 
             offset += size;

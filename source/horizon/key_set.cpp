@@ -142,4 +142,10 @@ namespace FastNx::Horizon {
             ticket.Export(tiks.OpenFile(tik->path, FsSys::FileModeType::ReadWrite));
         tickets.insert_or_assign(pfstikhash, std::make_pair(tik, std::move(ticket)));
     }
+
+    std::optional<std::array<U8, 16>> KeySet::GetIndexableKey(KeyIndexType type, U32 index) {
+        if (const auto keyval{indexablekeys.find({type, index})}; keyval != indexablekeys.end())
+            return ToArrayOfBytes<16>(keyval->second);
+        return std::nullopt;
+    }
 }

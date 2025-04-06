@@ -54,6 +54,8 @@ namespace FastNx::Horizon {
         bool AddProdKey(const std::string_view &keyname, const std::string_view &keyvalue);
 
         void AddTicket(const FsSys::VfsBackingFilePtr &tik);
+        std::optional<std::array<U8, 16>> GetIndexableKey(KeyIndexType type, U32 index);
+
         std::optional<Crypto::Key256*> headerKey;
         bool saveall{};
     private:

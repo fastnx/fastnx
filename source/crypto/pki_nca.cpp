@@ -4,6 +4,7 @@
 #include <crypto/types.h>
 #include <crypto/checksum.h>
 
+
 namespace FastNx::Crypto {
     enum class FixedNcaType {
         NcaHeader

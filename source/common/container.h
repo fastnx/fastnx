@@ -35,8 +35,11 @@ namespace FastNx {
     constexpr auto IsEqual(const auto &first, const auto &second) {
         return std::ranges::equal(first, second);
     }
-    auto ToSpan(const auto &container) {
-        return std::span(container.begin(), container.begin());
+    template<typename T>
+    auto ToSpan(T &container) {
+        if constexpr (IsArrayType<T>)
+            return std::span{container.data(), container.size()};
+        return std::span{container.begin(), container.end()};
     }
 
     template<typename T>

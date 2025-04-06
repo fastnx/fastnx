@@ -115,4 +115,13 @@ namespace FastNx::FsSys::ReFs {
         }
         return copied;
     }
+
+    std::string GetLine(const std::string &filename, const std::string &starts) {
+        if (BufferedFile file{filename})
+            for (const auto &line: file.GetAllLines())
+                if (line.starts_with(starts))
+                    return line;
+
+        return {};
+    }
 }

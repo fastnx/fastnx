@@ -26,7 +26,7 @@ namespace FastNx::Crypto {
             const auto size{std::min(file->GetSize() - offset, buffer.size())};
             if (size < buffer.size())
                 buffer.resize(size);
-            NX_ASSERT(file->ReadSome(std::span(buffer), offset) == size); NX_ASSERT(size); // To make sure we're making some progress
+            NX_ASSERT(file->ReadSome(ToSpan(buffer), offset) == size); NX_ASSERT(size); // To make sure we're making some progress
             chk256.Update(buffer);
             offset += size;
         }

@@ -1,7 +1,10 @@
 #include <common/async_logger.h>
+#include <common/container.h>
 #include <horizon/key_set.h>
 
 #include <crypto/ticket.h>
+
+
 namespace FastNx::Crypto {
 
     U64 GetSignatureSize(const std::vector<U8> &signature) {
@@ -47,7 +50,7 @@ namespace FastNx::Crypto {
 
     void Ticket::Export(const FsSys::VfsBackingFilePtr &file) {
         file->Write(type);
-        file->WriteSome(std::span(signature), 0x4);
+        file->WriteSome(ToSpan(signature), 0x4);
 
         auto offset{0x4};
 

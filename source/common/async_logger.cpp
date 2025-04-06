@@ -1,12 +1,26 @@
 
 #include <iostream>
 #include <shared_mutex>
+
+#include <sys/ptrace.h>
 #include <fmt/chrono.h>
 #include <boost/algorithm/string.hpp>
 
 #include <fs_sys/standard_file.h>
+#include <fs_sys/refs/buffered_file.h>
 #include <common/async_logger.h>
+
+
 namespace FastNx {
+    bool IsDebuggerPresent() {
+        if (const auto tracer{FsSys::ReFs::GetLine("/proc/self/status", "TracerPid:")}; !tracer.empty())
+            if (const auto debugger{tracer.substr(strlen("TracerPid:") + 1)}; !debugger.empty())
+                if (strtoull(debugger.data(), nullptr, 10))
+                    return true;
+
+        return ptrace(PTRACE_TRACEME, 0, nullptr, nullptr) < 0;
+    }
+
     std::shared_ptr<AsyncLogger> BuildAsyncLogger(std::optional<FsSys::ReFs::EditableDirectory> logdir) {
         std::optional<fmt::memory_buffer> logs;
         U64 count{};
@@ -18,6 +32,9 @@ namespace FastNx {
             logger = std::make_shared<AsyncLogger>(std::cout); // Only streams valid for the lifetime of the process are valid here
             logger->threshold = 4;
         } else {
+            if (IsDebuggerPresent())
+                return logger;
+
             const auto filename{logdir->path / std::format("fastnx-{:%m-%d-%y}.log", std::chrono::system_clock::now())};
             if (const auto logfile{logdir->OpenFile(filename, FsSys::FileModeType::WriteOnly)})
                 logger = std::make_shared<AsyncLogger>(logfile);

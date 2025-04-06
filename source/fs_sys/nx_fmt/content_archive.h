@@ -24,7 +24,7 @@ namespace FastNx::FsSys::NxFmt {
     };
     enum class KeyGenerationOld : U8 {
         Gen100,
-        Unused,
+        GenUnused,
         Gen300
     };
 
@@ -112,7 +112,21 @@ namespace FastNx::FsSys::NxFmt {
         std::array<U8, 0x20> masterhash;
         std::array<U8, 0x18> reserved1;
     };
-    static_assert(IsSizeMatch<IntegrityMetaInfo, 0xE0 + 0x18>);
+    static_assert(IsSizeMatch<IntegrityMetaInfo, 0xF8>);
+
+    struct HierarchicalSha256Data {
+        std::array<U8, 0x20> masterhash;
+        U32 blocksize;
+        U32 layercount; // always 2
+        struct Region {
+            U64 region;
+            U64 size;
+        };
+        std::array<Region, 5> regions;
+        std::array<U8, 0x80> reserved;
+    };
+    static_assert(IsSizeMatch<HierarchicalSha256Data, 0xF8>);
+
 
     struct FsHeader {
         U16 version;
@@ -123,6 +137,7 @@ namespace FastNx::FsSys::NxFmt {
         U16 reserved;
         union {
             IntegrityMetaInfo integrity;
+            HierarchicalSha256Data hierarchical;
         };
         std::array<U8, 0x40> patchinfo;
         U32 generation;
@@ -139,8 +154,10 @@ namespace FastNx::FsSys::NxFmt {
     class ContentArchive {
     public:
         explicit ContentArchive(const VfsBackingFilePtr &nca, const std::shared_ptr<Horizon::KeySet> &ks);
-        void LoadAllContent(const NcaHeader &nch);
-        VfsBackingFilePtr GetFile(const FsEntry &fscursor, const FsHeader &fsheader);
+        void LoadAllContent(const NcaHeader &archive);
+        VfsBackingFilePtr GetFile(const FsEntry &fscursor, const FsHeader &fsheader, const NcaHeader &archive);
+
+        std::optional<std::array<U8, 16>> GetDecryptionKey(const FsHeader &fsheader, const NcaHeader &archive) const;
 
         bool encrypted{};
         ContentType type;
