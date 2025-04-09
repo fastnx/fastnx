@@ -157,7 +157,7 @@ namespace FastNx::FsSys::NxFmt {
         void LoadAllContent(const NcaHeader &content);
         VfsBackingFilePtr GetFile(const FsEntry &fileentry, const FsHeader &fsheader, const NcaHeader &content);
 
-        std::optional<std::array<U8, 16>> GetDecryptionKey(const FsHeader &fsheader, const NcaHeader &archive) const;
+        std::optional<std::array<U8, 16>> GetDecryptionKey(const FsHeader &fsheader, const NcaHeader &content) const;
 
         bool encrypted{};
         ContentType type;

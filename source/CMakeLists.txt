@@ -41,6 +41,8 @@ target_sources(fastnx PRIVATE
     kernel/dram/device_lpddr4.h
     kernel/types/kprocess.cpp
     kernel/types/kprocess.h
+    procrt/spin_lock.cpp
+    procrt/spin_lock.h
     crypto/integrity.cpp
     crypto/checksum.cpp
     crypto/checksum.h

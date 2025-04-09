@@ -1,5 +1,6 @@
 #include <functional>
 #include <fcntl.h>
+#include <mutex>
 #include <unistd.h>
 
 #include <common/container.h>
@@ -112,9 +113,20 @@ namespace FastNx::FsSys::ReFs {
         if (create && is_regular_file(openpath))
             remove(openpath);
 
-        if (exists(openpath) && file_size(openpath) > 120_MBYTES) {
-            return std::make_shared<HugeFile>(openpath, descriptor, mode);
+        std::lock_guard guard(spinlock);
+        if (const auto file{filelist.find(openpath)}; file != filelist.end()) {
+            if (file->second->mode == mode)
+                return file->second;
+            filelist.erase(file);
         }
-        return std::make_shared<BufferedFile>(openpath, descriptor, mode, create);
+
+        const auto file = [&] -> VfsBackingFilePtr {
+            if (exists(openpath) && file_size(openpath) > 120_MBYTES) {
+                return std::make_shared<HugeFile>(openpath, descriptor, mode);
+            }
+            return std::make_shared<BufferedFile>(openpath, descriptor, mode, create);
+        }();
+        filelist[openpath] = file;
+        return file;
     }
 }

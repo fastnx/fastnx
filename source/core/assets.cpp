@@ -53,7 +53,7 @@ namespace FastNx::Core {
         logs.emplace(directory->path / "logs", true);
         tiks.emplace(directory->path / "tiks", true);
 
-        BuildAsyncLogger(logs);
+        BuildAsyncLogger(&*logs);
 
         if (keys->ListAllFiles().empty())
             throw exception{"No keys found on the system"};

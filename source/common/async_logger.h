@@ -66,5 +66,5 @@ namespace FastNx {
         std::shared_mutex lock;
     };
 
-    std::shared_ptr<AsyncLogger> BuildAsyncLogger(std::optional<FsSys::ReFs::EditableDirectory> logdir = {});
+    std::shared_ptr<AsyncLogger> BuildAsyncLogger(FsSys::ReFs::EditableDirectory *logdir = {});
 }

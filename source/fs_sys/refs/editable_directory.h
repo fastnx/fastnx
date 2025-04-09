@@ -1,6 +1,9 @@
 #pragma once
-
+#include <map>
+#include <procrt/spin_lock.h>
 #include <fs_sys/types.h>
+
+
 namespace FastNx::FsSys::ReFs {
     class EditableDirectory final : public VfsBackingDirectory {
     public:
@@ -12,6 +15,9 @@ namespace FastNx::FsSys::ReFs {
         U64 GetFilesCount() const override;
 
         explicit operator bool() const;
+
+        std::map<FsPath, VfsBackingFilePtr> filelist;
+        Procrt::SpinLock spinlock;
 
         VfsBackingFilePtr OpenFile(const FsPath &_path, FileModeType mode = FileModeType::ReadOnly) override;
         I32 descriptor;

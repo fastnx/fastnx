@@ -21,7 +21,7 @@ namespace FastNx {
         return ptrace(PTRACE_TRACEME, 0, nullptr, nullptr) < 0;
     }
 
-    std::shared_ptr<AsyncLogger> BuildAsyncLogger(std::optional<FsSys::ReFs::EditableDirectory> logdir) {
+    std::shared_ptr<AsyncLogger> BuildAsyncLogger(FsSys::ReFs::EditableDirectory *logdir) {
         std::optional<fmt::memory_buffer> logs;
         U64 count{};
         if (logger) {
