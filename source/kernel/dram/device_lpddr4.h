@@ -8,6 +8,6 @@ namespace FastNx::Kernel::Dram {
         DeviceLppd4();
         ~DeviceLppd4();
         U64 size{SwitchMemorySize};
-        U8 *devram{};
+        U8 *device{};
     };
 }

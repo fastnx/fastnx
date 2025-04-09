@@ -16,7 +16,7 @@ namespace FastNx::Kernel {
     public:
         virtual ~KAutoObject() = default;
 
-        explicit KAutoObject(const KObjectType _type, Kernel &kernel) : type(_type), context(kernel) {}
+        explicit KAutoObject(const KObjectType _type, Kernel &_kernel) : type(_type), kernel(_kernel) {}
 
         void AddReference(U64 value);
         void RemoveReference(U64 value) const;
@@ -27,8 +27,8 @@ namespace FastNx::Kernel {
 
         KObjectType type;
         std::atomic<U32> counter{};
-        void *treenode{nullptr}; // < Intrusive red-black tree node
-        Kernel &context;
+        void *treenode{}; // < Intrusive red-black tree node
+        Kernel &kernel;
 
         virtual void Destroyed() = 0;
     };

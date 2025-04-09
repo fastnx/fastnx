@@ -20,8 +20,8 @@ namespace FastNx::FsSys::NxFmt {
     ContentArchive::ContentArchive(const VfsBackingFilePtr &nca, const std::shared_ptr<Horizon::KeySet> &ks) : keys(ks) {
         if (nca->GetSize() < sizeof(NcaHeader))
             return;
-        auto archive{nca->Read<NcaHeader>()};
-        if (const auto magic{archive.magic})
+        auto content{nca->Read<NcaHeader>()};
+        if (const auto magic{content.magic})
             encrypted = !CheckNcaMagic(magic);
 
         ncavfs = [&] -> VfsBackingFilePtr {
@@ -30,26 +30,26 @@ namespace FastNx::FsSys::NxFmt {
             if (!keys->headerKey)
                 throw exception{"Header key not found"};
             auto xts = std::make_shared<XtsFile>(std::move(nca), *keys->headerKey.value());
-            archive = xts->Read<NcaHeader>();
+            content = xts->Read<NcaHeader>();
             return xts;
         }();
 
-        NX_ASSERT(CheckNcaMagic(archive.magic));
-        NX_ASSERT(archive.contentSize == ncavfs->GetSize());
+        NX_ASSERT(CheckNcaMagic(content.magic));
+        NX_ASSERT(content.size == ncavfs->GetSize());
 
-        if (!Crypto::VerifyNcaSignature(&archive.magic, 0x200, archive.rsaheader))
+        if (!Crypto::VerifyNcaSignature(&content.magic, 0x200, content.rsaheader))
             AsyncLogger::Info("Header signature verification failed");
 
-        size = archive.contentSize;
-        type = archive.type;
+        size = content.size;
+        type = content.type;
 
-        LoadAllContent(archive);
+        LoadAllContent(content);
     }
 
-    void ContentArchive::LoadAllContent(const NcaHeader &archive) {
+    void ContentArchive::LoadAllContent(const NcaHeader &content) {
         const auto entries = [&] {
             U64 count{};
-            for (const auto &entry: archive.fsent) {
+            for (const auto &entry: content.fileentries) {
                 if (const auto notzero{!IsZeroes(entry)})
                     count += notzero;
                 else break;
@@ -60,7 +60,7 @@ namespace FastNx::FsSys::NxFmt {
         for (U64 fsindex{}; fsindex < entries; fsindex++) {
             const auto fsinfo{ncavfs->Read<FsHeader>(0x400 + fsindex * 0x200)};
             NX_ASSERT(fsinfo.version == 2);
-            if (!GetFile(archive.fsent[fsindex], fsinfo, archive))
+            if (!GetFile(content.fileentries[fsindex], fsinfo, content))
                 return;
         }
     }
@@ -68,37 +68,32 @@ namespace FastNx::FsSys::NxFmt {
     struct FileProperties {
         U64 offset;
         U64 size;
-        U64 ends;
     };
     std::optional<FileProperties> GetFileProperties(const bool isintegrity, const FsHeader &fsheader) {
         const auto &integrity{fsheader.integrity};
-        const auto lastlayer{integrity.infolevelhash.maxlayers - 2 - 1};
-        std::optional<FileProperties> fileinfo;
-        if (isintegrity && lastlayer) {
-            const auto &layers{integrity.infolevelhash.levels};
-            if (const auto filelayer{layers.back()}; !IsZeroes(filelayer))
-                fileinfo.emplace(filelayer.logical, filelayer.hashdatasz);
 
+        if (const auto lastlayer{integrity.infolevelhash.maxlayers - 2 - 1}; isintegrity && lastlayer) {
+            const auto &layers{integrity.infolevelhash.levels};
             NX_ASSERT(lastlayer >= 0 || lastlayer < std::size(layers));
             NX_ASSERT(layers.begin() + lastlayer == std::prev(layers.end() - 1));
+            if (const auto filelayer{layers.back()}; !IsZeroes(filelayer)) {
+                return FileProperties{filelayer.logical, filelayer.hashdatasz};
+            }
         } else {
             const auto &hierarchical{fsheader.hierarchical};
             NX_ASSERT(hierarchical.layercount == 2);
             if (const auto fileregion{hierarchical.regions.front()}; !IsZeroes(fileregion)) {
-                fileinfo.emplace(fileregion.region, fileregion.size);
+                return FileProperties{fileregion.region, fileregion.size};
             }
         }
-        if (fileinfo)
-            fileinfo->ends = fileinfo->offset + fileinfo->size;
-        return fileinfo;
+        return std::nullopt;
     }
 
-    U8 GetKeyGeneration(const NcaHeader &archive) {
-        auto generation{archive.generation};
-        generation = std::min(generation, static_cast<U8>(generation - 1));
-        return std::max(std::to_underlying(archive.kgo), generation);
+    U8 GetKeyGeneration(const NcaHeader &content) {
+        const auto generation{std::min(content.generation, static_cast<U8>(content.generation - 1))};
+        return std::max(std::to_underlying(content.kgo), generation);
     }
-    std::optional<std::array<U8, 16>> ContentArchive::GetDecryptionKey(const FsHeader &fsheader, const NcaHeader &archive) const {
+    std::optional<std::array<U8, 16>> ContentArchive::GetDecryptionKey(const FsHeader &fsheader, const NcaHeader &content) const {
         const auto DecryptKek = [&] ([[maybe_unused]] const KeyAreaEncryptionKeyIndex type) {
             std::array<U8, 16> decryptedkey{};
 
@@ -112,34 +107,41 @@ namespace FastNx::FsSys::NxFmt {
                         return 0;
                 }
             }();
-            const auto generation{GetKeyGeneration(archive)};
+            const auto generation{GetKeyGeneration(content)};
             auto kek{*keys->GetIndexableKey(Horizon::KeyIndexType::Titlekek, generation)};
-            Copy(decryptedkey, archive.encKeyArea.at(index));
+            Copy(decryptedkey, content.encKeyArea.at(index));
 
             Crypto::SafeAes ecbdecrypt{ToSpan(kek), Crypto::AesMode::Decryption, Crypto::AesType::AesEcb128};
             ecbdecrypt.Process(decryptedkey.data(), decryptedkey.data(), 16);
 
             return decryptedkey;
         };
-       return DecryptKek(archive.keyIndex);
+       return DecryptKek(content.keyIndex);
     }
 
-    VfsBackingFilePtr ContentArchive::GetFile(const FsEntry &fscursor, const FsHeader &fsheader, const NcaHeader &archive) {
-        const FileProperties fileinfo = [&] {
+    constexpr auto StorageSectorSize{0x200};
+    VfsBackingFilePtr ContentArchive::GetFile(const FsEntry &fileentry, const FsHeader &fsheader, const NcaHeader &content) {
+        const auto boundoffset{fileentry.end * StorageSectorSize};
+        const auto [fileoffset, filesize] = [&] {
             const bool isintegrity{fsheader.hashType == HashType::HierarchicalIntegrityHash};
             if (isintegrity) {
                 if (fsheader.integrity.magic != ConstMagicValue<U32>("IVFC"))
                     throw exception{"Header integrity violated"};
                 NX_ASSERT(fsheader.type == FsType::RomFs);
             }
-            if (const auto properties{GetFileProperties(isintegrity, fsheader)})
-                return *properties;
-            throw exception{"Invalid NCA subfile size"};
+            auto properties{GetFileProperties(isintegrity, fsheader)};
+
+            if (!properties)
+                throw exception{"Invalid NCA subfile size"};
+            properties->offset += fileentry.start * StorageSectorSize;
+
+            return *properties;
         }();
 
-        NX_ASSERT(fscursor.end * 0x200 > fileinfo.ends);
+        NX_ASSERT(CalculateCoverage(fileoffset + filesize, boundoffset) > 90);
+
         const auto file = [&] -> VfsBackingFilePtr {
-            const auto decryptkey{GetDecryptionKey(fsheader, archive)};
+            const auto decryptkey{GetDecryptionKey(fsheader, content)};
             if (!decryptkey)
                 return nullptr;
             NX_ASSERT(decryptkey->size());

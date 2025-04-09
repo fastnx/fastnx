@@ -34,11 +34,11 @@ namespace FastNx::FsSys::NxFmt {
                     corrupted = ncafile;
 
                 AsyncLogger::Info("Processing content of NCA {}", GetPathStr(ncafile));
-                const auto archive{std::make_shared<ContentArchive>(std::move(ncafile), keys)};
-                NX_ASSERT(archive->size);
+                const auto nca{std::make_shared<ContentArchive>(std::move(ncafile), keys)};
+                NX_ASSERT(nca->size);
             }
         }
-        if (corrupted)
+        if (!corrupted)
             AsyncLogger::Error("The NCA file {} is corrupted, check your ROM", GetPathStr(corrupted));
     }
 }

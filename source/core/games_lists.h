@@ -19,7 +19,7 @@ namespace FastNx::Core {
         bool AddTypedGame(const FsSys::FsPath &gamefiles);
         std::vector<FsSys::FsPath> GetAllGamesPaths(GamePathType type) const;
 
-        std::list<FsSys::FsPath> _dirs;
+        std::list<FsSys::FsPath> dirs;
         std::list<std::pair<GamePathType, FsSys::FsPath>> gamespaths;
     };
 }

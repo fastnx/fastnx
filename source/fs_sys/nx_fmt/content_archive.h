@@ -51,7 +51,7 @@ namespace FastNx::FsSys::NxFmt {
         ContentType type;
         KeyGenerationOld kgo;
         KeyAreaEncryptionKeyIndex keyIndex;
-        U64 contentSize;
+        U64 size;
         U64 programId;
         U32 contentIndex;
         U32 sdkAddonVersion;
@@ -59,7 +59,7 @@ namespace FastNx::FsSys::NxFmt {
         U8 signatureKey;
         std::array<U8, 0xE> reserved;
         Crypto::RightsId rights;
-        std::array<FsEntry, 4> fsent;
+        std::array<FsEntry, 4> fileentries;
         std::array<std::array<U8, 0x20>, 4> listhashes;
         std::array<std::array<U8, 0x10>, 4> encKeyArea;
     };
@@ -154,8 +154,8 @@ namespace FastNx::FsSys::NxFmt {
     class ContentArchive {
     public:
         explicit ContentArchive(const VfsBackingFilePtr &nca, const std::shared_ptr<Horizon::KeySet> &ks);
-        void LoadAllContent(const NcaHeader &archive);
-        VfsBackingFilePtr GetFile(const FsEntry &fscursor, const FsHeader &fsheader, const NcaHeader &archive);
+        void LoadAllContent(const NcaHeader &content);
+        VfsBackingFilePtr GetFile(const FsEntry &fileentry, const FsHeader &fsheader, const NcaHeader &content);
 
         std::optional<std::array<U8, 16>> GetDecryptionKey(const FsHeader &fsheader, const NcaHeader &archive) const;
 
