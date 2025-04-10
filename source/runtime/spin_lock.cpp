@@ -1,7 +1,7 @@
 #include <thread>
-#include <procrt/spin_lock.h>
+#include <runtime/spin_lock.h>
 
-namespace FastNx::Procrt {
+namespace FastNx::Runtime {
     void SpinLock::lock() {
         U64 count{};
         while (!try_lock()) {

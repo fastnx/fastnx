@@ -3,7 +3,7 @@
 #include <atomic>
 
 #include <common/types.h>
-namespace FastNx::Procrt {
+namespace FastNx::Runtime {
     // https://github.com/facebook/folly/blob/main/folly/synchronization/RWSpinLock.h
     class SpinLock {
     public:

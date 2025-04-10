@@ -30,8 +30,8 @@ namespace FastNx {
     class AsyncLogger {
     public:
         AsyncLogger() = delete;
-        explicit AsyncLogger(std::ostream &output);
-        explicit AsyncLogger(const FsSys::VfsBackingFilePtr &file);
+        explicit AsyncLogger(std::ostream &output, U64 size = 32);
+        explicit AsyncLogger(const FsSys::VfsBackingFilePtr &file, U64 size = 32);
 
         void FlushBuffers();
         template<typename ...Args>
@@ -55,14 +55,14 @@ namespace FastNx {
             logger->Log(LogType::Error, fmt.location, fmt::format(fmt::runtime(fmt.format), std::forward<Args>(args)...));
         }
 
-        U64 threshold{32};
+        U64 threshold;
         U64 count{};
         fmt::memory_buffer fmtlists; // We should prioritize using our memory instead of calling I/O functions
     private:
         void Log(LogType _type, const std::source_location &source, std::string &&fmtmsg);
         void Log(std::string &&fmtmsg);
 
-        FsSys::VfsBackingFilePtr outback;
+        FsSys::VfsBackingFilePtr backing;
         std::shared_mutex lock;
     };
 

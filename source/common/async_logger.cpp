@@ -22,40 +22,30 @@ namespace FastNx {
     }
 
     std::shared_ptr<AsyncLogger> BuildAsyncLogger(FsSys::ReFs::EditableDirectory *logdir) {
-        std::optional<fmt::memory_buffer> logs;
-        U64 count{};
-        if (logger) {
-            logs.emplace(std::move(logger->fmtlists));
-            count = logger->count;
-        }
-        if (!logdir) {
-            logger = std::make_shared<AsyncLogger>(std::cout); // Only streams valid for the lifetime of the process are valid here
-            logger->threshold = 4;
-        } else {
-            if (IsDebuggerPresent())
-                return logger;
+        logger = [&] -> std::shared_ptr<AsyncLogger> {
+            if (!logdir || IsDebuggerPresent())
+                return std::make_shared<AsyncLogger>(std::cout, 4); // Only streams valid for the lifetime of the process are valid here
 
             const auto filename{logdir->path / std::format("fastnx-{:%m-%d-%y}.log", std::chrono::system_clock::now())};
             if (const auto logfile{logdir->OpenFile(filename, FsSys::FileModeType::WriteOnly)})
-                logger = std::make_shared<AsyncLogger>(logfile);
-        }
-        if (logs)
-            logger->fmtlists.append(std::move(*logs));
-        logger->count = count;
+                return std::make_shared<AsyncLogger>(logfile);
+
+            return nullptr;
+        }();
         return logger;
     }
 
-    AsyncLogger::AsyncLogger(std::ostream &output) :
-        outback(std::make_shared<FsSys::StandardFile>(output)) {}
+    AsyncLogger::AsyncLogger(std::ostream &output, const U64 size) :
+        threshold(size), backing(std::make_shared<FsSys::StandardFile>(output)) {}
 
-    AsyncLogger::AsyncLogger(const FsSys::VfsBackingFilePtr &file) : outback(file) {}
+    AsyncLogger::AsyncLogger(const FsSys::VfsBackingFilePtr &file, const U64 size) : threshold(size), backing(file) {}
 
     void AsyncLogger::FlushBuffers() {
         std::shared_lock guard(lock);
         for (U64 _offset{}; _offset < fmtlists.size() && count; count--) {
             const auto *begin{fmtlists.begin() + _offset};
             const std::string_view line(begin, strchr(begin, '\n') + 1);
-            outback->WriteType(line.data(), line.size(), _offset);
+            backing->WriteType(line.data(), line.size(), _offset);
             _offset += line.size();
         }
         NX_ASSERT(count == 0);
