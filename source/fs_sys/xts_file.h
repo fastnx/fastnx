@@ -2,7 +2,7 @@
 
 #include <fs_sys/types.h>
 #include <crypto/types.h>
-#include <crypto/safe_aes.h>
+#include <crypto/aes_cipher.h>
 namespace FastNx::FsSys {
     class XtsFile final : public VfsBackingFile {
     public:
@@ -12,8 +12,8 @@ namespace FastNx::FsSys {
         U64 GetSize() const override;
 
         VfsBackingFilePtr encfile{};
-        std::optional<Crypto::SafeAes> encrypt{};
-        std::optional<Crypto::SafeAes> decrypt{};
+        std::optional<Crypto::AesCipher> encrypt{};
+        std::optional<Crypto::AesCipher> decrypt{};
 
         bool doublebuf{};
     private:

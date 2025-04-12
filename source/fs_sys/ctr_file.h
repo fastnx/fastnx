@@ -2,7 +2,7 @@
 
 #include <fs_sys/types.h>
 #include <crypto/types.h>
-#include <crypto/safe_aes.h>
+#include <crypto/aes_cipher.h>
 
 namespace FastNx::FsSys {
     class CtrFile final : public VfsBackingFile {
@@ -13,7 +13,7 @@ namespace FastNx::FsSys {
         U64 GetSize() const override;
 
         VfsBackingFilePtr encfile{};
-        std::optional<Crypto::SafeAes> decrypt{};
+        std::optional<Crypto::AesCipher> decrypt{};
         std::array<U8, 16> ctr;
 
         U64 ctroffset{};

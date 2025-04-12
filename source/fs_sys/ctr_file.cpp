@@ -32,7 +32,7 @@ namespace FastNx::FsSys {
         boost::endian::endian_reverse_inplace(sector);
 
         std::memcpy(&ctr[8], &sector, sizeof(sector));
-        decrypt->Setup(0x10, ctr);
+        decrypt->SetupIv(ctr);
     }
 
     U64 CtrFile::ReadTypeImpl(U8 *dest, const U64 size, const U64 offset) {

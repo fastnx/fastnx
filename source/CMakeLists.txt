@@ -48,8 +48,8 @@ target_sources(fastnx PRIVATE
     crypto/integrity.cpp
     crypto/checksum.cpp
     crypto/checksum.h
-    crypto/safe_aes.cpp
-    crypto/safe_aes.h
+    crypto/aes_cipher.cpp
+    crypto/aes_cipher.h
     crypto/pki_nca.cpp
     crypto/ticket.cpp
     crypto/ticket.h

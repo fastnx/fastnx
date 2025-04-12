@@ -6,13 +6,13 @@
 
 namespace FastNx::Core {
     GamesLists::GamesLists(const std::shared_ptr<Assets> &_assets) : assets(_assets) {
-        const auto _games{
-            ArrayOf("~/.local/fastnx/Games"_fs, "~/.fastnx/Games"_fs, "~/Documents/Games"_fs)
+        const auto gamesfiles{
+            ArrayOf("~/.local/fastnx/Games", "~/.fastnx/Games", "~/Documents/Games")
         };
 
-        for (const auto &hardpath: _games) {
-            if (const auto _realPath{FsSys::GetFullPath(hardpath)})
-                dirs.emplace_back(*_realPath);
+        for (const auto &hardpath: gamesfiles) {
+            if (const auto realPath{FsSys::GetFullPath(hardpath)})
+                dirs.emplace_back(*realPath);
         }
         if (exists(assets->games->path))
             dirs.emplace_back(assets->games->path);
@@ -25,8 +25,8 @@ namespace FastNx::Core {
             NX_ASSERT(is_directory(gameDir));
             if (!AddTypedGame(gameDir)) {
                 if (const auto &_roms{directory.ListAllFiles()}; !_roms.empty()) {
-                    for ([[maybe_unused]] const auto &_gameFiles: _roms)
-                        NX_ASSERT(AddTypedGame(_gameFiles) == true);
+                    for ([[maybe_unused]] const auto &gamefiles: _roms)
+                        NX_ASSERT(AddTypedGame(gamefiles) == true);
                 }
             }
         }

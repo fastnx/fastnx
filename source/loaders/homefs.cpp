@@ -7,25 +7,25 @@ namespace FastNx::Loaders {
         NX_ASSERT(is_directory(dirfs));
         const FsSys::ReFs::EditableDirectory directory{dirfs};
 
-        const auto _content{directory.ListAllFiles()};
+        const auto content{directory.ListAllFiles()};
         I32 version{};
-        if (Contains(_content, {"version.txt"_fs}))
+        if (Contains(content, {"version.txt"}))
             version = directory.ListAllFiles().size();
         // We're not reading the version for now, but we expect a value greater than 0
 
-        I32 isHfs{version > 100};
+        I32 ishomefs{version > 100};
         switch (version) {
             case 102:
-                if (Contains(_content, {"exefs/main.npdm"_fs, "exefs/main"_fs}))
-                    isHfs++;
+                if (Contains(content, {"exefs/main.npdm", "exefs/main"}))
+                    ishomefs++;
                 [[fallthrough]];
             case 101:
-                if (Contains(_content, {"home.json"_fs}))
-                    isHfs++;
+                if (Contains(content, {"home.json"}))
+                    ishomefs++;
                 break;
             default:
                 return {};
         }
-        return isHfs;
+        return ishomefs;
     }
 }

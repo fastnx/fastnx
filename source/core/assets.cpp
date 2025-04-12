@@ -25,7 +25,7 @@ namespace FastNx::Core {
     Assets::Assets() {
         const auto _pcwd{std::filesystem::current_path()};
         NX_ASSERT(!_pcwd.empty());
-        if (const auto target{"com/callsvc/fastnx"_fs}; !ContainsPath(_pcwd, target)) {
+        if (const FsSys::FsPath target{"com/callsvc/fastnx"}; !ContainsPath(_pcwd, target)) {
             MoveProcess(target);
         }
     }

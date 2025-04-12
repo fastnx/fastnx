@@ -1,8 +1,10 @@
 #include <ranges>
 
 #include <common/container.h>
+#include <common/values.h>
 #include <fs_sys/offset_file.h>
 #include <fs_sys/nx_fmt/partition_filesystem.h>
+
 
 namespace FastNx::FsSys::NxFmt {
     PartitionFileSystem::PartitionFileSystem(const VfsBackingFilePtr &pfsf) : VfsReadOnlyDirectory(pfsf->path), partfs(pfsf) {
@@ -17,7 +19,7 @@ namespace FastNx::FsSys::NxFmt {
         pents.reserve(pfs0hd.fileCount);
 
         U64 _nextOffset{_auxOffset};
-        for (U64 _pei{}; _pei < pfs0hd.fileCount; ++_pei) {
+        for (U64 _peindex{}; _peindex < pfs0hd.fileCount; ++_peindex) {
             pents.emplace_back(partfs->Read<PartitionEntry>(_nextOffset));
 
             NX_ASSERT(_nextOffset - sizeof(pfs0hd) < _partsSize);

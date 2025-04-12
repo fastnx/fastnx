@@ -1,7 +1,10 @@
 #include <unordered_map>
 
 #include <common/exception.h>
+#include <common/values.h>
 #include <fs_sys/types.h>
+
+
 namespace FastNx::FsSys {
     bool IsInsideOf(const FsPath &path, const FsPath &is, const bool check) {
         if (check)

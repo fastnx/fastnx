@@ -2,7 +2,7 @@
 #include <common/container.h>
 #include <horizon/key_set.h>
 
-#include <crypto/safe_aes.h>
+#include <crypto/aes_cipher.h>
 #include <crypto/ticket.h>
 
 
@@ -65,7 +65,7 @@ namespace FastNx::Crypto {
         std::array<U8, 16> titlekey;
         std::memcpy(titlekey.data(), content.keyblock.data(), 16);
 
-        SafeAes decrypt(ToSpan(kek), AesMode::Decryption, AesType::AesEcb128);
+        AesCipher decrypt(ToSpan(kek), AesMode::Decryption, AesType::AesEcb128);
         decrypt.Process(titlekey.data(), titlekey.data(), 16);
         return titlekey;
     }

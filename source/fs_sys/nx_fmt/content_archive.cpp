@@ -2,6 +2,7 @@
 
 #include <common/container.h>
 #include <common/exception.h>
+#include <common/values.h>
 #include <common/async_logger.h>
 #include <horizon/key_set.h>
 #include <fs_sys/xts_file.h>
@@ -64,15 +65,14 @@ namespace FastNx::FsSys::NxFmt {
         }();
 
         for (U64 fsindex{}; fsindex < entries; fsindex++) {
-            const auto fsinfo{ncavfs->Read<FsHeader>(0x400 + fsindex * 0x200)};
-            NX_ASSERT(fsinfo.version == 2);
-            const auto file{GetFile(content.fileentries[fsindex], fsinfo, content)};
+            const auto fsheader{ncavfs->Read<FsHeader>(0x400 + fsindex * 0x200)};
+            NX_ASSERT(fsheader.version == 2);
+            const auto file{GetFile(content.fileentries[fsindex], fsheader, content)};
             if (!file)
                 return;
 
-            if (file->Read<U32>() == ConstMagicValue<U32>("PFS0"))
+            if (fsheader.type == FsType::PartitionFs)
                 pfslist.emplace_back(std::make_shared<PartitionFileSystem>(std::move(file)));
-
         }
     }
 
@@ -120,7 +120,7 @@ namespace FastNx::FsSys::NxFmt {
             const auto kek{*keys->GetIndexableKey(type, generation)};
             Copy(decryptedkey, content.encKeyArea.at(index));
 
-            Crypto::SafeAes ecbdecrypt{ToSpan(kek), Crypto::AesMode::Decryption, Crypto::AesType::AesEcb128};
+            Crypto::AesCipher ecbdecrypt{ToSpan(kek), Crypto::AesMode::Decryption, Crypto::AesType::AesEcb128};
             ecbdecrypt.Process(decryptedkey.data(), decryptedkey.data(), 16);
 
             return decryptedkey;

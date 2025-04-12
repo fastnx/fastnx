@@ -2,7 +2,7 @@
 #include <cstring>
 #include <string_view>
 #include <utility>
-
+#include <common/types.h>
 namespace FastNx {
     template<typename T> requires (std::is_unsigned_v<T>)
     constexpr auto ConstMagicValue(const std::string_view &magic) -> T {

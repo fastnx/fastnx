@@ -20,13 +20,12 @@ namespace FastNx::Loaders {
         const auto firstType{ProbApplicationFilename(file)};
         return firstType;
     }
-
     std::string AppTypeToString(const AppType type) {
         switch (type) {
             case AppType::NspEs:
                 return "NSP";
             default:
-                break;
+                return {};
         }
         std::unreachable();
     }

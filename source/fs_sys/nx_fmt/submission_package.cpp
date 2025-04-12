@@ -29,8 +29,10 @@ namespace FastNx::FsSys::NxFmt {
             if (content.extension() != ".nca")
                 continue;
             if (const auto ncafile{pfs->OpenFile(content)}) {
-                if (Crypto::CheckNcaIntegrity(ncafile) == false)
+                if (!Crypto::CheckNcaIntegrity(ncafile)) {
                     corrupted = ncafile;
+                    break;
+                }
 
                 AsyncLogger::Info("Processing content of NCA {}", GetPathStr(ncafile));
                 const auto nca{std::make_shared<ContentArchive>(std::move(ncafile), keys)};

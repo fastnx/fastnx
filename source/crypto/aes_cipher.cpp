@@ -1,9 +1,9 @@
 #include <boost/endian.hpp>
 #include <common/container.h>
-#include <crypto/safe_aes.h>
+#include <crypto/aes_cipher.h>
 
 namespace FastNx::Crypto {
-    SafeAes::SafeAes(const std::span<const U8> &key, const AesMode _mode, AesType _type) {
+    AesCipher::AesCipher(const std::span<const U8> &key, const AesMode _mode, AesType _type) {
         NX_ASSERT(!key.empty());
 
         context = new mbedtls_cipher_context_t;
@@ -14,20 +14,20 @@ namespace FastNx::Crypto {
 
     }
 
-    SafeAes::~SafeAes() {
+    AesCipher::~AesCipher() {
         if (context)
             mbedtls_cipher_free(context);
 
         delete context;
     }
 
-    void SafeAes::Setup(const U64 sector, const std::span<U8> &vector) {
+    void AesCipher::SetupIv(const std::span<U8> &vector, const U64 sector) {
         mbedtls_cipher_set_iv(context, vector.data(), vector.size());
         if (sector && sector % mbedtls_cipher_get_block_size(context) == 0)
             sectorsz = sector;
     }
 
-    U64 SafeAes::Process(U8 *dest, const U8 *source, const U64 size) {
+    U64 AesCipher::Process(U8 *dest, const U8 *source, const U64 size) {
         U8 *destination = [&] {
             if (dest != source)
                 return dest;
@@ -65,16 +65,16 @@ namespace FastNx::Crypto {
         return iv;
     }
 
-    U64 SafeAes::ProcessXts(U8 *dest, const U8 *source, const U64 size, const U64 starts) {
+    U64 AesCipher::ProcessXts(U8 *dest, const U8 *source, const U64 size, const U64 starts) {
         U64 count{};
         tweak = starts / sectorsz;
-        Setup(tweak, {});
+        SetupIv({}, tweak);
         std::array<U8, 16> thisiv;
         for (U64 offset{}; offset < size; offset += sectorsz) {
             {
                 Copy(thisiv, GetNintendoTweak(tweak));
             }
-            Setup(0, thisiv);
+            SetupIv(thisiv);
             if (const auto result{Process(dest + offset, source + offset, sectorsz)})
                 count += result;
             else break;
