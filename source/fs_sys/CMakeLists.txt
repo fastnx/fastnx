@@ -13,6 +13,8 @@ target_sources(fastnx PRIVATE
     offset_file.h
     xts_file.cpp
     xts_file.h
+    ctr_file.cpp
+    ctr_file.h
     standard_file.cpp
     standard_file.h
     refs/editable_directory.cpp

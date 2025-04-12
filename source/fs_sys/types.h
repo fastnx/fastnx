@@ -26,36 +26,36 @@ namespace FastNx::FsSys {
         explicit VfsBackingFile(const FsPath &_path, const FileModeType _mode = FileModeType::ReadOnly) : path(_path), mode(_mode) {}
 
         template<typename T> requires (std::is_trivial_v<T>)
-        T Read(const U64 _offset = {}) {
+        T Read(const U64 offset = {}) {
             T value;
             std::memset(&value, 0, sizeof(T));
-            ReadType(reinterpret_cast<U8 *>(&value), sizeof(T), _offset);
+            ReadType(reinterpret_cast<U8 *>(&value), sizeof(T), offset);
             return value;
         }
         template<typename T> requires (std::is_trivial_v<T>)
-        void Write(T& value, const U64 _offset = {}) {
-            WriteType(reinterpret_cast<U8 *>(&value), sizeof(T), _offset);
+        void Write(T& value, const U64 offset = {}) {
+            WriteType(reinterpret_cast<U8 *>(&value), sizeof(T), offset);
         }
 
         template<typename T> requires (std::is_trivial_v<T>)
-        U64 Read(T &object, const U64 _offset = {}) {
+        U64 Read(T &object, const U64 offset = {}) {
             std::memset(&object, 0, sizeof(T));
-            return ReadType(reinterpret_cast<U8 *>(&object), sizeof(T), _offset);
+            return ReadType(reinterpret_cast<U8 *>(&object), sizeof(T), offset);
         }
 
         template<typename T = U8> requires (!IsVectorType<T>)
-        std::vector<T> ReadSome(const U64 size, const U64 _offset) {
+        std::vector<T> ReadSome(const U64 size, const U64 offset = 0) {
             std::vector<T> _content(size);
-            NX_ASSERT(ReadTypeImpl(reinterpret_cast<U8*>(_content.data()), size, _offset) == size);
+            NX_ASSERT(ReadTypeImpl(reinterpret_cast<U8*>(_content.data()), size, offset) == size);
             return _content;
         }
         template<typename T>
-        U64 ReadSome(const std::span<T> &content, const U64 _offset) {
-            return ReadTypeImpl(reinterpret_cast<U8*>(content.data()), content.size(), _offset);
+        U64 ReadSome(const std::span<T> &content, const U64 offset = 0) {
+            return ReadTypeImpl(reinterpret_cast<U8*>(content.data()), content.size(), offset);
         }
         template<typename T>
-        U64 WriteSome(const std::span<T> &content, const U64 _offset) {
-            return WriteTypeImpl(reinterpret_cast<const U8*>(content.data()), content.size(), _offset);
+        U64 WriteSome(const std::span<T> &content, const U64 offset = 0) {
+            return WriteTypeImpl(reinterpret_cast<const U8*>(content.data()), content.size(), offset);
         }
         std::string ReadLine(U64 offset = {});
         std::vector<std::string> GetAllLines();

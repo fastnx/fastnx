@@ -3,7 +3,6 @@
 #include <crypto/types.h>
 #include <common/async_logger.h>
 #include <fs_sys/nx_fmt/submission_package.h>
-#include <fs_sys/nx_fmt/content_archive.h>
 
 
 namespace FastNx::FsSys::NxFmt {
@@ -36,9 +35,13 @@ namespace FastNx::FsSys::NxFmt {
                 AsyncLogger::Info("Processing content of NCA {}", GetPathStr(ncafile));
                 const auto nca{std::make_shared<ContentArchive>(std::move(ncafile), keys)};
                 NX_ASSERT(nca->size);
+                if (!titleid && nca->type == ContentType::Program)
+                    titleid = nca->titleid;
+
+                ncalist.emplace_back(std::move(nca));
             }
         }
-        if (!corrupted)
+        if (corrupted)
             AsyncLogger::Error("The NCA file {} is corrupted, check your ROM", GetPathStr(corrupted));
     }
 }

@@ -1,17 +1,25 @@
 #include <common/container.h>
+
+#include <fs_sys/offset_file.h>
+
 #include <fs_sys/xts_file.h>
 
 namespace FastNx::FsSys {
-    XtsFile::XtsFile(const VfsBackingFilePtr &file, const Crypto::SourceKey<256> &key) : VfsBackingFile(file->path), encfile(file) {
-        std::vector<U8> _tweakbytes(sizeof(key));
-        Copy(_tweakbytes, key);
+    XtsFile::XtsFile(const VfsBackingFilePtr &file, const Crypto::Key256 &key, const U64 starts, const U64 size) : VfsBackingFile(file->path) {
+        encfile = [&] -> VfsBackingFilePtr {
+            if (starts && size)
+                return std::make_shared<OffsetFile>(file, file->path, starts, size);
+            return file;
+        }();
+        std::vector<U8> tweakbytes(sizeof(key));
+        Copy(tweakbytes, key);
 
         using Mode = Crypto::AesMode;
         constexpr auto AesType{Crypto::AesType::AesXts128};
 
         if (file->mode != FileModeType::ReadOnly)
-            encrypt.emplace(ToSpan(_tweakbytes), Mode::Encryption, AesType);
-        decrypt.emplace(ToSpan(_tweakbytes), Mode::Decryption, AesType);
+            encrypt.emplace(ToSpan(tweakbytes), Mode::Encryption, AesType);
+        decrypt.emplace(ToSpan(tweakbytes), Mode::Decryption, AesType);
     }
 
     XtsFile::operator bool() const {

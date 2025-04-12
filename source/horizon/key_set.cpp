@@ -96,6 +96,12 @@ namespace FastNx::Horizon {
         const auto _type = [&] -> KeyIndexType {
             if (keyname == "header_key")
                 return KeyIndexType::HeaderKey;
+            if (keyname.starts_with("key_area_key_application"))
+                return KeyIndexType::KeyAreaApplication;
+            if (keyname.starts_with("key_area_key_ocean"))
+                return KeyIndexType::KeyAreaOcean;
+            if (keyname.starts_with("key_area_key_system"))
+                return KeyIndexType::KeyAreaSystem;
             if (keyname.starts_with("titlekek"))
                 return KeyIndexType::Titlekek;
             return {};
@@ -142,9 +148,19 @@ namespace FastNx::Horizon {
         tickets.insert_or_assign(pfstikhash, std::make_pair(tik, std::move(ticket)));
     }
 
-    std::optional<std::array<U8, 16>> KeySet::GetIndexableKey(KeyIndexType type, U32 index) {
+    std::optional<std::array<U8, 16>> KeySet::GetIndexableKey(const KeyIndexType type, const U32 index) {
         if (const auto keyval{indexablekeys.find({type, index})}; keyval != indexablekeys.end())
             return ToArrayOfBytes<16>(keyval->second);
+        return std::nullopt;
+    }
+
+    std::optional<const Crypto::Ticket *> KeySet::GetTicket(const Crypto::RightsId &rights) {
+        // ReSharper disable once CppUseStructuredBinding
+        for (const auto &_ticket: tickets | std::ranges::views::values) {
+            const auto &ticketdata{_ticket.second};
+            if (IsEqual(ticketdata.content.rights, rights))
+                return &ticketdata;
+        }
         return std::nullopt;
     }
 }

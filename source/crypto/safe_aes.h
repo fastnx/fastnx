@@ -9,11 +9,12 @@ namespace FastNx::Crypto {
     };
     enum class AesType {
         AesXts128 = MBEDTLS_CIPHER_AES_128_XTS,
-        AesEcb128 = MBEDTLS_CIPHER_AES_128_ECB
+        AesCtr128 = MBEDTLS_CIPHER_AES_128_CTR,
+        AesEcb128 = MBEDTLS_CIPHER_AES_128_ECB,
     };
     class SafeAes {
     public:
-        explicit SafeAes(const std::span<U8> &key, AesMode _mode, AesType _type);
+        explicit SafeAes(const std::span<const U8> &key, AesMode _mode, AesType _type);
         ~SafeAes();
 
         void Setup(U64 sector, const std::span<U8> &vector);

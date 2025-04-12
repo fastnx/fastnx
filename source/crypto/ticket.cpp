@@ -2,6 +2,7 @@
 #include <common/container.h>
 #include <horizon/key_set.h>
 
+#include <crypto/safe_aes.h>
 #include <crypto/ticket.h>
 
 
@@ -52,11 +53,20 @@ namespace FastNx::Crypto {
         file->Write(type);
         file->WriteSome(ToSpan(signature), 0x4);
 
-        auto offset{0x4};
-
-        offset += GetSignatureSize(signature);
+        const auto offset{GetSignatureSize(signature) + 0x4};
         const std::span ticket{reinterpret_cast<U8 *>(&content), sizeof(content) - offset};
         file->WriteSome(ticket, offset);
         NX_ASSERT(file->GetSize() == sizeof(content));
+    }
+
+    std::array<U8, 16> Ticket::DecryptTitleKey(const std::array<U8, 16> &kek) const {
+        if (content.keytype > 1)
+            return {};
+        std::array<U8, 16> titlekey;
+        std::memcpy(titlekey.data(), content.keyblock.data(), 16);
+
+        SafeAes decrypt(ToSpan(kek), AesMode::Decryption, AesType::AesEcb128);
+        decrypt.Process(titlekey.data(), titlekey.data(), 16);
+        return titlekey;
     }
 }

@@ -6,12 +6,14 @@
 #include <loaders/types.h>
 
 namespace FastNx::Loaders {
-    class NspEs : public AppLoader {
+    class NspEs final : public AppLoader {
     public:
-        explicit NspEs(const FsSys::VfsBackingFilePtr &nspf, const std::shared_ptr<Horizon::KeySet> &keys, bool &isLoaded);
+        explicit NspEs(const FsSys::VfsBackingFilePtr &nspf, const std::shared_ptr<Horizon::KeySet> &keys, bool &isloaded);
 
+        std::vector<U8> GetLogo() override;
+        U64 GetTitleId() override;
     private:
-        std::shared_ptr<FsSys::NxFmt::PartitionFileSystem> _mainPfs;
+        std::shared_ptr<FsSys::NxFmt::PartitionFileSystem> _mainpfs;
         std::shared_ptr<FsSys::NxFmt::SubmissionPackage> subnsp;
     };
 }

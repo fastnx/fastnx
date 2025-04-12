@@ -3,7 +3,7 @@
 #include <crypto/safe_aes.h>
 
 namespace FastNx::Crypto {
-    SafeAes::SafeAes(const std::span<U8> &key, const AesMode _mode, AesType _type) {
+    SafeAes::SafeAes(const std::span<const U8> &key, const AesMode _mode, AesType _type) {
         NX_ASSERT(!key.empty());
 
         context = new mbedtls_cipher_context_t;
@@ -23,7 +23,7 @@ namespace FastNx::Crypto {
 
     void SafeAes::Setup(const U64 sector, const std::span<U8> &vector) {
         mbedtls_cipher_set_iv(context, vector.data(), vector.size());
-        if (sector % mbedtls_cipher_get_block_size(context) == 0)
+        if (sector && sector % mbedtls_cipher_get_block_size(context) == 0)
             sectorsz = sector;
     }
 
@@ -68,12 +68,13 @@ namespace FastNx::Crypto {
     U64 SafeAes::ProcessXts(U8 *dest, const U8 *source, const U64 size, const U64 starts) {
         U64 count{};
         tweak = starts / sectorsz;
+        Setup(tweak, {});
         std::array<U8, 16> thisiv;
         for (U64 offset{}; offset < size; offset += sectorsz) {
             {
                 Copy(thisiv, GetNintendoTweak(tweak));
             }
-            Setup(sectorsz, thisiv);
+            Setup(0, thisiv);
             if (const auto result{Process(dest + offset, source + offset, sectorsz)})
                 count += result;
             else break;

@@ -10,18 +10,18 @@ namespace FastNx::Crypto {
     struct TicketData {
         std::array<char, 0x40> issuer;
         std::array<U8, 0x100> keyblock;
-        U8 constant;
-        U16 version;
+        U8 constant; // Always 2 for Switch (ES) Tickets
+        U8 keytype;
+        U16 version; // Ticket Version
         U8 license;
         U8 revision;
-        U8 master;
         U16 properties;
         U64 reserved;
         U64 ticketid;
         U64 deviceid;
         RightsId rights;
         U32 accountid;
-        std::array<U8, 0x14C> reserved1;
+        std::array<U8, 0x140 + 0xC> reserved1;
     };
     static_assert(IsSizeMatch<TicketData, 0x180 + 0x140>);
 #pragma pack(pop)
@@ -43,5 +43,6 @@ namespace FastNx::Crypto {
         std::vector<U8> signature;
         TicketData content;
         void Export(const FsSys::VfsBackingFilePtr &file);
+        std::array<U8, 16> DecryptTitleKey(const std::array<U8, 16> &kek) const;
     };
 }

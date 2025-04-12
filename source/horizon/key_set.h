@@ -20,7 +20,10 @@ namespace FastNx::Horizon {
     enum class KeyIndexType : U64 {
         Undefined,
         HeaderKey,
-        Titlekek
+        Titlekek,
+        KeyAreaApplication,
+        KeyAreaOcean,
+        KeyAreaSystem
     };
     struct KeyIdentifier {
         KeyIndexType type;
@@ -55,6 +58,7 @@ namespace FastNx::Horizon {
 
         void AddTicket(const FsSys::VfsBackingFilePtr &tik);
         std::optional<std::array<U8, 16>> GetIndexableKey(KeyIndexType type, U32 index);
+        std::optional<const Crypto::Ticket *> GetTicket(const Crypto::RightsId &rights);
 
         std::optional<Crypto::Key256*> headerKey;
         bool saveall{};

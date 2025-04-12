@@ -10,10 +10,14 @@ namespace FastNx::Horizon {
     public:
         explicit SwitchNs(const std::shared_ptr<KeySet> &ks);
 
-        void LoadApplicationFile(const FsSys::VfsBackingFilePtr &appf);
+        void LoadApplicationFile(const FsSys::FsPath &apppath);
+        void GetLoaders(const std::vector<FsSys::FsPath> &apps);
 
         std::shared_ptr<KeySet> keys;
-        std::shared_ptr<Loaders::AppLoader> application;
+        std::shared_ptr<Loaders::AppLoader> application{};
+
+        std::vector<std::shared_ptr<Loaders::AppLoader>> loaders;
         std::shared_ptr<Kernel::Kernel> kernel;
+
     };
 }

@@ -51,6 +51,15 @@ namespace FastNx {
         }
         return count == values.size();
     }
+    bool StartsWith(const auto &container, const auto &values) {
+        if (container.size() > values.size())
+            return false;
+        for (const auto &[index, value]: container | std::views::enumerate) {
+            if (value != values[index])
+                return false;
+        }
+        return true;
+    }
 
 
     template<typename T>

@@ -10,10 +10,12 @@ namespace FastNx::Core {
         ~Application();
         void Initialize();
 
+        void DumpAllLogos() const;
+
         void LoadFirstPickedGame() const;
     private:
         std::shared_ptr<Assets> assets;
         std::shared_ptr<Horizon::KeySet> keys;
-        std::shared_ptr<Horizon::SwitchNs> _switch;
+        std::shared_ptr<Horizon::SwitchNs> switchnx;
     };
 }

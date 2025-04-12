@@ -163,6 +163,7 @@ namespace FastNx::FsSys::NxFmt {
         ContentType type;
         U32 version{};
         U64 size{};
+        U64 titleid{};
 
         boost::container::small_vector<std::pair<FsType, VfsBackingFilePtr>, 4> files;
         std::list<std::shared_ptr<PartitionFileSystem>> pfslist;

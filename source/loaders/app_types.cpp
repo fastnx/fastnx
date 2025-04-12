@@ -11,9 +11,9 @@ auto ProbApplicationFilename(const FastNx::FsSys::VfsBackingFilePtr &file) {
 
 namespace FastNx::Loaders {
     void AppLoader::Finish() const {
-        isLoaded = type != AppType::None;
-        if (isLoaded)
-            isLoaded = status == LoaderStatus::Success;
+        isloaded = type != AppType::None;
+        if (isloaded)
+            isloaded = status == LoaderStatus::Success;
     }
 
     AppType GetApplicationType(const FsSys::VfsBackingFilePtr &file) {

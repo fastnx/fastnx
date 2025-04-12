@@ -26,7 +26,7 @@ namespace FastNx::FsSys::NxFmt {
                 break;
             _count++;
         }
-        _files.reserve(_count);
+        files.reserve(_count);
         const auto namestable{partfs->ReadSome<char>(pfs0hd.strTableSize, _nextOffset)};
         const auto filedata{_nextOffset + namestable.size()};
 
@@ -43,29 +43,29 @@ namespace FastNx::FsSys::NxFmt {
                 return size;
             });
 
-            if (!_files.contains(filename))
-                _files.emplace(std::move(filename), FileEntryMetadata{filedata + file.offset, file.size});
+            if (!files.contains(filename))
+                files.emplace(std::move(filename), FileEntryMetadata{filedata + file.offset, file.size});
         };
 
-        std::ranges::for_each(_files, [&](const auto &file) {
+        std::ranges::for_each(files, [&](const auto &file) {
             bytesused += file.second.size;
         });
         coverage = CalculateCoverage(bytesused, partfs->GetSize());
     }
 
     std::vector<FsPath> PartitionFileSystem::ListAllFiles() const {
-        if (_files.empty())
+        if (files.empty())
             return {};
         std::vector<FsPath> result;
-        result.reserve(_files.size());
-        for (const auto &entryname: std::ranges::views::keys(_files)) {
+        result.reserve(files.size());
+        for (const auto &entryname: std::ranges::views::keys(files)) {
             result.emplace_back(entryname);
         }
         return result;
     }
 
     U64 PartitionFileSystem::GetFilesCount() const {
-        return std::min(_count, _files.size());
+        return std::min(_count, files.size());
     }
 
     VfsBackingFilePtr PartitionFileSystem::OpenFile(const FsPath &_path, const FileModeType mode) {
@@ -75,7 +75,7 @@ namespace FastNx::FsSys::NxFmt {
             return nullptr;
         NX_ASSERT(mode == FileModeType::ReadOnly);
 
-        if (const auto entry{_files.find(_path)}; entry != _files.end())
+        if (const auto entry{files.find(_path)}; entry != files.end())
             return std::make_shared<OffsetFile>(partfs, _path, entry->second.offset, entry->second.size, exists(path));
         return nullptr;
     }

@@ -42,7 +42,7 @@ namespace FastNx::FsSys::NxFmt {
 
         VfsBackingFilePtr partfs;
     private:
-        boost::container::flat_map<std::string, FileEntryMetadata> _files;
+        boost::container::flat_map<std::string, FileEntryMetadata> files;
         U64 _count{};
         U64 bytesused{}; // Byte counter used by the data of all files in this partition
     };

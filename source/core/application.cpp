@@ -6,9 +6,11 @@
 #include <common/exception.h>
 #include <common/container.h>
 #include <fs_sys/refs/editable_directory.h>
-#include <fs_sys/refs/huge_file.h>
 #include <fs_sys/refs/buffered_file.h>
 #include <common/async_logger.h>
+
+#include <horizon/nx_apps.h>
+
 #include <core/application.h>
 
 namespace FastNx::Core {
@@ -64,21 +66,33 @@ namespace FastNx::Core {
         assets->Initialize();
 
         keys = std::make_shared<Horizon::KeySet>(*assets->keys, *assets->tiks);
-        _switch = std::make_shared<Horizon::SwitchNs>(keys);
+        switchnx = std::make_shared<Horizon::SwitchNs>(keys);
+
+        switchnx->GetLoaders(assets->GetAllGames());
+    }
+
+    void Application::DumpAllLogos() const {
+        const auto logos{Horizon::GetAppsPublicLogo(switchnx)};
+        const auto temp{std::filesystem::temp_directory_path()};
+        // ReSharper disable once CppUseStructuredBinding
+        for (const auto &distpng: logos) {
+            const auto logofilename{temp / fmt::format("{:X}.jpeg", distpng.first)};
+            if (FsSys::ReFs::BufferedFile writable{logofilename, 0, FsSys::FileModeType::WriteOnly})
+                writable.WriteSome(ToSpan(distpng.second));
+        }
     }
 
     void Application::LoadFirstPickedGame() const {
-        const auto gamefile = [&]-> FsSys::VfsBackingFilePtr {
-            const auto &runnable{assets->GetAllGames()};
-            if (runnable.empty())
-                return nullptr;
+        const auto gamefile = [&] -> std::optional<FsSys::FsPath> {
+            const auto application{assets->GetAllGames().front()};
+            if (application.empty())
+                return std::nullopt;
 
-            const auto &pathdir{runnable.front()};
-            if (const auto filename{pathdir.filename()}; pathdir.has_filename())
+            if (const auto filename{application.filename()}; application.has_filename())
                 AsyncLogger::Info("Loading the game from path: {}", FsSys::GetPathStr(filename));
-            return std::make_shared<FsSys::ReFs::HugeFile>(pathdir);
+            return application;
         }();
-        if (gamefile != nullptr)
-            _switch->LoadApplicationFile(gamefile);
+        if (gamefile)
+            switchnx->LoadApplicationFile(*gamefile);
     }
 }

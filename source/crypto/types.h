@@ -7,8 +7,7 @@ namespace FastNx::Crypto {
     using RightsId = std::array<U8, 0x10>;
 
     template<U64 Bits>
-    struct SourceKey : std::array<U8, Bits / 8> {
-    };
+    struct SourceKey : std::array<U8, Bits / 8> {};
 
     template<typename T, U64 Size>
     struct ArrayHash {

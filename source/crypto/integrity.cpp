@@ -33,6 +33,6 @@ namespace FastNx::Crypto {
 
         const auto result(chk256.Finish());
         AsyncLogger::Success("SHA256 result of NCA {}, {:x}", GetPathStr(file), fmt::join(result, ""));
-        return Contains(hashsum, ToSpan(result));
+        return StartsWith(hashsum, result);
     }
 }

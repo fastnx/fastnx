@@ -18,6 +18,8 @@ target_sources(fastnx PRIVATE
     horizon/switch_ns.h
     horizon/key_set.cpp
     horizon/key_set.h
+    horizon/nx_apps.cpp
+    horizon/nx_apps.h
     common/bytes.h
     common/container.h
     common/traits.h

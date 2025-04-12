@@ -3,6 +3,52 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/externals/boost" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/algorithm" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/align" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/any" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/array" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/assert" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/bind" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/concept_check" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/config" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/container" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/container_hash" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/conversion" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/core" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/describe" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/detail" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/endian" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/exception" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/function" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/function_types" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/functional" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/fusion" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/interprocess" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/intrusive" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/io" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/iterator" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/lexical_cast" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/move" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/mp11" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/mpl" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/optional" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/predef" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/preprocessor" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/program_options" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/range" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/regex" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/smart_ptr" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/static_assert" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/throw_exception" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/tokenizer" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/tuple" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/type_index" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/type_traits" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/typeof" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/unordered" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/utility" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/libs/winapi" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/externals/boost/tools/cmake" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/externals/fmt" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/externals/mbedtls" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/externals/mbedtls/framework" vcs="Git" />
