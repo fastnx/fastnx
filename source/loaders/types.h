@@ -34,5 +34,5 @@ namespace FastNx::Loaders {
     AppType GetApplicationType(const FsSys::VfsBackingFilePtr &file);
 
     std::string AppTypeToString(AppType type);
-    std::string GetLoaderPrettyString(const std::shared_ptr<AppLoader> &app);
+    std::string GetLoaderPrettyString(const std::shared_ptr<AppLoader> &loader);
 }

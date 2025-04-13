@@ -24,7 +24,6 @@ namespace FastNx::Horizon {
     }
 
     void SwitchNs::GetLoaders(const std::vector<FsSys::FsPath> &apps) {
-
         bool isloaded{};
         for (const auto &loadable: apps) {
             if (std::filesystem::file_size(loadable) < 1_KBYTES)

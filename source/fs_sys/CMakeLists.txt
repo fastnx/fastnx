@@ -29,4 +29,6 @@ target_sources(fastnx PRIVATE
     nx_fmt/submission_package.h
     nx_fmt/content_archive.cpp
     nx_fmt/content_archive.h
+    nx_fmt/romfs.cpp
+    nx_fmt/romfs.h
 )

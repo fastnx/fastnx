@@ -33,8 +33,8 @@ namespace FastNx::Loaders {
     std::vector<U8> NspEs::GetLogo() {
         std::vector<U8> logo{};
         for (const auto &nca: subnsp->ncalist) {
-            for (const auto &partition: nca->pfslist) {
-                if (const auto logofile{partition->OpenFile("icon_AmericanEnglish.dat")})
+            for (const auto &romfs: nca->romfslist) {
+                if (const auto logofile{romfs->OpenFile("/icon_AmericanEnglish.dat")})
                     logo = ReadLogo(logofile);
 
             }

@@ -6,7 +6,7 @@
 #include <common/traits.h>
 #include <crypto/types.h>
 #include <fs_sys/nx_fmt/partition_filesystem.h>
-
+#include <fs_sys/nx_fmt/romfs.h>
 
 namespace FastNx::FsSys::NxFmt {
     // https://switchbrew.org/wiki/NCA
@@ -167,6 +167,7 @@ namespace FastNx::FsSys::NxFmt {
 
         boost::container::small_vector<std::pair<FsType, VfsBackingFilePtr>, 4> files;
         std::list<std::shared_ptr<PartitionFileSystem>> pfslist;
+        std::list<std::shared_ptr<RomFs>> romfslist;
 
         std::shared_ptr<Horizon::KeySet> keys;
         VfsBackingFilePtr ncavfs;

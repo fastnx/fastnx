@@ -49,11 +49,11 @@ namespace FastNx::FsSys {
             std::array<U8, CtrSectorSize> buffer;
             std::memmove(dest, dest + aligment, size - aligment);
 
-            if (size < CtrSectorSize) {
-                if (ReadSome(ToSpan(buffer), offset - aligment))
-                    std::memcpy(dest, buffer.data() + aligment, aligment);
-            } else if (ReadSome(ToSpan(buffer), offset - aligment + CtrSectorSize))
-                std::memcpy(dest + size - aligment, buffer.data() + aligment, aligment);
+            if (const auto slice{buffer.size() - aligment}; size < slice) {
+                if (ReadSome(ToSpan(buffer), blockoffset))
+                    std::memcpy(dest, buffer.data() + aligment, size);
+            } else if (ReadSome(ToSpan(buffer), boost::alignment::align_down(blockoffset + size, 16)))
+                std::memcpy(dest + size - aligment, buffer.data() + slice, aligment);
         }
 
         return size;

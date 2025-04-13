@@ -30,16 +30,16 @@ namespace FastNx::Loaders {
         std::unreachable();
     }
 
-    std::string GetLoaderPrettyString(const std::shared_ptr<AppLoader> &app) {
-        if (app->type == AppType::None)
+    std::string GetLoaderPrettyString(const std::shared_ptr<AppLoader> &loader) {
+        if (loader->type == AppType::None)
             return "Unknown";
-        if (app->backing == nullptr)
+        if (!loader->backing)
             return "File unavailable";
-        switch (app->status) {
+        switch (loader->status) {
             case LoaderStatus::PfsNotFound:
                 return "PFS not found";
             default:
-                return std::format("{} successfully loaded", AppTypeToString(app->type));
+                return std::format("{} successfully loaded", AppTypeToString(loader->type));
         }
     }
 }
