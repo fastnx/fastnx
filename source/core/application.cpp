@@ -75,10 +75,10 @@ namespace FastNx::Core {
         const auto logos{Horizon::GetAppsPublicLogo(switchnx)};
         const auto temp{std::filesystem::temp_directory_path()};
         // ReSharper disable once CppUseStructuredBinding
-        for (const auto &distpng: logos) {
-            const auto logofilename{temp / fmt::format("{:X}.jpeg", distpng.first)};
-            if (FsSys::ReFs::BufferedFile writable{logofilename, 0, FsSys::FileModeType::WriteOnly})
-                writable.WriteSome(ToSpan(distpng.second));
+        for (const auto &logo: logos) {
+            const auto logofilename{temp / fmt::format("{:X}.jpeg", logo.first)};
+            if (FsSys::ReFs::BufferedFile writable{logofilename, 0, FsSys::FileModeType::WriteOnly, true})
+                writable.WriteSome(ToSpan(logo.second));
         }
     }
 

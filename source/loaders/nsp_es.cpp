@@ -1,6 +1,6 @@
-#include <regex>
 #include <common/async_logger.h>
 #include <loaders/nsp_es.h>
+
 
 namespace FastNx::Loaders {
     NspEs::NspEs(const FsSys::VfsBackingFilePtr &nspf, const std::shared_ptr<Horizon::KeySet> &keys, bool &isloaded) : AppLoader(nspf, isloaded, AppType::NspEs),
@@ -22,24 +22,24 @@ namespace FastNx::Loaders {
     }
 
     std::vector<U8> ReadLogo(const FsSys::VfsBackingFilePtr &file) {
-        const auto logo{file->ReadSome(file->GetSize(), 0)};
-        const std::regex exif("Nintendo AuthoringTool");
-        const std::string content{reinterpret_cast<const char *>(logo.data()), logo.size()};
-        if (std::smatch match; std::regex_search(content, match, exif)) {
-            return logo;
+        const auto logo{file->ReadSome(file->GetSize())};
+        const std::string jpegtiff{"Nintendo AuthoringTool"};
+        static std::vector<U8> authority;
+        if (authority.empty()) {
+            authority.resize(jpegtiff.size());
+            std::memcpy(authority.data(), jpegtiff.data(), jpegtiff.size());
         }
-        return {};
+        return !std::ranges::search(logo, authority).empty() ? logo : std::vector<U8>{};
     }
     std::vector<U8> NspEs::GetLogo() {
-        std::vector<U8> logo{};
         for (const auto &nca: subnsp->ncalist) {
             for (const auto &romfs: nca->romfslist) {
                 if (const auto logofile{romfs->OpenFile("/icon_AmericanEnglish.dat")})
-                    logo = ReadLogo(logofile);
+                    return ReadLogo(logofile);
 
             }
         }
-        return logo;
+        return {};
     }
     U64 NspEs::GetTitleId() {
         return subnsp->titleid;

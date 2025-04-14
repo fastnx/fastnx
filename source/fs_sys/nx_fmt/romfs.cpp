@@ -50,14 +50,13 @@ namespace FastNx::FsSys::NxFmt {
         if (romfs->GetSize() < sizeof(RomfsHeader))
             return;
 
-        const auto romroot{romfs->Read<RomfsHeader>()};
-        if (romroot.headersize != sizeof(RomfsHeader)) {
+        const auto rootfs{romfs->Read<RomfsHeader>()};
+        if (rootfs.headersize != sizeof(RomfsHeader))
             throw exception{"Unsupported RomFs version"};
-        }
 
-        dataoffset = romroot.filedataoffset;
-        filescache = romfs->ReadSome(romroot.filemetasize, romroot.filemetaoffset);
-        dirscache = romfs->ReadSome(romroot.dirmetasize, romroot.dirmetaoffset);
+        dataoffset = rootfs.filedataoffset;
+        filescache = romfs->ReadSome(rootfs.filemetasize, rootfs.filemetaoffset);
+        dirscache = romfs->ReadSome(rootfs.dirmetasize, rootfs.dirmetaoffset);
 
         GetAllFiles("/");
 
@@ -66,7 +65,7 @@ namespace FastNx::FsSys::NxFmt {
     VfsBackingFilePtr RomFs::OpenFile(const FsPath &_path, const FileModeType mode) {
         NX_ASSERT(mode == FileModeType::ReadOnly);
         if (const auto fileit{files.find(_path)}; fileit != files.end()) {
-            if (const auto [size, offset]{fileit->second}; size)
+            if (const auto [offset, size]{fileit->second}; size)
                 return std::make_shared<OffsetFile>(backing, fileit->first, dataoffset + offset, size);
         }
         return nullptr;
