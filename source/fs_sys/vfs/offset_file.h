@@ -3,7 +3,7 @@
 #include <fs_sys/refs/huge_file.h>
 #include <fs_sys/types.h>
 
-namespace FastNx::FsSys {
+namespace FastNx::FsSys::Vfs {
     class OffsetFile final : public VfsBackingFile {
     public:
         OffsetFile(const VfsBackingFilePtr &backing, const FsPath &_path, U64 offset, U64 size, bool isHuge = {});

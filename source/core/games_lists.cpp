@@ -1,5 +1,5 @@
 #include <common/container.h>
-#include <fs_sys/refs/editable_directory.h>
+#include <fs_sys/refs/directory_file_access.h>
 #include <loaders/homefs.h>
 #include <core/assets.h>
 #include <core/games_lists.h>
@@ -18,7 +18,7 @@ namespace FastNx::Core {
             dirs.emplace_back(assets->games->path);
 
         for (const auto &gameDir: dirs) {
-            FsSys::ReFs::EditableDirectory directory{gameDir};
+            FsSys::ReFs::DirectoryFileAccess directory{gameDir};
             if (!directory)
                 continue;
 

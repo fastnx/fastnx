@@ -18,7 +18,7 @@ namespace FastNx::Core {
     }
 
     void MoveProcess(const FsSys::FsPath &target) {
-        const FsSys::ReFs::EditableDirectory directory{target, true};
+        const FsSys::ReFs::DirectoryFileAccess directory{target, true};
         NX_ASSERT(fchdir(directory.descriptor) == 0);
     }
 

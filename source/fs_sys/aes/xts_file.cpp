@@ -1,14 +1,14 @@
 #include <common/container.h>
 
-#include <fs_sys/offset_file.h>
+#include <fs_sys/vfs/offset_file.h>
 
-#include <fs_sys/xts_file.h>
+#include <fs_sys/aes/xts_file.h>
 
-namespace FastNx::FsSys {
+namespace FastNx::FsSys::Aes {
     XtsFile::XtsFile(const VfsBackingFilePtr &file, const Crypto::Key256 &key, const U64 starts, const U64 size) : VfsBackingFile(file->path) {
         encfile = [&] -> VfsBackingFilePtr {
             if (starts && size)
-                return std::make_shared<OffsetFile>(file, file->path, starts, size);
+                return std::make_shared<Vfs::OffsetFile>(file, file->path, starts, size);
             return file;
         }();
         std::vector<U8> tweakbytes(sizeof(key));

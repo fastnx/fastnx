@@ -7,10 +7,10 @@
 #include <common/container.h>
 #include <common/exception.h>
 #include <common/async_logger.h>
-#include <fs_sys/regex_file.h>
+#include <fs_sys/vfs/regex_file.h>
 
 
-namespace FastNx::FsSys {
+namespace FastNx::FsSys::Vfs {
     RegexFile::RegexFile(const VfsBackingFilePtr &_file, const std::string &pattern): VfsBackingFile(_file->path), file(_file) {
         NX_ASSERT(file && !pattern.empty());
         try {

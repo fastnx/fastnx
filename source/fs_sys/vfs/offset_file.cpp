@@ -1,11 +1,10 @@
-#include <fs_sys/offset_file.h>
+#include <fs_sys/vfs/offset_file.h>
 
-namespace FastNx::FsSys {
+namespace FastNx::FsSys::Vfs {
     OffsetFile::OffsetFile(const VfsBackingFilePtr &backing, const FsPath &_path, const U64 offset, const U64 size, const bool isHuge) : VfsBackingFile(_path), size(size), begin(offset), _source(backing) {
         eof = offset + size;
         if (isHuge)
             hugefs = std::dynamic_pointer_cast<ReFs::HugeFile>(backing);
-
         NX_ASSERT(*this);
     }
 
@@ -18,7 +17,6 @@ namespace FastNx::FsSys {
             return std::min(_source->GetSize(), eof - begin);
         return size;
     }
-
     U64 OffsetFile::ReadTypeImpl(U8 *dest, const U64 size, const U64 offset) {
         if (begin + offset + size > eof)
             return {};

@@ -6,7 +6,7 @@
 #include <fmt/chrono.h>
 #include <boost/algorithm/string.hpp>
 
-#include <fs_sys/standard_file.h>
+#include <fs_sys/vfs/standard_file.h>
 #include <fs_sys/refs/buffered_file.h>
 #include <common/async_logger.h>
 
@@ -21,7 +21,7 @@ namespace FastNx {
         return ptrace(PTRACE_TRACEME, 0, nullptr, nullptr) < 0;
     }
 
-    std::shared_ptr<AsyncLogger> BuildAsyncLogger(FsSys::ReFs::EditableDirectory *logdir) {
+    std::shared_ptr<AsyncLogger> BuildAsyncLogger(FsSys::ReFs::DirectoryFileAccess *logdir) {
         logger = [&] -> std::shared_ptr<AsyncLogger> {
             if (!logdir || IsDebuggerPresent())
                 return std::make_shared<AsyncLogger>(std::cout, 4); // Only streams valid for the lifetime of the process are valid here
@@ -36,7 +36,7 @@ namespace FastNx {
     }
 
     AsyncLogger::AsyncLogger(std::ostream &output, const U64 size) :
-        threshold(size), backing(std::make_shared<FsSys::StandardFile>(output)) {}
+        threshold(size), backing(std::make_shared<FsSys::Vfs::StandardFile>(output)) {}
 
     AsyncLogger::AsyncLogger(const FsSys::VfsBackingFilePtr &file, const U64 size) : threshold(size), backing(file) {}
 

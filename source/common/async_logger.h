@@ -7,7 +7,7 @@
 #include <fs_sys/types.h>
 #include <common/types.h>
 
-#include <fs_sys/refs/editable_directory.h>
+#include <fs_sys/refs/directory_file_access.h>
 
 namespace FastNx {
     enum class LogType {
@@ -66,5 +66,5 @@ namespace FastNx {
         std::shared_mutex lock;
     };
 
-    std::shared_ptr<AsyncLogger> BuildAsyncLogger(FsSys::ReFs::EditableDirectory *logdir = {});
+    std::shared_ptr<AsyncLogger> BuildAsyncLogger(FsSys::ReFs::DirectoryFileAccess *logdir = {});
 }

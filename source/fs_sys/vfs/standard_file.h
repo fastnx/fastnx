@@ -2,7 +2,7 @@
 
 #include <common/types.h>
 #include <fs_sys/types.h>
-namespace FastNx::FsSys {
+namespace FastNx::FsSys::Vfs {
     class StandardFile final : public VfsBackingFile {
     public:
         explicit StandardFile(std::ostream& stream);

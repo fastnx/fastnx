@@ -1,6 +1,6 @@
 
 #include <common/exception.h>
-#include <fs_sys/offset_file.h>
+#include <fs_sys/vfs/offset_file.h>
 #include <fs_sys/nx_fmt/romfs.h>
 
 
@@ -66,7 +66,7 @@ namespace FastNx::FsSys::NxFmt {
         NX_ASSERT(mode == FileModeType::ReadOnly);
         if (const auto fileit{files.find(_path)}; fileit != files.end()) {
             if (const auto [offset, size]{fileit->second}; size)
-                return std::make_shared<OffsetFile>(backing, fileit->first, dataoffset + offset, size);
+                return std::make_shared<Vfs::OffsetFile>(backing, fileit->first, dataoffset + offset, size);
         }
         return nullptr;
     }

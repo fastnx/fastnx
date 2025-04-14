@@ -1,7 +1,7 @@
 #pragma once
 
 #include <fs_sys/types.h>
-namespace FastNx::FsSys {
+namespace FastNx::FsSys::Vfs {
     class RegexFile final : public VfsBackingFile {
     public:
         explicit RegexFile(const VfsBackingFilePtr &_file, const std::string &pattern);

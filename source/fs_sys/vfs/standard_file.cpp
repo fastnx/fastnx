@@ -1,6 +1,6 @@
-#include <fs_sys/standard_file.h>
+#include <fs_sys/vfs/standard_file.h>
 
-namespace FastNx::FsSys {
+namespace FastNx::FsSys::Vfs {
     StandardFile::StandardFile(std::ostream &stream) : VfsBackingFile("vfs", FileModeType::WriteOnly), outstr(stream) {}
 
     StandardFile::operator bool() const {

@@ -1,11 +1,11 @@
 #include <common/container.h>
-#include <fs_sys/refs/editable_directory.h>
+#include <fs_sys/refs/directory_file_access.h>
 #include <loaders/homefs.h>
 
 namespace FastNx::Loaders {
     bool IsHomebrewFsDirectory(const FsSys::FsPath &dirfs) {
         NX_ASSERT(is_directory(dirfs));
-        const FsSys::ReFs::EditableDirectory directory{dirfs};
+        const FsSys::ReFs::DirectoryFileAccess directory{dirfs};
 
         const auto content{directory.ListAllFiles()};
         I32 version{};

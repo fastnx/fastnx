@@ -7,18 +7,18 @@ target_sources(fastnx PRIVATE
     fullpath.cpp
     filters.cpp
     match.cpp
-    regex_file.cpp
-    regex_file.h
-    offset_file.cpp
-    offset_file.h
-    xts_file.cpp
-    xts_file.h
-    ctr_file.cpp
-    ctr_file.h
-    standard_file.cpp
-    standard_file.h
-    refs/editable_directory.cpp
-    refs/editable_directory.h
+    vfs/regex_file.cpp
+    vfs/regex_file.h
+    vfs/offset_file.cpp
+    vfs/offset_file.h
+    vfs/standard_file.cpp
+    vfs/standard_file.h
+    aes/xts_file.cpp
+    aes/xts_file.h
+    aes/ctr_file.cpp
+    aes/ctr_file.h
+    refs/directory_file_access.cpp
+    refs/directory_file_access.h
     refs/buffered_file.cpp
     refs/buffered_file.h
     refs/huge_file.cpp

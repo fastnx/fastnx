@@ -2,7 +2,7 @@
 
 #include <common/container.h>
 #include <common/values.h>
-#include <fs_sys/offset_file.h>
+#include <fs_sys/vfs/offset_file.h>
 #include <fs_sys/nx_fmt/partition_filesystem.h>
 
 
@@ -78,7 +78,7 @@ namespace FastNx::FsSys::NxFmt {
         NX_ASSERT(mode == FileModeType::ReadOnly);
 
         if (const auto entry{files.find(_path)}; entry != files.end())
-            return std::make_shared<OffsetFile>(partfs, _path, entry->second.offset, entry->second.size, exists(path));
+            return std::make_shared<Vfs::OffsetFile>(partfs, _path, entry->second.offset, entry->second.size, exists(path));
         return nullptr;
     }
 

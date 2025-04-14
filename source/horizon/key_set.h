@@ -1,6 +1,6 @@
 #pragma once
 #include <unordered_map>
-#include <fs_sys/refs/editable_directory.h>
+#include <fs_sys/refs/directory_file_access.h>
 
 #include <crypto/ticket.h>
 #include <crypto/types.h>
@@ -49,7 +49,7 @@ namespace FastNx::Horizon {
 
     class KeySet {
     public:
-        explicit KeySet(FsSys::ReFs::EditableDirectory &dirKeys, FsSys::ReFs::EditableDirectory &dirTiks);
+        explicit KeySet(FsSys::ReFs::DirectoryFileAccess &dirKeys, FsSys::ReFs::DirectoryFileAccess &dirTiks);
 
         void ParserKeys(std::vector<std::string> &&pairs, KeyType type);
 
@@ -72,6 +72,6 @@ namespace FastNx::Horizon {
 
         std::vector<std::string> keyring; // <- Store the keys to avoid unnecessary allocations
 
-        FsSys::ReFs::EditableDirectory &tiks;
+        FsSys::ReFs::DirectoryFileAccess &tiks;
     };
 }

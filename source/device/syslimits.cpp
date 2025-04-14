@@ -9,7 +9,7 @@
 #endif
 
 #include <device/capabilities.h>
-#include <fs_sys/refs/editable_directory.h>
+#include <fs_sys/refs/directory_file_access.h>
 #include <fs_sys/refs/buffered_file.h>
 
 FastNx::U64 FastNx::Device::GetCoresCount() {
@@ -22,7 +22,7 @@ FastNx::U64 FastNx::Device::GetCoresCount() {
     }
     NX_ASSERT(count == threads);
 
-    if (const FsSys::ReFs::EditableDirectory cores{"/sys/devices/system/cpu"}) {
+    if (const FsSys::ReFs::DirectoryFileAccess cores{"/sys/devices/system/cpu"}) {
         const auto cpus{cores.GlobAllFiles("cpu*")};
         I32 threadable{};
         for (const auto &cpuef: cpus)

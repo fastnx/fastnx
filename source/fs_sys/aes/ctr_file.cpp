@@ -4,16 +4,16 @@
 #include <boost/container/small_vector.hpp>
 
 #include <common/container.h>
-#include <fs_sys/offset_file.h>
-#include <fs_sys/ctr_file.h>
+#include <fs_sys/vfs/offset_file.h>
+#include <fs_sys/aes/ctr_file.h>
 
-namespace FastNx::FsSys {
+namespace FastNx::FsSys::Aes {
     constexpr auto CtrSectorSize{16};
 
     CtrFile::CtrFile(const VfsBackingFilePtr &file, const Crypto::Key128 &key, const std::array<U8, 16> &iv, const U64 starts, const U64 size) : VfsBackingFile(file->path), ctr(iv) {
         encfile = [&] -> VfsBackingFilePtr {
             if (starts && size)
-                return std::make_shared<OffsetFile>(file, file->path, starts, size);
+                return std::make_shared<Vfs::OffsetFile>(file, file->path, starts, size);
             return file;
         }();
         ctroffset = starts / CtrSectorSize;

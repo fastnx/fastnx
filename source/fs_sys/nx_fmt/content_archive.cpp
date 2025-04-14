@@ -5,9 +5,10 @@
 #include <common/values.h>
 #include <common/async_logger.h>
 #include <horizon/key_set.h>
-#include <fs_sys/xts_file.h>
-#include <fs_sys/ctr_file.h>
-#include <fs_sys/offset_file.h>
+
+#include <fs_sys/aes/xts_file.h>
+#include <fs_sys/aes/ctr_file.h>
+#include <fs_sys/vfs/offset_file.h>
 
 #include <crypto/types.h>
 #include <fs_sys/nx_fmt/content_archive.h>
@@ -35,7 +36,7 @@ namespace FastNx::FsSys::NxFmt {
                 return std::move(nca);
             if (!keys->headerKey)
                 throw exception{"Header key not found"};
-            const auto xts = std::make_shared<XtsFile>(std::move(nca), *keys->headerKey.value());
+            const auto xts = std::make_shared<Aes::XtsFile>(std::move(nca), *keys->headerKey.value());
             content = xts->Read<NcaHeader>();
             return xts;
         }();
@@ -180,18 +181,18 @@ namespace FastNx::FsSys::NxFmt {
                 return nullptr;
 
             std::array<U8, 16> counter{};
-            const auto ncafile{encrypted ? std::dynamic_pointer_cast<XtsFile>(ncavfs)->encfile : ncavfs};
+            const auto ncafile{encrypted ? std::dynamic_pointer_cast<Aes::XtsFile>(ncavfs)->encfile : ncavfs};
 
             switch (fsheader.encryptionType) {
                 case EncryptionType::AesCtr: [[fallthrough]];
                 case EncryptionType::AesCtrEx:
                     GetCtr(counter, fsheader);
 
-                    return std::make_shared<CtrFile>(ncafile, static_cast<const Crypto::Key128 &>(*decryptkey), counter, fileoffset, filesize);
+                    return std::make_shared<Aes::CtrFile>(ncafile, static_cast<const Crypto::Key128 &>(*decryptkey), counter, fileoffset, filesize);
                 case EncryptionType::AesXts:
-                    return std::make_shared<XtsFile>(ncafile, Crypto::Key256{}, fileoffset, filesize);
+                    return std::make_shared<Aes::XtsFile>(ncafile, Crypto::Key256{}, fileoffset, filesize);
                 default:
-                    return std::make_shared<OffsetFile>(ncafile, ncafile->path, fileoffset, filesize);
+                    return std::make_shared<Vfs::OffsetFile>(ncafile, ncafile->path, fileoffset, filesize);
             }
         }();
 

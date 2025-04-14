@@ -5,10 +5,10 @@
 
 
 namespace FastNx::FsSys::ReFs {
-    class EditableDirectory final : public VfsBackingDirectory {
+    class DirectoryFileAccess final : public VfsBackingDirectory {
     public:
-        explicit EditableDirectory(const FsPath &_path, bool create = {});
-        ~EditableDirectory() override;
+        explicit DirectoryFileAccess(const FsPath &_path, bool create = {});
+        ~DirectoryFileAccess() override;
 
         std::vector<FsPath> ListAllFiles() const override;
         std::vector<FsPath> ListAllTopLevelFiles() const override;

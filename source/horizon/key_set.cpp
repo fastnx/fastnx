@@ -7,7 +7,7 @@
 #include <common/exception.h>
 #include <common/async_logger.h>
 #include <common/bytes.h>
-#include <fs_sys/regex_file.h>
+#include <fs_sys/vfs/regex_file.h>
 #include <horizon/key_set.h>
 
 
@@ -22,7 +22,7 @@ namespace FastNx::Horizon {
         return {};
     }
 
-    KeySet::KeySet(FsSys::ReFs::EditableDirectory &dirKeys, FsSys::ReFs::EditableDirectory &dirTiks) : tiks(dirTiks) {
+    KeySet::KeySet(FsSys::ReFs::DirectoryFileAccess &dirKeys, FsSys::ReFs::DirectoryFileAccess &dirTiks) : tiks(dirTiks) {
         if (dirKeys.GetFilesCount() < 2)
             return;
         const auto keys{dirKeys.GlobAllFiles("*.keys")};
@@ -38,7 +38,7 @@ namespace FastNx::Horizon {
                     return "^[a-fA-F0-9]{32}\\s*=\\s*[a-fA-F0-9]{32}$";
                 }();
 
-                if (const auto kfile{std::make_shared<FsSys::RegexFile>(std::move(keyfile), pattern)}; *kfile)
+                if (const auto kfile{std::make_shared<FsSys::Vfs::RegexFile>(std::move(keyfile), pattern)}; *kfile)
                     ParserKeys(kfile->GetAllMatches(), _ktype);
             }
         }

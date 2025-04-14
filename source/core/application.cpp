@@ -5,7 +5,7 @@
 
 #include <common/exception.h>
 #include <common/container.h>
-#include <fs_sys/refs/editable_directory.h>
+#include <fs_sys/refs/directory_file_access.h>
 #include <fs_sys/refs/buffered_file.h>
 #include <common/async_logger.h>
 
@@ -25,7 +25,7 @@ namespace FastNx::Core {
     Application::Application() {
         std::optional<std::string> osname;
 #if defined(__linux__)
-        FsSys::ReFs::EditableDirectory release{"/etc"};
+        FsSys::ReFs::DirectoryFileAccess release{"/etc"};
         if (const auto files{release.GlobAllFiles("*-release")}; !files.empty()) {
             osname.emplace(release.OpenFile(files.back())->ReadLine());
         }
@@ -45,7 +45,7 @@ namespace FastNx::Core {
     void Application::Initialize() {
         std::vector<std::pair<I32, std::string>> _procs;
         _procs.reserve(200);
-        if (const FsSys::ReFs::EditableDirectory procsdir{"/proc"}) {
+        if (const FsSys::ReFs::DirectoryFileAccess procsdir{"/proc"}) {
             for (const auto &proc: procsdir.ListAllTopLevelFiles()) {
                 const auto &_pathpid{FsSys::GetPathStr(proc)};
                 if (const auto &pidstr{_pathpid.substr(_pathpid.find_last_of('/') + 1)}; isdigit(pidstr.front()))

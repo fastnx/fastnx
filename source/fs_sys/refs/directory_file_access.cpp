@@ -6,11 +6,11 @@
 #include <common/container.h>
 #include <fs_sys/refs/buffered_file.h>
 #include <fs_sys/refs/huge_file.h>
-#include <fs_sys/refs/editable_directory.h>
+#include <fs_sys/refs/directory_file_access.h>
 
 namespace FastNx::FsSys::ReFs {
 
-    EditableDirectory::EditableDirectory(const FsPath &_path, const bool create) : VfsBackingDirectory(_path) {
+    DirectoryFileAccess::DirectoryFileAccess(const FsPath &_path, const bool create) : VfsBackingDirectory(_path) {
         if (create && !exists(path))
             if (!create_directories(path))
                 return;
@@ -20,12 +20,12 @@ namespace FastNx::FsSys::ReFs {
             descriptor = open(GetDataArray(dirpath), O_DIRECTORY);
     }
 
-    EditableDirectory::~EditableDirectory() {
+    DirectoryFileAccess::~DirectoryFileAccess() {
         if (descriptor != -1)
             close(descriptor);
     }
 
-    std::vector<FsPath> EditableDirectory::ListAllFiles() const {
+    std::vector<FsPath> DirectoryFileAccess::ListAllFiles() const {
         std::vector<FsPath> filepaths;
         for (const auto &folders: ArrayOf<FsPath>("/etc")) {
             if (path == folders)
@@ -35,7 +35,7 @@ namespace FastNx::FsSys::ReFs {
             filepaths.reserve(GetFilesCount());
         using FsDir = std::filesystem::directory_entry;
         std::function<void(const FsDir &)> ForeachAllFiles = [&](const FsDir &entry) {
-            if (const EditableDirectory directory{entry}; !directory)
+            if (const DirectoryFileAccess directory{entry}; !directory)
                 return;
 
             for (std::filesystem::directory_iterator treewalk{entry}; treewalk != decltype(treewalk){}; ++treewalk) {
@@ -53,7 +53,7 @@ namespace FastNx::FsSys::ReFs {
         return filepaths;
     }
 
-    std::vector<FsPath> EditableDirectory::ListAllTopLevelFiles() const {
+    std::vector<FsPath> DirectoryFileAccess::ListAllTopLevelFiles() const {
         std::filesystem::directory_iterator treewalk{path};
         std::vector<FsPath> files;
 
@@ -63,7 +63,7 @@ namespace FastNx::FsSys::ReFs {
         }
         return files;
     }
-    U64 EditableDirectory::GetFilesCount() const {
+    U64 DirectoryFileAccess::GetFilesCount() const {
         U64 result{};
         for (const std::filesystem::recursive_directory_iterator walker{path}; const auto &file: walker)
             if (file.is_regular_file())
@@ -71,7 +71,7 @@ namespace FastNx::FsSys::ReFs {
         return result;
     }
 
-    EditableDirectory::operator bool() const {
+    DirectoryFileAccess::operator bool() const {
         if (!exists(path))
             return {};
         const auto _directory{status(path)};
@@ -88,7 +88,7 @@ namespace FastNx::FsSys::ReFs {
         return true;
     }
 
-    VfsBackingFilePtr EditableDirectory::OpenFile(const FsPath &_path, const FileModeType mode) {
+    VfsBackingFilePtr DirectoryFileAccess::OpenFile(const FsPath &_path, const FileModeType mode) {
         const auto create{mode != FileModeType::ReadOnly};
         const FsPath openpath = [&] {
             if (_path.has_parent_path())
