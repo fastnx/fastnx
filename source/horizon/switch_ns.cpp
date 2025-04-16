@@ -13,7 +13,7 @@ namespace FastNx::Horizon {
 
     void SwitchNs::LoadApplicationFile(const FsSys::FsPath &apppath) {
         const auto apploader{std::ranges::find_if(loaders, [&](const auto &loader) {
-            if (FsSys::GetPathStr(loader->backing) == FsSys::GetPathStr(apppath))
+            if (FsSys::GetPathStr(loader->backing) == apppath)
                 return true;
             return false;
         })};

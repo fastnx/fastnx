@@ -101,7 +101,9 @@ namespace FastNx::FsSys::ReFs {
     U64 BufferedFile::WriteTypeImpl(const U8 *source, const U64 size, const U64 offset) {
         if (offset >= valid && start + valid < offset + size) {
             valid = start = {};
-            std::ranges::fill(buffer, '\0'); // Invalidation of our internal buffer
+#if !NDEBUG
+            std::memset(buffer.data(), 0, buffer.size()); // Invalidation of our internal buffer
+#endif
         }
         if (size > buffer.size()) {
             buffer.resize(size);

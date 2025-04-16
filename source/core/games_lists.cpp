@@ -1,6 +1,6 @@
 #include <common/container.h>
 #include <fs_sys/refs/directory_file_access.h>
-#include <loaders/homefs.h>
+#include <loaders/application_directory.h>
 #include <core/assets.h>
 #include <core/games_lists.h>
 
@@ -35,8 +35,8 @@ namespace FastNx::Core {
     bool GamesLists::AddTypedGame(const FsSys::FsPath &gamefiles) {
         GamePathType _type{};
         if (is_directory(gamefiles)) {
-            if (Loaders::IsHomebrewFsDirectory(gamefiles))
-                _type = GamePathType::HomebrewFs;
+            if (Loaders::IsApplicationDirectory(gamefiles))
+                _type = GamePathType::ApplicationDirectory;
         } else {
             if (gamefiles.extension() == ".xci")
                 _type = GamePathType::Card;

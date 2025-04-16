@@ -57,7 +57,7 @@ namespace FastNx::FsSys::Aes {
             if (size < CtrSectorSize - aligment) {
                 if (ReadSome(ToSpan(buffer), blockoffset))
                     std::memcpy(dest, buffer.data() + aligment, size);
-            } else if (ReadSome(ToSpan(buffer), boost::alignment::align_down(blockoffset + size, 16)))
+            } else if (ReadSome(ToSpan(buffer), blockoffset + size - slice))
                 std::memcpy(dest + size - aligment, buffer.data() + slice, aligment);
         }
 

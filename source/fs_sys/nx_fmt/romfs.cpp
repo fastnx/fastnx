@@ -58,7 +58,7 @@ namespace FastNx::FsSys::NxFmt {
         filescache = romfs->ReadSome(rootfs.filemetasize, rootfs.filemetaoffset);
         dirscache = romfs->ReadSome(rootfs.dirmetasize, rootfs.dirmetaoffset);
 
-        GetAllFiles("/");
+        GetAllFiles();
 
     }
 

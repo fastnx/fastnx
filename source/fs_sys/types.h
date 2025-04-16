@@ -10,7 +10,6 @@
 
 namespace FastNx::FsSys {
     using FsPath = std::filesystem::path;
-    class SolidDirectory;
 
     enum class FileModeType {
         ReadOnly,
@@ -66,7 +65,7 @@ namespace FastNx::FsSys {
         FileModeType mode;
 
         template<bool Read>
-        U64 PerformSafeIo(auto *data, const U64 size, const U64 offset) {
+        U64 ReadOrWrite(auto *data, const U64 size, const U64 offset) {
             const auto priviledge = [&] -> bool {
                 if (mode == FileModeType::ReadWrite)
                     return true;
@@ -76,7 +75,7 @@ namespace FastNx::FsSys {
                 if (mode == FileModeType::WriteOnly && !Read)
                     return true;
 
-                throw std::logic_error("Unsupported file access mode");
+                throw std::logic_error{"Unsupported file access mode"};
             }();
             if (!priviledge)
                 return {};
@@ -90,15 +89,15 @@ namespace FastNx::FsSys {
         }
         template<typename T> requires (sizeof(T) == 1)
         U64 ReadType(T *dest, const U64 size, const U64 offset) {
-            return PerformSafeIo<true>(reinterpret_cast<U8*>(dest), size, offset);
+            return ReadOrWrite<true>(reinterpret_cast<U8* >(dest), size, offset);
         }
         template<typename T> requires (sizeof(T) == 1)
         U64 WriteType(const T *source, const U64 size, const U64 offset) {
-            return PerformSafeIo<false>(reinterpret_cast<const U8*>(source), size, offset);
+            return ReadOrWrite<false>(reinterpret_cast<const U8* >(source), size, offset);
         }
     private:
         virtual U64 ReadTypeImpl(U8 *dest, U64 size, U64 offset) = 0;
-        virtual U64 WriteTypeImpl(const U8* source, U64 size, U64 offset) = 0;
+        virtual U64 WriteTypeImpl(const U8 *source, U64 size, U64 offset) = 0;
     };
 
     using VfsBackingFilePtr = std::shared_ptr<VfsBackingFile>;
@@ -119,12 +118,12 @@ namespace FastNx::FsSys {
         }
         FsPath path;
     };
-    using VfsReadOnlyDirectoryPtr = std::shared_ptr<VfsReadOnlyDirectory>;
 
     class VfsBackingDirectory : public VfsReadOnlyDirectory {
     public:
         explicit VfsBackingDirectory(const FsPath &_path) : VfsReadOnlyDirectory(_path) {}
     };
+    using VfsReadOnlyDirectoryPtr = std::shared_ptr<VfsReadOnlyDirectory>;
 
     I32 ModeToNative(FileModeType type);
     std::optional<FsPath> GetFullPath(const FsPath &_path);

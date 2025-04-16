@@ -27,10 +27,16 @@ namespace FastNx {
     using U64 = std::uint64_t;
     using F64 = double;
 
-    constexpr std::string process{"fastnx"};
+    constexpr std::string_view process{"fastnx"};
 
     constexpr auto EnumRange(const auto front, const auto back) {
-        return std::views::iota(std::to_underlying(front), std::to_underlying(back) + 1) | std::views::transform([](std::underlying_type_t<decltype(front)> _val) -> decltype(auto) { return static_cast<decltype(front)>(_val); });
+        using Type = std::underlying_type_t<decltype(front)>;
+        const auto first{static_cast<Type>(std::to_underlying(front))};
+        const auto last{static_cast<Type>(std::to_underlying(back) + 1)};
+
+        return std::views::iota(first, last) | std::views::transform([](typeof(first) eval) -> decltype(auto) {
+            return static_cast<decltype(front)>(eval);
+        });
     }
     constexpr U64 operator"" _KBYTES(const long long unsigned size) {
         NX_ASSERT(size);

@@ -7,7 +7,7 @@ namespace FastNx::Core {
     enum class GamePathType {
         Unrecognized,
         Homebrew,
-        HomebrewFs,
+        ApplicationDirectory,
         Card,
         Shop
     };

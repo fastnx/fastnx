@@ -10,10 +10,8 @@ target_sources(fastnx PRIVATE
     loaders/nsp_es.h
     loaders/app_types.cpp
     loaders/types.h
-    loaders/homefs.cpp
-    loaders/homefs.h
-    loaders/gamefs.cpp
-    loaders/gamefs.h
+    loaders/application_directory.cpp
+    loaders/application_directory.h
     horizon/switch_ns.cpp
     horizon/switch_ns.h
     horizon/key_set.cpp

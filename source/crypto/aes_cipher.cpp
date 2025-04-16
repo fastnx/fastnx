@@ -36,13 +36,13 @@ namespace FastNx::Crypto {
             return auxbuffer.data();
         }();
 
-        const bool isEcb{mbedtls_cipher_get_type(context) == MBEDTLS_CIPHER_AES_128_ECB};
         NX_ASSERT(mbedtls_cipher_reset(context) == 0);
 
-        U64 processed{};
-        for (U64 outsize{}; processed < size && isEcb; ) {
-            mbedtls_cipher_update(context, source + processed, 16, destination + processed, &outsize);
-            processed += outsize;
+        U64 processed{}, throughput{};
+        if (mbedtls_cipher_get_type(context) == MBEDTLS_CIPHER_AES_128_ECB) {
+            for (; processed < size; processed += throughput)
+                mbedtls_cipher_update(context, source + processed, 16, destination + processed, &throughput);
+            processed += size;
         }
 
         for (U64 output{}; processed < size; ) {

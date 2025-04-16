@@ -53,7 +53,7 @@ namespace FastNx::FsSys::NxFmt {
 
     private:
         void TouchFiles(const FsPath &dirname, U64 offset = 0);
-        void GetAllFiles(const FsPath &dirname, U64 offset = 0);
+        void GetAllFiles(const FsPath &dirname = {}, U64 offset = 0);
 
         template<typename T>
         auto GetType(const U64 offset) -> const T* {

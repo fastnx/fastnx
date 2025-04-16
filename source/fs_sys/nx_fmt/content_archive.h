@@ -8,20 +8,15 @@
 #include <fs_sys/nx_fmt/partition_filesystem.h>
 #include <fs_sys/nx_fmt/romfs.h>
 
+#include <fs_sys/cnmt.h>
+
 namespace FastNx::FsSys::NxFmt {
     // https://switchbrew.org/wiki/NCA
     enum class DistributionType : U8 {
         Download, // NSP
         GameCard // XCI
     };
-    enum class ContentType : U8 {
-        Program,
-        Meta,
-        Control,
-        Manual,
-        Data,
-        PublicData
-    };
+
     enum class KeyGenerationOld : U8 {
         Gen100,
         GenUnused,

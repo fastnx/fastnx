@@ -1,12 +1,17 @@
-#include <algorithm>
-
-#include <common/async_logger.h>
 #include <loaders/gamefs.h>
-namespace FastNx::Loaders {
-    GameFileSystem::GameFileSystem(const FsSys::VfsReadOnlyDirectoryPtr &romdir, const std::vector<ContentEnumerate> &enums) {
-        NX_ASSERT(romdir->GetFilesCount());
-        std::ranges::for_each(enums, [](const auto &files) {
-            AsyncLogger::Info("{}", FsSys::GetPathStr(files.first));
-        });
-    }
+
+FastNx::Loaders::GameFs::GameFs(const FsSys::VfsReadOnlyDirectoryPtr &files, bool &isloaded) : AppLoader(nullptr, isloaded, AppType::GameFilesystem) {
+
+    std::vector<FsSys::ContentEnumerate> metafiles;
+    if (!files->OpenFile("autofiles.txt"))
+        return;
+
+    nextloader = std::make_shared<ApplicationDirectory>(files);
+}
+
+std::vector<FastNx::U8> FastNx::Loaders::GameFs::GetLogo() {
+    return {};
+}
+FastNx::U64 FastNx::Loaders::GameFs::GetTitleId() {
+    return {};
 }

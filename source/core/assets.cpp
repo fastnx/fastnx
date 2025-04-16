@@ -36,7 +36,7 @@ namespace FastNx::Core {
 
     std::vector<FsSys::FsPath> Assets::GetAllGames() const {
         std::vector<FsSys::FsPath> result;
-        NX_ASSERT(EnumRange(GamePathType::HomebrewFs, GamePathType::Card).front());
+        NX_ASSERT(EnumRange(GamePathType::ApplicationDirectory, GamePathType::Card).front());
 
         for (const auto _type: EnumRange(GamePathType::Homebrew, GamePathType::Shop)) {
             if (const auto _titles{gamesLists->GetAllGamesPaths(_type)}; !_titles.empty())

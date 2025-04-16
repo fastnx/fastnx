@@ -73,7 +73,7 @@ I32 main(const I32 argc, const char **argv) {
 
     if (const auto application{std::make_shared<Core::Application>()}) {
         application->Initialize();
-        application->DumpAllLogos();
+        // application->DumpAllLogos();
         application->LoadFirstPickedGame();
     }
 

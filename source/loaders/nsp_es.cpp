@@ -31,10 +31,11 @@ namespace FastNx::Loaders {
         }
         return !std::ranges::search(logo, authority).empty() ? logo : std::vector<U8>{};
     }
+
     std::vector<U8> NspEs::GetLogo() {
-        for (const auto &nca: subnsp->ncalist) {
+        if (const auto &nca{subnsp->GetContentNca(FsSys::LogoType)}) {
             for (const auto &romfs: nca->romfslist) {
-                if (const auto logofile{romfs->OpenFile("/icon_AmericanEnglish.dat")})
+                if (const auto logofile{romfs->OpenFile("icon_AmericanEnglish.dat")})
                     return ReadLogo(logofile);
 
             }

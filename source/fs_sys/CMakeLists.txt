@@ -7,6 +7,10 @@ target_sources(fastnx PRIVATE
     fullpath.cpp
     filters.cpp
     match.cpp
+    cnmt.cpp
+    cnmt.h
+    linkable_directory.cpp
+    linkable_directory.h
     vfs/regex_file.cpp
     vfs/regex_file.h
     vfs/offset_file.cpp

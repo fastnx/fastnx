@@ -5,7 +5,8 @@
 namespace FastNx::Loaders {
     enum class AppType {
         None,
-        NspEs
+        NspEs,
+        GameFilesystem
     };
 
     enum class LoaderStatus {
