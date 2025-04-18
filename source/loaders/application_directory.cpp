@@ -5,10 +5,12 @@
 
 #include <common/container.h>
 #include <common/async_logger.h>
+#include <common/exception.h>
 #include <fs_sys/refs/directory_file_access.h>
 #include <fs_sys/refs/buffered_file.h>
 
 #include <loaders/application_directory.h>
+
 
 
 namespace FastNx::Loaders {
@@ -17,7 +19,7 @@ namespace FastNx::Loaders {
         // "version.txt", "autofiles.txt"
         return std::ranges::includes(files, appfiles);
     }
-    ApplicationDirectory::ApplicationDirectory(const FsSys::VfsReadOnlyDirectoryPtr &content, std::vector<FsSys::ContentEnumerate> &&metadata) : appdir(content), cenum(std::move(metadata)) {
+    ApplicationDirectory::ApplicationDirectory(const FsSys::VfsReadOnlyDirectoryPtr &content, std::vector<FsSys::ContentEnumerate> &&metadata) : appdir(content), contentenum(std::move(metadata)) {
         if (!content->GetFilesCount())
             return;
         if (!ValidDirectoryFiles(content->ListAllFiles()))
@@ -63,10 +65,10 @@ namespace FastNx::Loaders {
             return;
 
         const auto autofiles{files->OpenFile("autofiles.txt")};
-        cenum.reserve(files->GetFilesCount());
+        contentenum.reserve(files->GetFilesCount());
         if (const auto line{autofiles->ReadLine()}; !line.empty())
             if (const auto _type{GetType(line)}; _type.first != FsSys::ContentMetaType::Invalid)
-                cenum.emplace_back(line.substr(line.find(';') + 1, line.size()),  _type);
+                contentenum.emplace_back(line.substr(line.find(';') + 1, line.size()),  _type);
     }
 
     void ApplicationDirectory::ExtractAllFiles() const {
@@ -77,25 +79,22 @@ namespace FastNx::Loaders {
 
         version << "100";
 
-        NX_ASSERT(cenum.size() == appdir->GetFilesCount());
-
-        for (const auto &[filepath, _type]: cenum) {
-            files << fmt::format("{};{}\n", GetType(_type), FsSys::GetPathStr(filepath));
-        }
+        NX_ASSERT(contentenum.size() == appdir->GetFilesCount());
 
         std::vector<U8> buffer(8_MBYTES);
-        for (const auto &dumpfile: appdir->ListAllFiles()) {
-            std::filesystem::create_directories(tmp / dumpfile.parent_path());
-            auto outputfile{std::make_unique<FsSys::ReFs::BufferedFile>(tmp / dumpfile, 0, FsSys::FileModeType::WriteOnly, true)};
+        for (const auto &[filepath, _type]: contentenum) {
+            files << fmt::format("{};{}\n", GetType(_type), FsSys::GetPathStr(filepath));
 
-            const auto inputfile{appdir->OpenFile(dumpfile)};
+            std::filesystem::create_directories(tmp / filepath.parent_path());
+            auto outputfile{std::make_unique<FsSys::ReFs::BufferedFile>(tmp / filepath, 0, FsSys::FileModeType::WriteOnly, true)};
+
+            const auto inputfile{appdir->OpenFile(filepath)};
             for (U64 offset{}; offset < inputfile->GetSize(); ) {
                 const auto slice{std::min(inputfile->GetSize() - offset, buffer.size())};
                 if (inputfile->ReadSome(std::span{buffer.data(), slice}, offset) != slice)
-                    std::terminate();
+                    throw exception("Failed to read all {} bytes at offset {} from file {}", slice, offset, FsSys::GetPathStr(filepath));
 
                 outputfile->WriteSome(std::span{buffer.data(), slice}, offset);
-
                 offset += slice;
             }
         }

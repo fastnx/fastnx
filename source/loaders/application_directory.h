@@ -10,7 +10,7 @@ namespace FastNx::Loaders {
 
         void ExtractAllFiles() const;
         const FsSys::VfsReadOnlyDirectoryPtr appdir;
-        std::vector<FsSys::ContentEnumerate> cenum;
+        std::vector<FsSys::ContentEnumerate> contentenum;
     };
 
     bool IsApplicationDirectory(const FsSys::FsPath &dirfs);
