@@ -3,23 +3,31 @@
 #include <common/container.h>
 #include <common/exception.h>
 #include <kernel/kernel.h>
+#include <kernel/types/kprocess.h>
 
 namespace FastNx::Kernel {
-    I32 Kernel::GetPid(const Types::KProcess &process) {
-        I32 result{};
+    U64 Kernel::GetPid(const Types::KProcess &process) {
+        U64 pident{};
         std::scoped_lock lock{idsMutex};
-        const auto &values{process.entbytes};
+        const auto &values{process.entropy};
 
         for (auto itPid{std::begin(pidslist)}; itPid != pidslist.end(); ++itPid) {
             if (IsEqual(itPid->second, values))
                 return itPid->first;
-            if (!result)
+            if (!pident)
                 continue;
             itPid->second = values;
-            result = itPid->first;
+            pident = itPid->first;
         }
-        if (!result)
+        if (!pident)
             throw exception{"Could not allocate a PID for the process"};
-        return result;
+        return pident;
+    }
+
+    std::shared_ptr<Types::KProcess> Kernel::CreateProcess() {
+        auto process{std::make_shared<Types::KProcess>(*this)};
+        if (process)
+            liveprocs.emplace_back(process);
+        return process;
     }
 }

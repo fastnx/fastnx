@@ -2,6 +2,10 @@
 
 #include <fs_sys/types.h>
 
+namespace FastNx::Kernel::Types {
+    class KProcess;
+}
+
 namespace FastNx::Loaders {
     enum class AppType {
         None,
@@ -22,7 +26,7 @@ namespace FastNx::Loaders {
         explicit AppLoader(const FsSys::VfsBackingFilePtr &file, bool &loaded, const AppType _type) :
             backing(file), type(_type), isloaded(loaded) {}
 
-        virtual void LoadApplication() = 0;
+        virtual void LoadApplication(std::shared_ptr<Kernel::Types::KProcess> &kprocess) = 0;
         virtual std::vector<U8> GetLogo() = 0;
         virtual U64 GetTitleId() = 0;
 

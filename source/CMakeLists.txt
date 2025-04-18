@@ -46,6 +46,8 @@ target_sources(fastnx PRIVATE
     kernel/memory/kmemory_block_manager.h
     kernel/memory/kslab_heap.cpp
     kernel/memory/kslab_heap.h
+    kernel/memory/kpage_table.cpp
+    kernel/memory/kpage_table.h
     kernel/types/kprocess.cpp
     kernel/types/kprocess.h
     runtime/spin_lock.cpp

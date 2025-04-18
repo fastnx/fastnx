@@ -23,7 +23,8 @@ namespace FastNx::Horizon {
             throw exception{"Could not load the ROM due to: {}", GetLoaderPrettyString(application)};
         application = *apploader;
 
-        application->LoadApplication();
+        auto kprocess{kernel->CreateProcess()};
+        application->LoadApplication(kprocess);
     }
 
     void SwitchNs::GetLoaders(const std::vector<FsSys::FsPath> &apps) {

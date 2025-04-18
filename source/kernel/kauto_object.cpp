@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <kernel/kernel.h>
 #include <kernel/kauto_object.h>
 
 namespace FastNx::Kernel {
