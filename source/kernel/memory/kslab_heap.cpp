@@ -3,8 +3,10 @@
 
 
 namespace FastNx::Kernel::Memory {
-    KSlabHeap::KSlabHeap(void *region, const U64 size, const U64 itemsize) : begin(region), end(region + size) {
-        for (void *itemlist{region}; itemlist < end; itemlist += itemsize) {
+    KSlabHeap::KSlabHeap(const MemoryDescriptor &region, const U64 itemsize) : region(region) {
+        auto *begin{static_cast<U8 *>(region.begin)};
+        const auto *end{static_cast<U8 *>(region.end)};
+        for (auto *itemlist{begin}; itemlist < end; itemlist += itemsize) {
             objects.emplace_back(itemlist);
         }
         objects.reverse();
@@ -20,7 +22,7 @@ namespace FastNx::Kernel::Memory {
         return object;
     }
     void KSlabHeap::Free(void *pointer) {
-        if (begin >= pointer && pointer < end)
+        if (region.begin >= pointer && pointer < region.end)
             objects.emplace_front(pointer);
         else
             throw exception{"This object does not belong to this slab"};

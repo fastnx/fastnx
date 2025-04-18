@@ -17,8 +17,10 @@ namespace FastNx::Kernel {
     private:
         I32 pidseed{InitialProcessId};
         std::map<I32, std::array<U64, 4>> pidslist;
+
         std::optional<Memory::KSlabHeap> userslabs;
         std::unique_ptr<Memory::DeviceLppd4> virtmem;
+
         std::mutex idsMutex;
     };
 }

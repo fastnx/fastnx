@@ -7,8 +7,7 @@ namespace FastNx::Kernel {
         }
         NX_ASSERT(std::prev(pidslist.end())->first == lastpid);
 
-        void *userobjs{virtmem->device + SlabHeap::BaseAddress};
-        userslabs.emplace(userobjs, SlabHeap::Size, SwitchPageSize);
+        userslabs.emplace(virtmem->GetDescriptor(SlabHeap::BaseAddress, SlabHeap::Size), SwitchPageSize);
     }
 
 }
