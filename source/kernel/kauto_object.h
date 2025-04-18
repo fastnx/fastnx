@@ -26,6 +26,7 @@ namespace FastNx::Kernel {
         void DeteriorateLifetime();
 
         KObjectType type;
+    protected:
         std::atomic<U32> counter{};
         void *treenode{}; // < Intrusive red-black tree node
         Kernel &kernel;

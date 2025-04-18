@@ -1,16 +1,14 @@
 #pragma once
 #include <map>
+#include <memory>
 #include <mutex>
 
-#include <kernel/dram/device_lpddr4.h>
+#include <kernel/memory/device_lpddr4.h>
+#include <kernel/memory/kslab_heap.h>
 #include <kernel/types/kprocess.h>
 
+#include <kernel/types.h>
 namespace FastNx::Kernel {
-    class KAutoObject;
-
-    constexpr auto InitialProcessId{0x51};
-    constexpr auto MaximumProcessIds{300};
-
     class Kernel {
     public:
         Kernel();
@@ -19,9 +17,8 @@ namespace FastNx::Kernel {
     private:
         I32 pidseed{InitialProcessId};
         std::map<I32, std::array<U64, 4>> pidslist;
-
-
-        Dram::DeviceLppd4 virtmem;
+        std::optional<Memory::KSlabHeap> userslabs;
+        std::unique_ptr<Memory::DeviceLppd4> virtmem;
         std::mutex idsMutex;
     };
 }

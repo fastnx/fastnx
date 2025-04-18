@@ -1,7 +1,7 @@
 #include <device/memory.h>
-#include <kernel/dram/device_lpddr4.h>
+#include <kernel/memory/device_lpddr4.h>
 
-namespace FastNx::Kernel::Dram {
+namespace FastNx::Kernel::Memory {
     DeviceLppd4::DeviceLppd4() : device(static_cast<U8 *>(Device::AllocateMemory(size, nullptr, -1, false, true))) {
     }
 

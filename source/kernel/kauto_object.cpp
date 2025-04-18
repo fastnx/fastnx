@@ -3,16 +3,14 @@
 
 namespace FastNx::Kernel {
     void KAutoObject::AddReference(const U64 value) {
-        NX_ASSERT(!kernel.autorefs.contains(value));
-        kernel.autorefs.emplace(value, this);
+        if (!kernel.autorefs.contains(value))
+            kernel.autorefs.emplace(value, this);
     }
     void KAutoObject::RemoveReference(U64 value) const {
         for (auto objsite{kernel.autorefs.begin()}; objsite != kernel.autorefs.end() && !value; ++objsite) {
             if (objsite->second == this)
                 value = objsite->first;
         }
-
-        NX_ASSERT(kernel.autorefs.contains(value));
         kernel.autorefs.erase(value);
     }
 
@@ -26,7 +24,6 @@ namespace FastNx::Kernel {
         }
         return nullptr;
     }
-
     void KAutoObject::IncreaseLifetime() {
         NX_ASSERT(counter >= 0);
         counter.fetch_add(1, std::memory_order_acq_rel);

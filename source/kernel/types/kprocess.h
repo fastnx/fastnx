@@ -5,7 +5,6 @@ namespace FastNx::Kernel::Types {
     class KProcess {
     public:
         KProcess() = default;
-
-        std::array<U64, 4> entropy;
+        std::array<U64, 4> entbytes;
     };
 }

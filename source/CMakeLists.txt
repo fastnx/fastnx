@@ -32,13 +32,18 @@ target_sources(fastnx PRIVATE
     device/memory.cpp
     device/memory.h
     device/capabilities.h
+    kernel/types.h
     kernel/kernel.cpp
     kernel/kernel.h
-    kernel/pid.cpp
+    kernel/routines.cpp
     kernel/kauto_object.cpp
     kernel/kauto_object.h
-    kernel/dram/device_lpddr4.cpp
-    kernel/dram/device_lpddr4.h
+    kernel/memory/device_lpddr4.cpp
+    kernel/memory/device_lpddr4.h
+    kernel/memory/kmemory_block_manager.cpp
+    kernel/memory/kmemory_block_manager.h
+    kernel/memory/kslab_heap.cpp
+    kernel/memory/kslab_heap.h
     kernel/types/kprocess.cpp
     kernel/types/kprocess.h
     runtime/spin_lock.cpp
