@@ -1,6 +1,8 @@
 #include <loaders/types.h>
 
 auto ProbApplicationFilename(const FastNx::FsSys::VfsBackingFilePtr &file) {
+    if (is_directory(file->path))
+        return FastNx::Loaders::AppType::GameFilesystem;
     if (const auto &_filePath{file->path}; _filePath.has_extension()) {
         if (const auto _fileExt{_filePath.extension()}; _fileExt == ".nsp") {
             return FastNx::Loaders::AppType::NspEs;

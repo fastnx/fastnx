@@ -9,6 +9,10 @@ FastNx::Loaders::GameFs::GameFs(const FsSys::VfsReadOnlyDirectoryPtr &files, boo
     nextloader = std::make_shared<ApplicationDirectory>(files);
 }
 
+void FastNx::Loaders::GameFs::LoadApplication() {
+
+}
+
 std::vector<FastNx::U8> FastNx::Loaders::GameFs::GetLogo() {
     return {};
 }

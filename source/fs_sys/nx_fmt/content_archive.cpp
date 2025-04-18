@@ -72,10 +72,13 @@ namespace FastNx::FsSys::NxFmt {
             if (!file)
                 return;
 
-            if (fsheader.type == FsType::PartitionFs)
+            if (fsheader.type == FsType::PartitionFs) {
                 pfslist.emplace_back(std::make_shared<PartitionFileSystem>(std::move(file)));
-            else if (fsheader.type == FsType::RomFs)
+                if (type == ContentType::Program)
+                    NX_ASSERT(GetPfsType(pfslist.back()) != PfsType::Unknown);
+            } else if (fsheader.type == FsType::RomFs) {
                 romfslist.emplace_back(std::make_shared<RomFs>(std::move(file)));
+            }
         }
     }
 

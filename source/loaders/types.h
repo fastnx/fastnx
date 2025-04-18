@@ -20,14 +20,15 @@ namespace FastNx::Loaders {
         virtual ~AppLoader() = default;
 
         explicit AppLoader(const FsSys::VfsBackingFilePtr &file, bool &loaded, const AppType _type) :
-            backing(file), type(_type), isloaded(loaded) {
-        }
+            backing(file), type(_type), isloaded(loaded) {}
+
+        virtual void LoadApplication() = 0;
+        virtual std::vector<U8> GetLogo() = 0;
+        virtual U64 GetTitleId() = 0;
+
         const FsSys::VfsBackingFilePtr backing;
         const AppType type;
         LoaderStatus status{};
-
-        virtual std::vector<U8> GetLogo() = 0;
-        virtual U64 GetTitleId() = 0;
     protected:
         bool &isloaded;
         void Finish() const;

@@ -3,6 +3,7 @@
 
 #include <common/exception.h>
 #include <loaders/nsp_es.h>
+#include <loaders/gamefs.h>
 #include <horizon/switch_ns.h>
 
 #include <fs_sys/refs/huge_file.h>
@@ -21,6 +22,8 @@ namespace FastNx::Horizon {
         if (apploader == loaders.end())
             throw exception{"Could not load the ROM due to: {}", GetLoaderPrettyString(application)};
         application = *apploader;
+
+        application->LoadApplication();
     }
 
     void SwitchNs::GetLoaders(const std::vector<FsSys::FsPath> &apps) {
@@ -34,6 +37,10 @@ namespace FastNx::Horizon {
                 switch (Loaders::GetApplicationType(storage)) {
                     case Loaders::AppType::NspEs:
                         return std::make_shared<Loaders::NspEs>(storage, keys, isloaded);
+                    case Loaders::AppType::GameFilesystem: {
+                        const auto appdir{std::make_shared<FsSys::ReFs::DirectoryFileAccess>(loadable)};
+                        return std::make_shared<Loaders::GameFs>(std::move(appdir), isloaded);
+                    }
                     default:
                         return nullptr;
                     }

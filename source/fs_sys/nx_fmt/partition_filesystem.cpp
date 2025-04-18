@@ -82,7 +82,22 @@ namespace FastNx::FsSys::NxFmt {
         return nullptr;
     }
 
+    bool PartitionFileSystem::Exists(const FsPath &_path) {
+        return files.contains(_path);
+    }
+
     bool IsAValidPfs(const std::shared_ptr<PartitionFileSystem> &spfs) {
         return spfs->GetFilesCount() > 0 && spfs->coverage > 95;
+    }
+
+    PfsType GetPfsType(const std::shared_ptr<PartitionFileSystem> &pfs) {
+        // https://switchbrew.org/wiki/ExeFS
+
+        if (pfs->Exists("main") && pfs->Exists("main.npdm"))
+            return PfsType::Exefs;
+        if (pfs->Exists("NintendoLogo.png"))
+            return PfsType::LogoFs;
+
+        return PfsType::Unknown;
     }
 }

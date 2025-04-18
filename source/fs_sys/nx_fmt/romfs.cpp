@@ -71,6 +71,10 @@ namespace FastNx::FsSys::NxFmt {
         return nullptr;
     }
 
+    bool RomFs::Exists(const FsPath &_path) {
+        return files.contains(_path);
+    }
+
     std::vector<FsPath> RomFs::ListAllFiles() const {
         std::vector<FsPath> result;
         for (const auto &file: files | std::ranges::views::keys) {

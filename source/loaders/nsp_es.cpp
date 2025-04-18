@@ -1,3 +1,4 @@
+#include <fs_sys/npdm.h>
 #include <common/async_logger.h>
 #include <loaders/nsp_es.h>
 
@@ -19,6 +20,10 @@ namespace FastNx::Loaders {
 
         status = LoaderStatus::Success;
         Finish();
+    }
+
+    void NspEs::LoadApplication() {
+        [[maybe_unused]] FsSys::Npdm pMeta{subnsp->appdir->GetNpdm()};
     }
 
     std::vector<U8> ReadLogo(const FsSys::VfsBackingFilePtr &file) {

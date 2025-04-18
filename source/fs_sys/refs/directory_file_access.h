@@ -20,6 +20,8 @@ namespace FastNx::FsSys::ReFs {
         Runtime::SpinLock spinlock;
 
         VfsBackingFilePtr OpenFile(const FsPath &_path, FileModeType mode = FileModeType::ReadOnly) override;
+        bool Exists(const FsPath &_path) override;
+
         I32 descriptor;
     };
 }

@@ -113,6 +113,8 @@ namespace FastNx::FsSys {
         virtual std::vector<FsPath> ListAllFiles() const = 0;
         [[nodiscard]] virtual std::vector<FsPath> ListAllTopLevelFiles() const = 0;
 
+        virtual bool Exists(const FsPath &_path) = 0;
+
         virtual U64 GetFilesCount() const {
             return {};
         }

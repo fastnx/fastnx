@@ -11,6 +11,8 @@ target_sources(fastnx PRIVATE
     cnmt.h
     linkable_directory.cpp
     linkable_directory.h
+    npdm.cpp
+    npdm.h
     vfs/regex_file.cpp
     vfs/regex_file.h
     vfs/offset_file.cpp

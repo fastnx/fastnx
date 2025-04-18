@@ -100,6 +100,12 @@ namespace FastNx::Loaders {
         }
     }
 
+    FsSys::VfsBackingFilePtr ApplicationDirectory::GetNpdm() const {
+        if (appdir->Exists("exefs/main.npdm"))
+            return appdir->OpenFile("exefs/main.npdm");
+        return nullptr;
+    }
+
     bool IsApplicationDirectory(const FsSys::FsPath &dirfs) {
         NX_ASSERT(is_directory(dirfs));
         FsSys::ReFs::DirectoryFileAccess directory{dirfs};

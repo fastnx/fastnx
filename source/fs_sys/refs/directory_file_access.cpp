@@ -129,4 +129,10 @@ namespace FastNx::FsSys::ReFs {
         filelist[openpath] = file;
         return file;
     }
+
+    bool DirectoryFileAccess::Exists(const FsPath &_path) {
+        if (_path.root_path() == _path)
+            return exists(_path);
+        return false;
+    }
 }

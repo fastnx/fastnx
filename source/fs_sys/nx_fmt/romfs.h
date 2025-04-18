@@ -47,6 +47,7 @@ namespace FastNx::FsSys::NxFmt {
         explicit RomFs(const VfsBackingFilePtr &romfs);
 
         VfsBackingFilePtr OpenFile(const FsPath &_path, FileModeType mode = FileModeType::ReadOnly) override;
+        bool Exists(const FsPath &_path) override;
 
         std::vector<FsPath> ListAllFiles() const override;
         [[nodiscard]] std::vector<FsPath> ListAllTopLevelFiles() const override;

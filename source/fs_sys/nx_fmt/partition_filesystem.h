@@ -38,6 +38,8 @@ namespace FastNx::FsSys::NxFmt {
             return ListAllFiles();
         }
         VfsBackingFilePtr OpenFile(const FsPath &_path, FileModeType mode = FileModeType::ReadOnly) override;
+        bool Exists(const FsPath &_path) override;
+
         U8 coverage{};
 
         VfsBackingFilePtr partfs;
@@ -48,4 +50,11 @@ namespace FastNx::FsSys::NxFmt {
     };
 
     bool IsAValidPfs(const std::shared_ptr<PartitionFileSystem> &spfs);
+
+    enum class PfsType {
+        Unknown,
+        Exefs,
+        LogoFs
+    };
+    PfsType GetPfsType(const std::shared_ptr<PartitionFileSystem> &pfs);
 }

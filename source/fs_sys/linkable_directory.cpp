@@ -38,4 +38,8 @@ namespace FastNx::FsSys {
     U64 LinkableDirectory::GetFilesCount() const {
         return files.size();
     }
+
+    bool LinkableDirectory::Exists(const FsPath &_path) {
+        return files.contains(_path);
+    }
 }

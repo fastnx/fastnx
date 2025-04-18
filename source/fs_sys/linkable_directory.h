@@ -17,7 +17,7 @@ namespace FastNx::FsSys {
 
 
         U64 GetFilesCount() const override;
-
+        bool Exists(const FsPath &_path) override;
     private:
         std::map<FsPath, VfsBackingFilePtr> files;
     };

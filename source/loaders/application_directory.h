@@ -9,6 +9,9 @@ namespace FastNx::Loaders {
         explicit ApplicationDirectory(const FsSys::VfsReadOnlyDirectoryPtr &files);
 
         void ExtractAllFiles() const;
+
+        FsSys::VfsBackingFilePtr GetNpdm() const;
+
         const FsSys::VfsReadOnlyDirectoryPtr appdir;
         std::vector<FsSys::ContentEnumerate> contentenum;
     };

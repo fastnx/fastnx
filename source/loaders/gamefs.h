@@ -7,8 +7,10 @@ namespace FastNx::Loaders {
     class GameFs final : public AppLoader {
     public:
         explicit GameFs(const FsSys::VfsReadOnlyDirectoryPtr &files, bool &isloaded);
+        void LoadApplication() override;
         std::vector<U8> GetLogo() override;
         U64 GetTitleId() override;
+
 
         std::shared_ptr<ApplicationDirectory> nextloader;
     };
