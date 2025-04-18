@@ -9,14 +9,12 @@ namespace FastNx::Kernel {
     U64 Kernel::GetPid(const Types::KProcess &process) {
         U64 pident{};
         std::scoped_lock lock{idsMutex};
-        const auto &values{process.entropy};
-
-        for (auto itPid{std::begin(pidslist)}; itPid != pidslist.end(); ++itPid) {
-            if (IsEqual(itPid->second, values))
+        for (auto itPid{std::begin(pidslist)}; itPid != pidslist.end() && !pident; ++itPid) {
+            if (IsEqual(itPid->second, process.entropy))
                 return itPid->first;
-            if (!pident)
+            if (!IsZeroes(itPid->second))
                 continue;
-            itPid->second = values;
+            itPid->second = process.entropy;
             pident = itPid->first;
         }
         if (!pident)

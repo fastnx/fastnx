@@ -52,6 +52,8 @@ target_sources(fastnx PRIVATE
     kernel/types/kprocess.h
     runtime/spin_lock.cpp
     runtime/spin_lock.h
+    runtime/entropy.cpp
+    runtime/entropy.h
     crypto/integrity.cpp
     crypto/checksum.cpp
     crypto/checksum.h
