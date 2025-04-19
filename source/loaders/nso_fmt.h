@@ -51,9 +51,9 @@ namespace FastNx::Loaders {
     };
 
     static_assert(IsSizeOf<NsoHeader, 0x100>);
-    class NsoExe final : public AppLoader {
+    class NsoFmt final : public AppLoader {
     public:
-        NsoExe(const FsSys::VfsBackingFilePtr &nso, bool &loaded);
+        NsoFmt(const FsSys::VfsBackingFilePtr &nso, bool &loaded);
 
         void LoadApplication(std::shared_ptr<Kernel::Types::KProcess> &kprocess) override;
         std::vector<U8> GetLogo() override;

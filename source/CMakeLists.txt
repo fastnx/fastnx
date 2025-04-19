@@ -14,8 +14,8 @@ target_sources(fastnx PRIVATE
     loaders/application_directory.h
     loaders/gamefs.cpp
     loaders/gamefs.h
-    loaders/nsoexe.cpp
-    loaders/nsoexe.h
+    loaders/nso_fmt.cpp
+    loaders/nso_fmt.h
     horizon/switch_ns.cpp
     horizon/switch_ns.h
     horizon/key_set.cpp
@@ -60,6 +60,8 @@ target_sources(fastnx PRIVATE
     runtime/spin_lock.h
     runtime/entropy.cpp
     runtime/entropy.h
+    runtime/lossless.cpp
+    runtime/lossless.h
     crypto/integrity.cpp
     crypto/checksum.cpp
     crypto/checksum.h

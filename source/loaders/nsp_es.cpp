@@ -5,7 +5,7 @@
 #include <kernel/kernel.h>
 #include <kernel/types/kprocess.h>
 
-#include <loaders/nsoexe.h>
+#include <loaders/nso_fmt.h>
 #include <loaders/nsp_es.h>
 
 
@@ -31,9 +31,7 @@ namespace FastNx::Loaders {
     void NspEs::LoadApplication(std::shared_ptr<Kernel::Types::KProcess> &kprocess) {
         auto &tables{kprocess->kernel.tables};
         tables.emplace(kprocess->kernel);
-
-        NsoExe::LoadModules(kprocess, subnsp->appdir->GetExefs());
-
+        NsoFmt::LoadModules(kprocess, subnsp->appdir->GetExefs());
         tables->CreateProcessMemory(subnsp->appdir->GetNpdm());
     }
 

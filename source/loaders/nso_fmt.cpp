@@ -3,12 +3,12 @@
 #include <common/container.h>
 #include <common/exception.h>
 
+#include <runtime/lossless.h>
+
 #include <crypto/checksum.h>
-#include <loaders/nsoexe.h>
+#include <loaders/nso_fmt.h>
 namespace FastNx::Loaders {
-
-
-    NsoExe::NsoExe(const FsSys::VfsBackingFilePtr &nso, bool &loaded) : AppLoader(nso, loaded, AppType::NsoExe) {
+    NsoFmt::NsoFmt(const FsSys::VfsBackingFilePtr &nso, bool &loaded) : AppLoader(nso, loaded, AppType::NsoExe) {
         if (nso->GetSize() < sizeof(NsoHeader))
             return;
 
@@ -40,34 +40,40 @@ namespace FastNx::Loaders {
         }
     }
 
-    void NsoExe::LoadApplication(std::shared_ptr<Kernel::Types::KProcess> &kprocess) {}
+    void NsoFmt::LoadApplication(std::shared_ptr<Kernel::Types::KProcess> &kprocess) {}
 
-    std::vector<U8> NsoExe::GetLogo() {
+    std::vector<U8> NsoFmt::GetLogo() {
         return {};
     }
-    U64 NsoExe::GetTitleId() {
+    U64 NsoFmt::GetTitleId() {
         return {};
     }
 
-    void NsoExe::GetSection(const BinarySection &section, const U32 compressed, NsoSectionType type) {
-        std::vector<U8> content(section.size);
-        if (!backing->ReadSome(std::span{content.data(), compressed}, section.fileoffset))
+    void NsoFmt::GetSection(const BinarySection &section, const U32 compressed, NsoSectionType type) {
+        if (secsmap.contains(type))
             return;
+        std::vector<U8> content(section.size);
 
-        if (content.size() != compressed) {}
+        if (content.size() == compressed) {
+            if (!backing->ReadSome(ToSpan(content), section.fileoffset))
+                return;
+        } else {
+            const std::span output{content.data(), compressed};
+            backing->ReadSome(output, section.fileoffset);
+            Runtime::FastLz4(ToSpan(content), output);
+        }
         secsmap.emplace(type, std::move(content));
     }
 
-    void NsoExe::LoadModules([[maybe_unused]] const std::shared_ptr<Kernel::Types::KProcess> &kprocess, const FsSys::VfsReadOnlyDirectoryPtr &exefs) {
-
+    void NsoFmt::LoadModules([[maybe_unused]] const std::shared_ptr<Kernel::Types::KProcess> &kprocess, const FsSys::VfsReadOnlyDirectoryPtr &exefs) {
         // Like the linker, the binaries described in the exefs partition must be loaded in this order, if they exist
         static const std::vector<FsSys::FsPath> exepathlist{"rtld", "main", "subsdk0", "subsdk1", "subsdk2", "subsdk3", "subsdk4", "subsdk5", "subsdk6", "subsdk7", "subsdk8", "subsdk9", "sdk"};
 
-        std::vector<std::shared_ptr<NsoExe>> nsolist;
+        std::vector<std::shared_ptr<NsoFmt>> nsolist;
         bool loaded{};
         for (const auto &nsofile: exepathlist) {
             if (const auto nso{exefs->OpenFile("exefs" / nsofile)})
-                nsolist.emplace_back(std::make_shared<NsoExe>(nso, loaded));
+                nsolist.emplace_back(std::make_shared<NsoFmt>(nso, loaded));
         }
     }
 

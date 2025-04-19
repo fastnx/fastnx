@@ -7,3 +7,6 @@
 [submodule "externals/fmt"]
 	path = externals/fmt
 	url = https://github.com/fmtlib/fmt.git
+[submodule "externals/lz4"]
+	path = externals/lz4
+	url = https://github.com/lz4/lz4.git
