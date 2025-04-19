@@ -25,8 +25,8 @@ namespace FastNx::Loaders {
             AsyncLogger::Info("NSO module name: {}", std::string_view{modulename.data(), strlen(modulename.data())});
 
         GetSection(nsofront.textsection, nsofront.textfilesize, NsoSectionType::Text);
-        GetSection(nsofront.datasection, nsofront.datafilesize, NsoSectionType::Data);
         GetSection(nsofront.rosection, nsofront.rofilesize, NsoSectionType::Ro);
+        GetSection(nsofront.datasection, nsofront.datafilesize, NsoSectionType::Data);
 
         if ((nsofront.flags & 1 << 3) == 0)
             return;
@@ -37,20 +37,13 @@ namespace FastNx::Loaders {
 
             if (const auto &content{itsec->second}; !content.empty())
                 checksum.Update(content.data(), content.size());
-            if (const auto result{checksum.Finish()}; !IsEqual(result, sectionhash)) {}
-                // throw exception("NSO section {} appears to be corrupted", FsSys::GetPathStr(nso));
+            if (const auto result{checksum.Finish()}; !IsEqual(result, sectionhash))
+                throw exception("NSO section {} appears to be corrupted", FsSys::GetPathStr(nso));
         }
+        Finish();
     }
 
     void NsoFmt::LoadApplication(std::shared_ptr<Kernel::Types::KProcess> &kprocess) {}
-
-    std::vector<U8> NsoFmt::GetLogo() {
-        return {};
-    }
-    U64 NsoFmt::GetTitleId() {
-        return {};
-    }
-
     void NsoFmt::GetSection(const BinarySection &section, const U32 compressed, NsoSectionType type) {
         if (secsmap.contains(type))
             return;
@@ -60,14 +53,14 @@ namespace FastNx::Loaders {
                 return;
         } else {
             const std::span output{content.data(), compressed};
-            if (const auto filesection{backing->ReadSome(output, section.fileoffset)}; filesection == compressed)
-                Runtime::FastLz4(ToSpan(content), output);
+            if (backing->ReadSome(output, section.fileoffset) == compressed)
+                if (Runtime::FastLz4(ToSpan(content), output) == 0)
+                    throw exception{"Failed to decompress the section"};
         }
 
         if (type == NsoSectionType::Ro)
             if (const std::string rostrs{reinterpret_cast<const char *>(content.data()), content.size()}; !rostrs.empty())
                 PrintRo(rostrs);
-
         secsmap.emplace(type, std::move(content));
     }
 
@@ -83,19 +76,19 @@ namespace FastNx::Loaders {
         }
     }
 
-    void NsoFmt::PrintRo(const std::string &rostrs) const {
+    void NsoFmt::PrintRo(const std::string &strings) const {
         std::optional<std::string_view> modulepath;
-        if (std::memcmp(rostrs.data(), "\\0\\0\\0\\0", 4)) {
+        if (std::memcmp(strings.data(), "\\0\\0\\0\\0", 4)) {
             U32 length;
-            std::memcpy(&length, &rostrs[4], sizeof(length));
+            std::memcpy(&length, &strings[4], sizeof(length));
             if (length)
-                modulepath.emplace(&rostrs[8], length);
+                modulepath.emplace(&strings[8], length);
         }
         static const boost::regex moduleregex{"[a-z]:[\\/][ -~]{5,}\\.nss", boost::regex::icase};
         boost::smatch match;
 
         if (!modulepath) {
-            if (boost::regex_match(rostrs, match, moduleregex))
+            if (boost::regex_match(strings, match, moduleregex))
                 modulepath.emplace(match.str());
         }
         std::string report;
@@ -103,17 +96,16 @@ namespace FastNx::Loaders {
 
         static const boost::regex sdkregex{"SDK MW[ -~]"};
         static const boost::regex fsregex{"sdk_version: ([0-9.]*)"};
-        if (boost::regex_search(rostrs, match, fsregex))
+        if (boost::regex_search(strings, match, fsregex))
             report += fmt::format("FS SDK Version: {} ", match.str());
 
-        // ReSharper disable once CppTooWideScopeInitStatement
-        boost::sregex_iterator itsdk(rostrs.begin(), rostrs.end(), sdkregex);
+        boost::sregex_iterator itsdk(strings.begin(), strings.end(), sdkregex);
         if (itsdk != decltype(itsdk){})
             report += "SDK Libraries:";
         for (; itsdk != boost::sregex_iterator{}; ++itsdk) {
             report += fmt::format(" {}", itsdk->str());
         }
 
-        AsyncLogger::Info("RO section data of NSO module {}: {}", FsSys::GetPathStr(backing), report);
+        AsyncLogger::Info("SDK versions of NSO module {}: {}", FsSys::GetPathStr(backing), report);
     }
 }

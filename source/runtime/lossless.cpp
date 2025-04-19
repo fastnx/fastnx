@@ -5,27 +5,20 @@
 #include <runtime/lossless.h>
 namespace FastNx::Runtime {
     U64 FastLz4(const std::span<char> &dest, const std::span<const char> &source) {
-        if (dest.data() != source.data()) {
-            if (const auto requested{LZ4_decompress_safe(source.data(), nullptr, source.size(), 0)}; requested > 0) {
-                if (dest.size() >= static_cast<U64>(requested))
-                    return LZ4_decompress_safe(source.data(), dest.data(), source.size(), requested);
-            }
-            return {};
+        std::vector<char> buffer;
+        const auto size{source.size()};
+        if (dest.data() == source.data()) {
+            buffer.resize(size);
+            std::memcpy(buffer.data(), source.data(), size);
         }
-        std::vector<char> buffer(32_KBYTES);
 
-        U64 destoffset{};
-        auto *context{LZ4_createStreamDecode()};
-        for (U64 sourceoffset{}; sourceoffset < source.size(); ) {
-            const auto size{std::min(buffer.size(), source.size() - sourceoffset)};
-            std::memcpy(buffer.data(), source.data() + sourceoffset, size);
+        const auto *sourcebuf{buffer.empty() ? source.data() : buffer.data()};
+        // Why does LZ4_compressBound always return a value smaller than the required output size?
+        if (static_cast<U64>(LZ4_compressBound(size)) <= dest.size())
+            if (const auto result{LZ4_decompress_safe(sourcebuf, dest.data(), source.size(), dest.size())}; result > 0)
+                return result;
 
-            sourceoffset += size;
-            if (const auto increase{LZ4_decompress_safe_continue(context, buffer.data(), dest.data(), size, dest.size())}; increase > 0)
-                destoffset += increase;
-            else break;
-        }
-        LZ4_freeStreamDecode(context);
-        return destoffset;
+        std::memset(dest.data(), 0, dest.size());
+        return {};
     }
 }

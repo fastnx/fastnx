@@ -1,7 +1,6 @@
-#include <boost/align/align_up.hpp>
-#include <boost/align/align_down.hpp>
 #include <boost/endian/detail/endian_reverse.hpp>
 #include <boost/container/small_vector.hpp>
+#include <boost/align/align_down.hpp>
 
 #include <common/container.h>
 #include <fs_sys/vfs/offset_file.h>
@@ -37,31 +36,33 @@ namespace FastNx::FsSys::Aes {
     }
 
     U64 CtrFile::ReadTypeImpl(U8 *dest, const U64 size, const U64 offset) {
-        const auto blockoffset{boost::alignment::align_down(offset, 16)};
-        if (blockoffset + size > GetSize())
+        const auto aligment{offset % CtrSectorSize};
+        if (offset + size > GetSize())
             return {};
-        UpdateCtr(blockoffset);
 
-        const auto rbcount{encfile->ReadSome(std::span{dest, size}, blockoffset)};
-        if (rbcount != size)
-            return {};
-        decrypt->Process(dest, dest, rbcount);
-        if (auto aligment{offset % CtrSectorSize}) {
-            if (static_cast<ssize_t>(size - aligment) > 0)
-                std::memmove(dest, dest + aligment, size - aligment);
+        std::scoped_lock guard(shared);
+        const auto startblock{offset - aligment};
 
-            const auto slice{size % CtrSectorSize};
-            if (slice + aligment > CtrSectorSize)
-                aligment = CtrSectorSize - slice;
-            boost::container::small_vector<U8, CtrSectorSize> buffer(aligment + slice);
-
-            if (size < CtrSectorSize - aligment) {
-                if (ReadSome(ToSpan(buffer), blockoffset))
-                    std::memcpy(dest, buffer.data() + aligment, size);
-            } else if (ReadSome(ToSpan(buffer), blockoffset + size - slice))
-                std::memcpy(dest + size - aligment, buffer.data() + slice, aligment);
+        if (!aligment) {
+            UpdateCtr(offset);
+            const auto result{encfile->ReadSome(std::span{dest, size}, offset)};
+            if (decrypt->Process(dest, dest, result) == result)
+                return result;
         }
+        const auto padding{CtrSectorSize - aligment};
 
+        boost::container::small_vector<U8, CtrSectorSize> buffer(CtrSectorSize);
+
+        UpdateCtr(startblock); encfile->ReadSome(ToSpan(buffer), startblock);
+        if (decrypt->Process(buffer.data(), buffer.data(), buffer.size())) {
+            if (size + aligment < CtrSectorSize) {
+                std::memcpy(dest, buffer.data() + aligment, size);
+                return size;
+            }
+            std::memcpy(dest, buffer.data() + aligment, padding);
+        }
+        if (const auto count{size - padding})
+            return padding + ReadSome(std::span{dest + padding, count}, offset + padding);
         return size;
     }
     U64 CtrFile::WriteTypeImpl(const U8 *source, U64 size, U64 offset) {

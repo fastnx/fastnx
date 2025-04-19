@@ -46,8 +46,8 @@ namespace FastNx::Loaders {
 
     enum class NsoSectionType : U64 {
         Text,
-        Data,
         Ro,
+        Data,
     };
 
     static_assert(IsSizeOf<NsoHeader, 0x100>);
@@ -56,15 +56,12 @@ namespace FastNx::Loaders {
         NsoFmt(const FsSys::VfsBackingFilePtr &nso, bool &loaded);
 
         void LoadApplication(std::shared_ptr<Kernel::Types::KProcess> &kprocess) override;
-        std::vector<U8> GetLogo() override;
-        U64 GetTitleId() override;
-
 
         std::unordered_map<NsoSectionType, std::vector<U8>> secsmap;
 
         static void LoadModules(const std::shared_ptr<Kernel::Types::KProcess> &kprocess, const FsSys::VfsReadOnlyDirectoryPtr &exefs);
     private:
-        void PrintRo(const std::string &rostrs) const;
+        void PrintRo(const std::string &strings) const;
         void GetSection(const BinarySection &section, U32 compressed, NsoSectionType type);
     };
 }

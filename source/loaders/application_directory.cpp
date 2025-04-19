@@ -110,7 +110,6 @@ namespace FastNx::Loaders {
     FsSys::VfsReadOnlyDirectoryPtr ApplicationDirectory::GetExefs() const {
         const auto exefs{std::make_shared<FsSys::LinkableDirectory>("exefs")};
 
-        // ReSharper disable once CppTooWideScopeInitStatement
         const auto files{appdir->GlobAllFiles("exefs/*", true)};
         for (const auto &exefile: files)
             exefs->LinkFile(exefile, appdir->OpenFile(exefile));

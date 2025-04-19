@@ -28,8 +28,12 @@ namespace FastNx::Loaders {
             backing(file), type(_type), isloaded(loaded) {}
 
         virtual void LoadApplication(std::shared_ptr<Kernel::Types::KProcess> &kprocess) = 0;
-        virtual std::vector<U8> GetLogo() = 0;
-        virtual U64 GetTitleId() = 0;
+        virtual std::vector<U8> GetLogo() {
+            return {};
+        }
+        virtual U64 GetTitleId() {
+            return {};
+        }
 
         const FsSys::VfsBackingFilePtr backing;
         const AppType type;

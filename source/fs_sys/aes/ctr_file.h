@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mutex>
 #include <fs_sys/types.h>
 #include <crypto/types.h>
 #include <crypto/aes_cipher.h>
@@ -17,6 +18,7 @@ namespace FastNx::FsSys::Aes {
         std::array<U8, 16> ctr;
 
         U64 ctroffset{};
+        std::recursive_mutex shared;
 
     private:
         void UpdateCtr(U64 offset);
