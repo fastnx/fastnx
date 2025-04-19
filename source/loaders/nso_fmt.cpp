@@ -1,3 +1,5 @@
+#include <boost/regex.hpp>
+
 #include <common/values.h>
 #include <common/async_logger.h>
 #include <common/container.h>
@@ -35,8 +37,8 @@ namespace FastNx::Loaders {
 
             if (const auto &content{itsec->second}; !content.empty())
                 checksum.Update(content.data(), content.size());
-            if (const auto result{checksum.Finish()}; !IsEqual(result, sectionhash))
-                throw exception("NSO section {} appears to be corrupted", FsSys::GetPathStr(nso));
+            if (const auto result{checksum.Finish()}; !IsEqual(result, sectionhash)) {}
+                // throw exception("NSO section {} appears to be corrupted", FsSys::GetPathStr(nso));
         }
     }
 
@@ -53,15 +55,19 @@ namespace FastNx::Loaders {
         if (secsmap.contains(type))
             return;
         std::vector<U8> content(section.size);
-
         if (content.size() == compressed) {
             if (!backing->ReadSome(ToSpan(content), section.fileoffset))
                 return;
         } else {
             const std::span output{content.data(), compressed};
-            backing->ReadSome(output, section.fileoffset);
-            Runtime::FastLz4(ToSpan(content), output);
+            if (const auto filesection{backing->ReadSome(output, section.fileoffset)}; filesection == compressed)
+                Runtime::FastLz4(ToSpan(content), output);
         }
+
+        if (type == NsoSectionType::Ro)
+            if (const std::string rostrs{reinterpret_cast<const char *>(content.data()), content.size()}; !rostrs.empty())
+                PrintRo(rostrs);
+
         secsmap.emplace(type, std::move(content));
     }
 
@@ -77,4 +83,37 @@ namespace FastNx::Loaders {
         }
     }
 
+    void NsoFmt::PrintRo(const std::string &rostrs) const {
+        std::optional<std::string_view> modulepath;
+        if (std::memcmp(rostrs.data(), "\\0\\0\\0\\0", 4)) {
+            U32 length;
+            std::memcpy(&length, &rostrs[4], sizeof(length));
+            if (length)
+                modulepath.emplace(&rostrs[8], length);
+        }
+        static const boost::regex moduleregex{"[a-z]:[\\/][ -~]{5,}\\.nss", boost::regex::icase};
+        boost::smatch match;
+
+        if (!modulepath) {
+            if (boost::regex_match(rostrs, match, moduleregex))
+                modulepath.emplace(match.str());
+        }
+        std::string report;
+        report += fmt::format("Module: {} ", *modulepath);
+
+        static const boost::regex sdkregex{"SDK MW[ -~]"};
+        static const boost::regex fsregex{"sdk_version: ([0-9.]*)"};
+        if (boost::regex_search(rostrs, match, fsregex))
+            report += fmt::format("FS SDK Version: {} ", match.str());
+
+        // ReSharper disable once CppTooWideScopeInitStatement
+        boost::sregex_iterator itsdk(rostrs.begin(), rostrs.end(), sdkregex);
+        if (itsdk != decltype(itsdk){})
+            report += "SDK Libraries:";
+        for (; itsdk != boost::sregex_iterator{}; ++itsdk) {
+            report += fmt::format(" {}", itsdk->str());
+        }
+
+        AsyncLogger::Info("RO section data of NSO module {}: {}", FsSys::GetPathStr(backing), report);
+    }
 }

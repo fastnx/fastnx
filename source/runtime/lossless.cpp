@@ -7,7 +7,7 @@ namespace FastNx::Runtime {
     U64 FastLz4(const std::span<char> &dest, const std::span<const char> &source) {
         if (dest.data() != source.data()) {
             if (const auto requested{LZ4_decompress_safe(source.data(), nullptr, source.size(), 0)}; requested > 0) {
-                if (dest.size() != static_cast<U64>(requested))
+                if (dest.size() >= static_cast<U64>(requested))
                     return LZ4_decompress_safe(source.data(), dest.data(), source.size(), requested);
             }
             return {};
@@ -20,12 +20,10 @@ namespace FastNx::Runtime {
             const auto size{std::min(buffer.size(), source.size() - sourceoffset)};
             std::memcpy(buffer.data(), source.data() + sourceoffset, size);
 
-            if (const auto increase{LZ4_decompress_safe_continue(context, buffer.data(), dest.data(), size, dest.size())}; increase > 0) {
+            sourceoffset += size;
+            if (const auto increase{LZ4_decompress_safe_continue(context, buffer.data(), dest.data(), size, dest.size())}; increase > 0)
                 destoffset += increase;
-                sourceoffset += size;
-            } else {
-                break;
-            }
+            else break;
         }
         LZ4_freeStreamDecode(context);
         return destoffset;

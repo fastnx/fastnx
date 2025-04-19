@@ -64,6 +64,7 @@ namespace FastNx::Loaders {
 
         static void LoadModules(const std::shared_ptr<Kernel::Types::KProcess> &kprocess, const FsSys::VfsReadOnlyDirectoryPtr &exefs);
     private:
+        void PrintRo(const std::string &rostrs) const;
         void GetSection(const BinarySection &section, U32 compressed, NsoSectionType type);
     };
 }
