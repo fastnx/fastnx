@@ -9,11 +9,16 @@ namespace FastNx::FsSys {
         else
             filter.clear();
 
+        const bool isfilename{!filter.contains('/')};
         std::vector<FsPath> filtered; {
-            for (const auto files{followTree ? ListAllFiles() : ListAllTopLevelFiles()}; const auto &_path: files) {
-                if (const auto &filename{_path.filename()}; _path.has_filename()) {
-                    if ((starts && filename.string().starts_with(filter)) || (!starts && filename.string().ends_with(filter)))
-                        filtered.emplace_back(_path);
+            auto TestFilter = [&](const auto &path) {
+                return (starts && path.string().starts_with(filter)) || (!starts && path.string().ends_with(filter));
+            };
+
+            for (const auto files{followTree ? ListAllFiles() : ListAllTopLevelFiles()}; const auto &filepath: files) {
+                if (const auto &filename{isfilename ? filepath.filename() : filepath}; !filepath.empty()) {
+                    if (TestFilter(filename))
+                        filtered.emplace_back(filepath);
                 }
             }
         }

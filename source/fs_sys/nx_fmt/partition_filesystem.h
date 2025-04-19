@@ -19,8 +19,8 @@ namespace FastNx::FsSys::NxFmt {
         U32 nameOffset;
         [[deprecated]] U32 version;
     };
-    static_assert(IsSizeMatch<Pfs0Header, 16>);
-    static_assert(IsSizeMatch<PartitionEntry, 0x14 + 0x4>);
+    static_assert(IsSizeOf<Pfs0Header, 16>);
+    static_assert(IsSizeOf<PartitionEntry, 0x14 + 0x4>);
 
     struct FileEntryMetadata {
         U64 offset, size;

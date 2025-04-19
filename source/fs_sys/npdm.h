@@ -33,7 +33,7 @@ namespace FastNx::FsSys {
         U32 acidsize;
     };
 #pragma pack(pop)
-    static_assert(IsSizeMatch<Meta, 0x80>);
+    static_assert(IsSizeOf<Meta, 0x80>);
 
     class Npdm {
     public:

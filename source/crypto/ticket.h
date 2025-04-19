@@ -23,7 +23,7 @@ namespace FastNx::Crypto {
         U32 accountid;
         std::array<U8, 0x140 + 0xC> reserved1;
     };
-    static_assert(IsSizeMatch<TicketData, 0x180 + 0x140>);
+    static_assert(IsSizeOf<TicketData, 0x180 + 0x140>);
 #pragma pack(pop)
 
     enum class SignatureType : U32 {

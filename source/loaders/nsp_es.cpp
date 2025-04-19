@@ -5,7 +5,10 @@
 #include <kernel/kernel.h>
 #include <kernel/types/kprocess.h>
 
+#include <loaders/nsoexe.h>
 #include <loaders/nsp_es.h>
+
+
 namespace FastNx::Loaders {
     NspEs::NspEs(const FsSys::VfsBackingFilePtr &nspf, const std::shared_ptr<Horizon::KeySet> &keys, bool &isloaded) : AppLoader(nspf, isloaded, AppType::NspEs),
         _mainpfs(std::make_shared<FsSys::NxFmt::PartitionFileSystem>(nspf)) {
@@ -28,6 +31,8 @@ namespace FastNx::Loaders {
     void NspEs::LoadApplication(std::shared_ptr<Kernel::Types::KProcess> &kprocess) {
         auto &tables{kprocess->kernel.tables};
         tables.emplace(kprocess->kernel);
+
+        NsoExe::LoadModules(kprocess, subnsp->appdir->GetExefs());
 
         tables->CreateProcessMemory(subnsp->appdir->GetNpdm());
     }

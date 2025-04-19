@@ -10,6 +10,7 @@ namespace FastNx::Loaders {
     enum class AppType {
         None,
         NspEs,
+        NsoExe,
         GameFilesystem
     };
 

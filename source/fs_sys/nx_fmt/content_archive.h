@@ -34,7 +34,7 @@ namespace FastNx::FsSys::NxFmt {
         U32 end;
         U64 reserved;
     };
-    static_assert(IsSizeMatch<FsEntry, 0x10>);
+    static_assert(IsSizeOf<FsEntry, 0x10>);
 
     struct alignas(0x200) NcaHeader {
         Crypto::Rsa2048 rsaheader; // Signature over the data from offset 0x200 to 0x400
@@ -58,7 +58,7 @@ namespace FastNx::FsSys::NxFmt {
         std::array<std::array<U8, 0x20>, 4> listhashes;
         std::array<std::array<U8, 0x10>, 4> encKeyArea;
     };
-    static_assert(IsSizeMatch<NcaHeader, 0x400>);
+    static_assert(IsSizeOf<NcaHeader, 0x400>);
 
     enum class FsType : U8 {
         RomFs,
@@ -107,7 +107,7 @@ namespace FastNx::FsSys::NxFmt {
         std::array<U8, 0x20> masterhash;
         std::array<U8, 0x18> reserved1;
     };
-    static_assert(IsSizeMatch<IntegrityMetaInfo, 0xF8>);
+    static_assert(IsSizeOf<IntegrityMetaInfo, 0xF8>);
 
     struct HierarchicalSha256Data {
         std::array<U8, 0x20> masterhash;
@@ -120,7 +120,7 @@ namespace FastNx::FsSys::NxFmt {
         std::array<Region, 5> regions;
         std::array<U8, 0x80> reserved;
     };
-    static_assert(IsSizeMatch<HierarchicalSha256Data, 0xF8>);
+    static_assert(IsSizeOf<HierarchicalSha256Data, 0xF8>);
 
 
     struct FsHeader {
@@ -142,7 +142,7 @@ namespace FastNx::FsSys::NxFmt {
         std::array<U8, 0x30> hashdatainfo;
         std::array<U8, 0x30> reserved1;
     };
-    static_assert(IsSizeMatch<FsHeader, 0x200>);
+    static_assert(IsSizeOf<FsHeader, 0x200>);
 #pragma pack(pop)
 
 

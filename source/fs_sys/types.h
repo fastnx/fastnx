@@ -69,18 +69,13 @@ namespace FastNx::FsSys {
             const auto priviledge = [&] -> bool {
                 if (mode == FileModeType::ReadWrite)
                     return true;
-
                 if (mode == FileModeType::ReadOnly && Read)
                     return true;
                 if (mode == FileModeType::WriteOnly && !Read)
                     return true;
-
                 throw std::logic_error{"Unsupported file access mode"};
             }();
-            if (!priviledge)
-                return {};
-
-            if (!data && !size)
+            if (!priviledge || !data || !size)
                 return {};
             if constexpr (Read)
                 return ReadTypeImpl(data, size, offset);

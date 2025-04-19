@@ -14,6 +14,8 @@ target_sources(fastnx PRIVATE
     loaders/application_directory.h
     loaders/gamefs.cpp
     loaders/gamefs.h
+    loaders/nsoexe.cpp
+    loaders/nsoexe.h
     horizon/switch_ns.cpp
     horizon/switch_ns.h
     horizon/key_set.cpp

@@ -47,7 +47,8 @@ namespace FastNx::FsSys::Aes {
             return {};
         decrypt->Process(dest, dest, rbcount);
         if (auto aligment{offset % CtrSectorSize}) {
-            std::memmove(dest, dest + aligment, size - aligment);
+            if (static_cast<ssize_t>(size - aligment) > 0)
+                std::memmove(dest, dest + aligment, size - aligment);
 
             const auto slice{size % CtrSectorSize};
             if (slice + aligment > CtrSectorSize)
