@@ -3,15 +3,16 @@
 #include <kernel/types.h>
 
 namespace FastNx::FsSys {
-    struct Flags {
-        bool is64bitInstruction : 1;
-        Kernel::ProcessAddressSpace pas : 3;
-        bool optimizeallocations : 1;
-        bool disablepasmerge : 1;
-        bool enablealiasextrasize : 1; // [18.0.0+]
-        bool preventcodereads : 1; // [19.0.0+]
-    };
 #pragma pack(push, 1)
+    struct Flags {
+        bool is64bitInstruction: 1;
+        Kernel::ProcessAddressSpace pas: 3;
+        bool optimizeallocations: 1;
+        bool disablepasmerge: 1;
+        bool enablealiasextrasize: 1; // [18.0.0+]
+        bool preventcodereads: 1; // [19.0.0+]
+    };
+
     struct Meta {
         U32 magic; // Always "META"
         U32 signaturekey;
@@ -32,11 +33,13 @@ namespace FastNx::FsSys {
         U32 acidsize;
     };
 #pragma pack(pop)
+    static_assert(IsSizeMatch<Meta, 0x80>);
 
     class Npdm {
     public:
         explicit Npdm(const VfsBackingFilePtr &npdm);
 
         Flags procflags;
+        U32 stacksize;
     };
 }

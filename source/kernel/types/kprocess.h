@@ -9,7 +9,7 @@ namespace FastNx::Kernel::Types {
         explicit KProcess(Kernel &_kernel);
 
         U64 processId;
-        std::array<U64, 4> entropy;
+        ProcessEntropy entropy;
     private:
         void Destroyed() override;
     };

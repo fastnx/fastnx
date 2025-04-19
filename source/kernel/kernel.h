@@ -22,13 +22,13 @@ namespace FastNx::Kernel {
         std::shared_ptr<Types::KProcess> CreateProcess();
     private:
         U64 pidseed{InitialProcessId};
-        std::map<U64, std::array<U64, 4>> pidslist;
+        std::vector<std::pair<U64, const ProcessEntropy*>> pidslist;
 
         std::optional<Memory::KSlabHeap> userslabs;
         std::unique_ptr<Memory::DeviceLppd4> virtmem;
 
         std::list<std::shared_ptr<Types::KProcess>> liveprocs;
 
-        std::mutex idsMutex;
+        std::mutex pmutex;
     };
 }

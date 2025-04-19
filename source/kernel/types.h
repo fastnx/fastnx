@@ -1,5 +1,6 @@
 #pragma once
 
+#include <common/types.h>
 namespace FastNx::Kernel {
     class KAutoObject;
     class Kernel;
@@ -8,6 +9,8 @@ namespace FastNx::Kernel {
         class KThread;
         class KProcess;
     }
+
+    using ProcessEntropy = std::array<U64, 4>;
 
     constexpr auto InitialProcessId{0x51};
     constexpr auto MaximumProcessIds{300};

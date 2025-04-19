@@ -8,10 +8,13 @@ void FastNx::Runtime::GetEntropy(const std::span<U8> &buffer, const EngineType t
     mbedtls_entropy_context entropy;
     mbedtls_entropy_init(&entropy);
     if (type == EngineType::Mbedtls) {
-        mbedtls_entropy_func(&entropy, buffer.data(), buffer.size());
+        if (buffer.size() > MBEDTLS_ENTROPY_BLOCK_SIZE)
+            return;
+        if (mbedtls_entropy_func(&entropy, buffer.data(), buffer.size()))
+            std::memset(buffer.data(), 0, buffer.size());
     } else if (type == EngineType::Urandom) {
-        if (FsSys::ReFs::BufferedFile unrandom{"/dev/urandom"})
-            unrandom.ReadSome(ToSpan(buffer));
+        if (FsSys::ReFs::BufferedFile bytestape{"/dev/urandom"})
+            bytestape.ReadSome(ToSpan(buffer));
     }
     mbedtls_entropy_free(&entropy);
 

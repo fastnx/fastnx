@@ -17,6 +17,7 @@ namespace FastNx::FsSys {
             return;
 
         procflags = meta.flags;
+        stacksize = meta.mainthreadstack;
     }
 
 }
