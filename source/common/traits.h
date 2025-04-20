@@ -33,10 +33,10 @@ namespace FastNx {
     concept IsArrayType = is_array_v<T>;
 
     template<typename T>
-    concept IsFlatArray = IsVectorType<T> or IsArrayType<T>;
+    concept IsFlatArray = std::__detail::__is_span<T> || IsVectorType<T> || IsArrayType<T>;
 
     template<typename T, U64 Size>
-    concept IsSizeOf = sizeof(T) == Size and std::is_trivial_v<T>;
+    concept IsSizeOf = sizeof(T) == Size && std::is_trivial_v<T>;
 
     template<typename T>
     concept IsStringType = is_one_of<T, std::string, std::string_view>();

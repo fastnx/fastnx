@@ -3,7 +3,6 @@
 #include <filesystem>
 #include <vector>
 #include <cstring>
-#include <utility>
 
 #include <common/types.h>
 #include <common/traits.h>
@@ -43,17 +42,17 @@ namespace FastNx::FsSys {
 
         template<typename T = U8> requires (!IsVectorType<T>)
         std::vector<T> ReadSome(const U64 size, const U64 offset = 0) {
-            std::vector<T> _content(size);
-            NX_ASSERT(ReadTypeImpl(reinterpret_cast<U8*>(_content.data()), size, offset) == size);
-            return _content;
+            std::vector<T> content(size);
+            NX_ASSERT(ReadTypeImpl(reinterpret_cast<U8 *>(content.data()), size, offset) == size);
+            return content;
         }
         template<typename T>
         U64 ReadSome(const std::span<T> &content, const U64 offset = 0) {
-            return ReadTypeImpl(reinterpret_cast<U8*>(content.data()), content.size(), offset);
+            return ReadTypeImpl(reinterpret_cast<U8 *>(content.data()), content.size_bytes(), offset);
         }
         template<typename T>
         U64 WriteSome(const std::span<T> &content, const U64 offset = 0) {
-            return WriteTypeImpl(reinterpret_cast<const U8*>(content.data()), content.size(), offset);
+            return WriteTypeImpl(reinterpret_cast<const U8 *>(content.data()), content.size_bytes(), offset);
         }
         std::string ReadLine(U64 offset = {});
         std::vector<std::string> GetAllLines();

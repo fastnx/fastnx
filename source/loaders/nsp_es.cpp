@@ -5,34 +5,25 @@
 #include <kernel/kernel.h>
 #include <kernel/types/kprocess.h>
 
-#include <loaders/nso_fmt.h>
 #include <loaders/nsp_es.h>
-
 
 namespace FastNx::Loaders {
     NspEs::NspEs(const FsSys::VfsBackingFilePtr &nspf, const std::shared_ptr<Horizon::KeySet> &keys, bool &isloaded) : AppLoader(nspf, isloaded, AppType::NspEs),
-        _mainpfs(std::make_shared<FsSys::NxFmt::PartitionFileSystem>(nspf)) {
-        if (!IsAValidPfs(_mainpfs)) {
+        mainpfs(std::make_shared<FsSys::NxFmt::PartitionFileSystem>(nspf)) {
+        if (!IsAValidPfs(mainpfs)) {
             status = LoaderStatus::PfsNotFound;
             return;
         }
 
         AsyncLogger::Puts("Files in this PFS: \n");
-        for (const auto &partfile: _mainpfs->ListAllFiles()) {
+        for (const auto &partfile: mainpfs->ListAllFiles()) {
             AsyncLogger::Puts("- {}\n", FsSys::GetPathStr(partfile));
         }
 
-        subnsp = std::make_shared<FsSys::NxFmt::SubmissionPackage>(_mainpfs, keys);
+        subnsp = std::make_shared<FsSys::NxFmt::SubmissionPackage>(*this, keys);
 
         status = LoaderStatus::Success;
         Finish();
-    }
-
-    void NspEs::LoadApplication(std::shared_ptr<Kernel::Types::KProcess> &kprocess) {
-        auto &tables{kprocess->kernel.tables};
-        tables.emplace(kprocess->kernel);
-        NsoFmt::LoadModules(kprocess, subnsp->appdir->GetExefs());
-        tables->CreateProcessMemory(subnsp->appdir->GetNpdm());
     }
 
     std::vector<U8> ReadLogo(const FsSys::VfsBackingFilePtr &file) {

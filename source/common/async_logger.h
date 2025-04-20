@@ -41,6 +41,11 @@ namespace FastNx {
         static void Puts(const std::string &format) {
             logger->Puts("{}", format);
         }
+        static void ClearLine() {
+            const std::string_view logs{logger->fmtlists.data(), logger->fmtlists.size()};
+            if (const auto length{logs.find_last_of('\n')}; length != std::string::npos)
+                logger->fmtlists.resize(length + 1);
+        }
 
         template<typename ...Args>
         static void Success(const FormatWrapper &fmt, Args &&...args) {

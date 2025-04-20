@@ -80,9 +80,8 @@ namespace FastNx {
             return dest.size();
         } else {
             U64 count{};
-            for (const auto &[index, _]: std::views::enumerate(dest)) {
-                dest[index] = source[index];
-                count++;
+            for (; count < dest.size(); ++count) {
+                dest[count] = source[count];
             }
             return count;
         }

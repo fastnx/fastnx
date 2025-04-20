@@ -1,3 +1,4 @@
+#include <common/bytes.h>
 #include <loaders/gamefs.h>
 
 namespace FastNx::Loaders {
@@ -6,15 +7,18 @@ namespace FastNx::Loaders {
         if (!files->OpenFile("autofiles.txt"))
             return;
 
-        nextloader = std::make_shared<ApplicationDirectory>(files);
+        titleid = ToArrayOfBytes<8>(FsSys::GetPathStr(files->path), true);
+        appdir = std::make_shared<ApplicationDirectory>(files);
     }
 
-    void GameFs::LoadApplication([[maybe_unused]] std::shared_ptr<Kernel::Types::KProcess> &kprocess) {
-    }
     std::vector<U8> GameFs::GetLogo() {
+        if (const auto logo{appdir->GetExefs()->OpenFile("exefs/icon_AmericanEnglish.dat")})
+            return logo->ReadSome(logo->GetSize());
         return {};
     }
     U64 GameFs::GetTitleId() {
-        return {};
+        U64 integral;
+        std::memcpy(&integral, titleid.data(), sizeof(titleid));
+        return integral;
     }
 }

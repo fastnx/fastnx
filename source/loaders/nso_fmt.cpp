@@ -19,6 +19,7 @@ namespace FastNx::Loaders {
             return;
 
         NX_ASSERT(nsofront.modulenameoffset == sizeof(NsoHeader));
+        bsssize = nsofront.bsssize;
 
         const auto modulename{nso->ReadSome<char>(nsofront.modulenamesize, sizeof(NsoHeader))};
         if (strlen(modulename.data()))
@@ -43,7 +44,6 @@ namespace FastNx::Loaders {
         Finish();
     }
 
-    void NsoFmt::LoadApplication(std::shared_ptr<Kernel::Types::KProcess> &kprocess) {}
     void NsoFmt::GetSection(const BinarySection &section, const U32 compressed, NsoSectionType type) {
         if (secsmap.contains(type))
             return;
@@ -61,10 +61,11 @@ namespace FastNx::Loaders {
         if (type == NsoSectionType::Ro)
             if (const std::string rostrs{reinterpret_cast<const char *>(content.data()), content.size()}; !rostrs.empty())
                 PrintRo(rostrs);
+        secsalign.emplace_back(type, std::make_pair(section.memoryoffset, section.size));
         secsmap.emplace(type, std::move(content));
     }
 
-    void NsoFmt::LoadModules([[maybe_unused]] const std::shared_ptr<Kernel::Types::KProcess> &kprocess, const FsSys::VfsReadOnlyDirectoryPtr &exefs) {
+    std::vector<std::shared_ptr<NsoFmt>> NsoFmt::LoadModules(const FsSys::VfsReadOnlyDirectoryPtr &exefs) {
         // Like the linker, the binaries described in the exefs partition must be loaded in this order, if they exist
         static const std::vector<FsSys::FsPath> exepathlist{"rtld", "main", "subsdk0", "subsdk1", "subsdk2", "subsdk3", "subsdk4", "subsdk5", "subsdk6", "subsdk7", "subsdk8", "subsdk9", "sdk"};
 
@@ -74,6 +75,7 @@ namespace FastNx::Loaders {
             if (const auto nso{exefs->OpenFile("exefs" / nsofile)})
                 nsolist.emplace_back(std::make_shared<NsoFmt>(nso, loaded));
         }
+        return nsolist;
     }
 
     void NsoFmt::PrintRo(const std::string &strings) const {
@@ -92,9 +94,9 @@ namespace FastNx::Loaders {
                 modulepath.emplace(match.str());
         }
         std::string report;
-        report += fmt::format("Module: {} ", *modulepath);
+        report += fmt::format("Module Path: {} ", *modulepath);
 
-        static const boost::regex sdkregex{"SDK MW[ -~]"};
+        static const boost::regex sdkregex{"SDK MW[ -~]*"};
         static const boost::regex fsregex{"sdk_version: ([0-9.]*)"};
         if (boost::regex_search(strings, match, fsregex))
             report += fmt::format("FS SDK Version: {} ", match.str());
@@ -103,7 +105,7 @@ namespace FastNx::Loaders {
         if (itsdk != decltype(itsdk){})
             report += "SDK Libraries:";
         for (; itsdk != boost::sregex_iterator{}; ++itsdk) {
-            report += fmt::format(" {}", itsdk->str());
+            report += fmt::format(" {}", itsdk->str().substr(7));
         }
 
         AsyncLogger::Info("SDK versions of NSO module {}: {}", FsSys::GetPathStr(backing), report);

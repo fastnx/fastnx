@@ -10,13 +10,12 @@ namespace FastNx::Loaders {
     public:
         explicit NspEs(const FsSys::VfsBackingFilePtr &nspf, const std::shared_ptr<Horizon::KeySet> &keys, bool &isloaded);
 
-        void LoadApplication(std::shared_ptr<Kernel::Types::KProcess> &kprocess) override;
         std::vector<U8> GetLogo() override;
         U64 GetTitleId() override;
 
 
+        std::shared_ptr<FsSys::NxFmt::PartitionFileSystem> mainpfs;
     private:
-        std::shared_ptr<FsSys::NxFmt::PartitionFileSystem> _mainpfs;
         std::shared_ptr<FsSys::NxFmt::SubmissionPackage> subnsp;
     };
 }

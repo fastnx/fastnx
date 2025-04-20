@@ -1,6 +1,5 @@
 #include <boost/endian/detail/endian_reverse.hpp>
 #include <boost/container/small_vector.hpp>
-#include <boost/align/align_down.hpp>
 
 #include <common/container.h>
 #include <fs_sys/vfs/offset_file.h>

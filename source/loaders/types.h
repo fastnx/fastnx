@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fs_sys/types.h>
+#include <loaders/application_directory.h>
 
 namespace FastNx::Kernel::Types {
     class KProcess;
@@ -27,7 +28,6 @@ namespace FastNx::Loaders {
         explicit AppLoader(const FsSys::VfsBackingFilePtr &file, bool &loaded, const AppType _type) :
             backing(file), type(_type), isloaded(loaded) {}
 
-        virtual void LoadApplication(std::shared_ptr<Kernel::Types::KProcess> &kprocess) = 0;
         virtual std::vector<U8> GetLogo() {
             return {};
         }
@@ -36,6 +36,8 @@ namespace FastNx::Loaders {
         }
 
         const FsSys::VfsBackingFilePtr backing;
+        std::shared_ptr<ApplicationDirectory> appdir;
+
         const AppType type;
         LoaderStatus status{};
     protected:

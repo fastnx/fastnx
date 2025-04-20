@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <ranges>
 
 #include <common/exception.h>
 #include <loaders/nsp_es.h>
@@ -13,18 +12,18 @@ namespace FastNx::Horizon {
         kernel(std::make_shared<Kernel::Kernel>()) {}
 
     void SwitchNs::LoadApplicationFile(const FsSys::FsPath &apppath) {
-        const auto apploader{std::ranges::find_if(loaders, [&](const auto &loader) {
-            if (FsSys::GetPathStr(loader->backing) == apppath)
-                return true;
-            return false;
-        })};
-
-        if (apploader == loaders.end())
-            throw exception{"Could not load the ROM due to: {}", GetLoaderPrettyString(application)};
-        application = *apploader;
-
-        auto kprocess{kernel->CreateProcess()};
-        application->LoadApplication(kprocess);
+        for (const auto &apploader: loaders) {
+            if (FsSys::GetPathStr(apploader->backing) == apppath)
+                loader = apploader;
+        }
+        if (!loader)
+            return;
+        if (loader->status != Loaders::LoaderStatus::Success) {
+            throw exception{"Failed to load the application due to: {}", GetLoaderPrettyString(loader)};
+        }
+        if (!procloader)
+            procloader.emplace(shared_from_this());
+        procloader->Load();
     }
 
     void SwitchNs::GetLoaders(const std::vector<FsSys::FsPath> &apps) {

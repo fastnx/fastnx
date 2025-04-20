@@ -7,10 +7,10 @@
 #include <fs_sys/linkable_directory.h>
 #include <fs_sys/nx_fmt/submission_package.h>
 
-
+#include <loaders/nsp_es.h>
 
 namespace FastNx::FsSys::NxFmt {
-    SubmissionPackage::SubmissionPackage(const std::shared_ptr<PartitionFileSystem> &pfs, const std::shared_ptr<Horizon::KeySet> &_keys) : files(pfs), keys(_keys)  {
+    SubmissionPackage::SubmissionPackage(Loaders::NspEs &nsp, const std::shared_ptr<Horizon::KeySet> &_keys) : pfs(nsp.mainpfs), keys(_keys)  {
         auto files{pfs->ListAllFiles()};
 
         for (auto subit{files.begin()}; subit != files.end() && !cnmt; ++subit) {
@@ -30,13 +30,13 @@ namespace FastNx::FsSys::NxFmt {
                 files.erase(subit);
         }
 
-        GetAll(cnmt, files);
+        GetAll(nsp, cnmt, files);
 
         if (corrupted)
             AsyncLogger::Error("The NCA file {} is corrupted, check your ROM", GetPathStr(corrupted));
     }
 
-    void SubmissionPackage::GetAll(const VfsBackingFilePtr &cnmt, const std::vector<FsPath> &content) {
+    void SubmissionPackage::GetAll(Loaders::NspEs &nsp, const VfsBackingFilePtr &cnmt, const std::vector<FsPath> &content) {
         NX_ASSERT(cnmt && cnmt->GetSize() > 0);
 
         Cnmt categorizer(cnmt);
@@ -44,7 +44,7 @@ namespace FastNx::FsSys::NxFmt {
         for (const auto &validfile: content) {
             if (corrupted || validfile.extension() != ".nca")
                 continue;
-            if (const auto ncafile{files->OpenFile(validfile)}) {
+            if (const auto ncafile{pfs->OpenFile(validfile)}) {
                 if (!Crypto::CheckNcaIntegrity(ncafile))
                     corrupted = ncafile;
 
@@ -59,7 +59,7 @@ namespace FastNx::FsSys::NxFmt {
 
         NX_ASSERT(ncalist.begin()->second->size > 0);
 
-        appdir = [&] -> std::shared_ptr<Loaders::ApplicationDirectory> {
+        nsp.appdir = [&] -> std::shared_ptr<Loaders::ApplicationDirectory> {
             auto directory{std::make_shared<LinkableDirectory>(std::format("{:X}", titleid))};
             if (!directory)
                 return nullptr;

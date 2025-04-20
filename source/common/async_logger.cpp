@@ -42,11 +42,11 @@ namespace FastNx {
 
     void AsyncLogger::FlushBuffers() {
         std::shared_lock guard(lock);
-        for (U64 _offset{}; _offset < fmtlists.size() && count; count--) {
-            const auto *begin{fmtlists.begin() + _offset};
+        for (U64 offset{}; offset < fmtlists.size() && count; count--) {
+            const auto *begin{fmtlists.begin() + offset};
             const std::string_view line(begin, strchr(begin, '\n') + 1);
-            backing->WriteType(line.data(), line.size(), _offset);
-            _offset += line.size();
+            backing->WriteType(line.data(), line.size(), offset);
+            offset += line.size();
         }
         NX_ASSERT(count == 0);
         fmtlists.clear();
@@ -54,7 +54,7 @@ namespace FastNx {
 
     void AsyncLogger::Log(std::string &&fmtmsg) {
         fmt::format_to(std::back_inserter(fmtlists), "{}", std::move(fmtmsg));
-        if (fmtlists.size() && *(fmtlists.end() - 1)  == '\n')
+        if (fmtlists.size() && *(fmtlists.end() - 1) == '\n')
             count++;
     }
 

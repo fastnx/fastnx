@@ -26,7 +26,7 @@ namespace FastNx::Loaders {
         U32 modulenamesize;
         BinarySection datasection;
 
-        U32 bssSize;
+        U32 bsssize; // .bss
 
         std::array<U8, 0x20> moduleid;
         // Size of the compressed sections on disk
@@ -55,11 +55,11 @@ namespace FastNx::Loaders {
     public:
         NsoFmt(const FsSys::VfsBackingFilePtr &nso, bool &loaded);
 
-        void LoadApplication(std::shared_ptr<Kernel::Types::KProcess> &kprocess) override;
-
         std::unordered_map<NsoSectionType, std::vector<U8>> secsmap;
+        std::vector<std::pair<NsoSectionType, std::pair<U32, U32>>> secsalign;
 
-        static void LoadModules(const std::shared_ptr<Kernel::Types::KProcess> &kprocess, const FsSys::VfsReadOnlyDirectoryPtr &exefs);
+        U64 bsssize{};
+        static std::vector<std::shared_ptr<NsoFmt>> LoadModules(const FsSys::VfsReadOnlyDirectoryPtr &exefs);
     private:
         void PrintRo(const std::string &strings) const;
         void GetSection(const BinarySection &section, U32 compressed, NsoSectionType type);

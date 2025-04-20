@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include <common/types.h>
 namespace FastNx::Kernel {
     class KAutoObject;
@@ -18,6 +20,13 @@ namespace FastNx::Kernel {
     struct MemoryDescriptor {
         void *begin{nullptr};
         void *end{nullptr};
+    };
+
+    struct ProcessCodeLayout {
+        U64 start;
+        U64 offset;
+
+        std::vector<U8> binaryimage; // Image of all binaries that will be loaded into the device's memory
     };
 
     enum class ProcessAddressSpace {

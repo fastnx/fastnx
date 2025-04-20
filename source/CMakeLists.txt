@@ -22,6 +22,8 @@ target_sources(fastnx PRIVATE
     horizon/key_set.h
     horizon/nx_apps.cpp
     horizon/nx_apps.h
+    horizon/process_loader.cpp
+    horizon/process_loader.h
     common/bytes.h
     common/container.h
     common/traits.h
@@ -56,6 +58,7 @@ target_sources(fastnx PRIVATE
     kernel/types/kprocess.h
     kernel/types/kprocess.cpp
     kernel/types/kprocess.h
+    kernel/svc/types.h
     runtime/spin_lock.cpp
     runtime/spin_lock.h
     runtime/entropy.cpp
