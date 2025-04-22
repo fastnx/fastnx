@@ -5,7 +5,6 @@ target_include_directories(fastnx PRIVATE
 )
 
 target_sources(fastnx PRIVATE
-    common/main.cpp
     loaders/nsp_es.cpp
     loaders/nsp_es.h
     loaders/app_types.cpp
@@ -24,6 +23,8 @@ target_sources(fastnx PRIVATE
     horizon/nx_apps.h
     horizon/process_loader.cpp
     horizon/process_loader.h
+    common/main.cpp
+    common/format.h
     common/bytes.h
     common/container.h
     common/traits.h
@@ -56,8 +57,8 @@ target_sources(fastnx PRIVATE
     kernel/memory/kpage_table.h
     kernel/types/kprocess.cpp
     kernel/types/kprocess.h
-    kernel/types/kprocess.cpp
-    kernel/types/kprocess.h
+    kernel/types/kthread.cpp
+    kernel/types/kthread.h
     kernel/svc/types.h
     runtime/spin_lock.cpp
     runtime/spin_lock.h

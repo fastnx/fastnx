@@ -21,7 +21,7 @@ namespace FastNx::Kernel::Svc {
         union {
             struct {
                 bool is64bitinstruction: 1;
-                ProcessAddressSpace pas: 3;
+                ProcessAddressSpace addrspace: 3;
                 bool enbdebug: 1;
                 bool enbaslr: 1;
                 bool isapplication: 1;

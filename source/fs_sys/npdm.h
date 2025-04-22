@@ -6,7 +6,7 @@ namespace FastNx::FsSys {
 #pragma pack(push, 1)
     struct Flags {
         bool is64bitInstruction: 1;
-        Kernel::ProcessAddressSpace pas: 3;
+        Kernel::ProcessAddressSpace addrspace: 3;
         bool optimizeallocations: 1;
         bool disablepasmerge: 1;
         bool enablealiasextrasize: 1; // [18.0.0+]

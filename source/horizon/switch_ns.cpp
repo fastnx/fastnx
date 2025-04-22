@@ -5,7 +5,9 @@
 #include <loaders/gamefs.h>
 #include <horizon/switch_ns.h>
 
+#include <fs_sys/nacp.h>
 #include <fs_sys/refs/huge_file.h>
+
 
 namespace FastNx::Horizon {
     SwitchNs::SwitchNs(const std::shared_ptr<KeySet> &ks) : keys(ks),
@@ -21,6 +23,11 @@ namespace FastNx::Horizon {
         if (loader->status != Loaders::LoaderStatus::Success) {
             throw exception{"Failed to load the application due to: {}", GetLoaderPrettyString(loader)};
         }
+
+        if (const auto exefs{loader->appdir->GetExefs()})
+            if (const auto control{exefs->OpenFile("exefs/control.nacp")})
+                [[maybe_unused]] FsSys::Nacp nacp(control);
+
         if (!procloader)
             procloader.emplace(shared_from_this());
         procloader->Load();

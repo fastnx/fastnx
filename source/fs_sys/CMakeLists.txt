@@ -13,6 +13,8 @@ target_sources(fastnx PRIVATE
     linkable_directory.h
     npdm.cpp
     npdm.h
+    nacp.cpp
+    nacp.h
     vfs/regex_file.cpp
     vfs/regex_file.h
     vfs/offset_file.cpp

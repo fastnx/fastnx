@@ -22,12 +22,10 @@ namespace FastNx::Horizon {
                 if (std::span codeout{codeset.binaryimage.data() + baseoffset, size}; codeout.size())
                     Copy(codeout, nso->secsmap[type]);
             }
+            // The size of the data section is aligned together with the size of the .bss section
             const bool isdata{type == Loaders::NsoSectionType::Data};
             AsyncLogger::Puts("{}: {:016X}, ", isdata ? ".data" : type == Loaders::NsoSectionType::Text ? ".text" : ".ro", baseoffset);
-            if (isdata) // The size of the data section is aligned together with the size of the .bss section
-                baseoffset += boost::alignment::align_up(size + nso->bsssize, Kernel::SwitchPageSize);
-            else
-                baseoffset += boost::alignment::align_up(size, Kernel::SwitchPageSize);
+            baseoffset += boost::alignment::align_up(isdata ? size + nso->bsssize : size, Kernel::SwitchPageSize);
         }
         if (!copyimage)
             AsyncLogger::ClearLine();
@@ -68,15 +66,15 @@ namespace FastNx::Horizon {
                 GetCodeSet(codeset, nsomodule, true);
         }
 
-        AsyncLogger::Info("Aligned binary layout size: {}", FormatSize{codeset.binaryimage});
-        Kernel::Svc::CreateProcessParameter process{};
-        std::memcpy(&process.flagsint, &npdm->procflags, 1);
+        AsyncLogger::Info("Process memory layout size: {}", FormatSize{codeset.binaryimage});
+        Kernel::Svc::CreateProcessParameter parameters{};
+        std::memcpy(&parameters.flagsint, &npdm->procflags, 1);
 
-        process.codestart = codeset.start;
+        parameters.codestart = codeset.start;
         if (codeset.offset)
-            process.codenumpages = (codeset.offset - codeset.start) / Kernel::SwitchPageSize;
-        process.titleid = loader->GetTitleId();
+            parameters.codenumpages = (codeset.offset - codeset.start) / Kernel::SwitchPageSize;
+        parameters.titleid = loader->GetTitleId();
 
-        // tables->InitilizeMemoryForProcess(process, codeset);
+        tables->CreateForProcess(process, parameters, codeset);
     }
 }

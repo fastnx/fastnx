@@ -108,6 +108,6 @@ namespace FastNx::Loaders {
             report += fmt::format(" {}", itsdk->str().substr(7));
         }
 
-        AsyncLogger::Info("SDK versions of NSO module {}: {}", FsSys::GetPathStr(backing), report);
+        AsyncLogger::Info("List of SDKs used by the NSO module {}: {}", FsSys::GetPathStr(backing), report);
     }
 }
