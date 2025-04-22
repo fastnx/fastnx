@@ -12,7 +12,7 @@ namespace FastNx::Horizon {
         std::shared_ptr<Kernel::Types::KProcess> process;
 
     private:
-        static void GetCodeSet(Kernel::ProcessCodeLayout &codeset, const std::shared_ptr<Loaders::NsoFmt> &nso, bool copyimage = false);
+        static void GetCodeSet(Kernel::ProcessCodeLayout &codeset, const std::shared_ptr<Loaders::NsoFmt> &nso);
 
         const std::shared_ptr<SwitchNs> switchnx;
     };

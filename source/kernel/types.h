@@ -1,5 +1,6 @@
 #pragma once
 
+#include <list>
 #include <vector>
 
 #include <common/types.h>
@@ -17,16 +18,12 @@ namespace FastNx::Kernel {
     constexpr auto InitialProcessId{0x51};
     constexpr auto MaximumProcessIds{300};
 
-    struct MemoryDescriptor {
-        void *begin{nullptr};
-        void *end{nullptr};
-    };
-
     struct ProcessCodeLayout {
         U64 start;
         U64 offset;
 
-        std::vector<U8> binaryimage; // Image of all binaries that will be loaded into the device's memory
+        std::list<std::pair<U64, std::vector<U8>>> procimage; // The entire process image that will be loaded into the kernel code section
+        std::list<U64> bsslayoutsize;
     };
 
     enum class ProcessAddressSpace {

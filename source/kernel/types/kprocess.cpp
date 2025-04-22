@@ -1,11 +1,11 @@
-#include <runtime/entropy.h>
 #include <kernel/kernel.h>
 #include <kernel/types/kprocess.h>
 
+#include <runtime/entropy.h>
 namespace FastNx::Kernel::Types {
-    KProcess::KProcess(Kernel &_kernel) : KSynchronizationObject(KAutoType::KProcess, _kernel) {
-        Runtime::GetEntropy(std::span{reinterpret_cast<U8* >(entropy.data()), entropy.size() * sizeof(U64)});
-        processId = kernel.GetPid(*this);
+    KProcess::KProcess(Kernel &_kernel) : KSynchronizationObject(KAutoType::KProcess, _kernel), memory(kernel.memory) {
+        Runtime::GetEntropy(entropy);
+        processid = kernel.GetPid(entropy);
     }
 
     void KProcess::Destroyed() {

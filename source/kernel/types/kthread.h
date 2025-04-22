@@ -5,6 +5,6 @@ namespace FastNx::Kernel::Types {
     public:
         explicit KThread(Kernel &_kernel) : KSynchronizationObject(KAutoType::KThread, _kernel) {}
 
-        std::list<KSynchronizationObject*> syncobjs;
+        std::list<KSynchronizationObject *> syncobjs;
     };
 }

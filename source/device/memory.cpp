@@ -36,6 +36,16 @@ namespace FastNx::Device {
         return result;
     }
 
+    void *AllocateGuestMemory(const U64 &size, void *fixed) {
+        constexpr auto prots{PROT_READ | PROT_WRITE};
+        constexpr auto flags{MAP_NORESERVE | MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED};
+
+        const auto result{mmap(fixed, size, prots, flags, -1, 0)};
+        if (result == MAP_FAILED)
+            throw std::bad_alloc{};
+        return result;
+    }
+
     void FreeMemory(void *allocated, U64 size) {
         size = boost::alignment::align_up(size, GetHostPageSize());
 

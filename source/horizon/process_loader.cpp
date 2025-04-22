@@ -11,37 +11,31 @@
 
 
 namespace FastNx::Horizon {
-    void ProcessLoader::GetCodeSet(Kernel::ProcessCodeLayout &codeset, const std::shared_ptr<Loaders::NsoFmt> &nso, const bool copyimage) {
+    void ProcessLoader::GetCodeSet(Kernel::ProcessCodeLayout &codeset, const std::shared_ptr<Loaders::NsoFmt> &nso) {
         auto baseoffset{codeset.offset};
 
         AsyncLogger::Puts("Loading NSO: {:^8}", GetPathStr(nso->backing));
         for (const auto &[type, section]: nso->secsalign) {
             const auto [offset, size] = section;
 
-            if (copyimage) {
-                if (std::span codeout{codeset.binaryimage.data() + baseoffset, size}; codeout.size())
-                    Copy(codeout, nso->secsmap[type]);
-            }
+            codeset.procimage.emplace_back(baseoffset, std::move(nso->secsmap[type]));
+
             // The size of the data section is aligned together with the size of the .bss section
             const bool isdata{type == Loaders::NsoSectionType::Data};
+            if (isdata)
+                codeset.bsslayoutsize.emplace_back(nso->bsssize);
             AsyncLogger::Puts("{}: {:016X}, ", isdata ? ".data" : type == Loaders::NsoSectionType::Text ? ".text" : ".ro", baseoffset);
+
             baseoffset += boost::alignment::align_up(isdata ? size + nso->bsssize : size, Kernel::SwitchPageSize);
         }
-        if (!copyimage)
-            AsyncLogger::ClearLine();
-        else
-            AsyncLogger::Puts("\n");
-
+        AsyncLogger::Puts("\n");
         codeset.offset = baseoffset;
     }
 
     void ProcessLoader::Load() {
-        if (const auto kernel{switchnx->kernel})
-            process = kernel->CreateProcess();
+        if (const auto &kernel{switchnx->kernel})
+            process = kernel->CreateKProcess();
 
-        auto &tables{process->kernel.tables};
-        if (!tables)
-            tables.emplace(process->kernel);
 
         const auto loader{switchnx->loader};
         std::optional<FsSys::Npdm> npdm;
@@ -51,7 +45,6 @@ namespace FastNx::Horizon {
         Kernel::ProcessCodeLayout codeset{};
 
         if (loader->type == Loaders::AppType::NspEs) {
-            Kernel::ProcessCodeLayout maskset{}; // Mask used to discover the total size and alignment of the binaries
 
             const auto exefs{loader->appdir->GetExefs()};
             const auto modules{Loaders::NsoFmt::LoadModules(exefs)};
@@ -59,14 +52,15 @@ namespace FastNx::Horizon {
             if (const auto rtld{modules.front()})
                 codeset.start = rtld->secsalign.front().second.first;
             for (const auto &nsomodule: modules)
-                GetCodeSet(maskset, nsomodule);
-
-            codeset.binaryimage.resize(maskset.offset);
-            for (const auto &nsomodule: modules)
-                GetCodeSet(codeset, nsomodule, true);
+                GetCodeSet(codeset, nsomodule);
         }
 
-        AsyncLogger::Info("Process memory layout size: {}", FormatSize{codeset.binaryimage});
+        const auto processize = [&] -> U64 {
+            if (!codeset.procimage.empty())
+                return codeset.offset;
+            return {};
+        }();
+        AsyncLogger::Info("Process memory layout size: {}", FormatSize{processize});
         Kernel::Svc::CreateProcessParameter parameters{};
         std::memcpy(&parameters.flagsint, &npdm->procflags, 1);
 
@@ -75,6 +69,9 @@ namespace FastNx::Horizon {
             parameters.codenumpages = (codeset.offset - codeset.start) / Kernel::SwitchPageSize;
         parameters.titleid = loader->GetTitleId();
 
-        tables->CreateForProcess(process, parameters, codeset);
+        parameters.enbaslr = true;
+
+        auto &memory{switchnx->kernel->memory};
+        memory.InitializeProcessMemory(parameters);
     }
 }

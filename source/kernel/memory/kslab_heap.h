@@ -2,19 +2,18 @@
 
 #include <list>
 #include <common/types.h>
-#include <kernel/types.h>
 
 
 namespace FastNx::Kernel::Memory {
     // 5.0.0
     class KSlabHeap {
     public:
-        KSlabHeap(const MemoryDescriptor &region, U64 itemsize);
+        KSlabHeap(const std::span<U8> &_slabfd, U64 itemsize);
 
         void *Allocate();
         void Free(void *pointer);
     private:
-        const MemoryDescriptor region;
+        const std::span<U8> slabfd;
         std::list<void *> objects;
     };
 }

@@ -3,7 +3,7 @@
 #include <common/traits.h>
 
 struct FormatSize {
-    FormatSize() = default;
+    explicit FormatSize(const size_t size) : value(size) {}
 
     template<typename T>
     explicit FormatSize(const T &container) {

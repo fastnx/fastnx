@@ -8,8 +8,11 @@ namespace FastNx::Kernel::Types {
     public:
         explicit KProcess(Kernel &_kernel);
 
-        U64 processId;
+        U64 processid;
         ProcessEntropy entropy;
+
+        Memory::KMemory &memory;
+        std::span<U8> procfd;
     private:
         void Destroyed() override;
     };
