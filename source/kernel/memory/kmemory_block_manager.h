@@ -23,9 +23,9 @@ namespace FastNx::Kernel::Memory {
     public:
         KMemoryBlockManager() = default;
 
-        void Initialize(const std::span<U8> &_blockfd);
+        void Initialize(const std::span<U8> &addrspace);
 
         std::unordered_map<U8 *, KMemoryBlock> treemap;
-        std::span<U8> blockfd;
+        std::span<U8> basemem;
     };
 }

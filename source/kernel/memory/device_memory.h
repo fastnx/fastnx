@@ -10,7 +10,7 @@ namespace FastNx::Kernel::Memory {
         ~DeviceMemory();
 
         std::span<U8> GetSpan(U64 baseaddr = {}, U64 offset = {}, bool ishost = false) const;
-        bool InitializeGuestAs(std::span<U8> &addrspace);
+        std::span<U8> InitializeGuestAs(U64 aswidth);
     private:
         U64 size{SwitchMemorySize};
         U8 *hostptr{nullptr};

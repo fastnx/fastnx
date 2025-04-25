@@ -1,15 +1,15 @@
 #include <kernel/types.h>
 #include <kernel/memory/kmemory_block_manager.h>
 
-void FastNx::Kernel::Memory::KMemoryBlockManager::Initialize(const std::span<U8> &_blockfd) {
-    if (_blockfd.empty())
+void FastNx::Kernel::Memory::KMemoryBlockManager::Initialize(const std::span<U8> &addrspace) {
+    if (addrspace.empty())
         return;
-    blockfd = _blockfd;
+    basemem = addrspace;
 
-    const auto count{static_cast<U64>(blockfd.end() - blockfd.begin()) / SwitchPageSize};
+    const auto count{static_cast<U64>(basemem.end() - basemem.begin()) / SwitchPageSize};
     KMemoryBlock block{
         .pagescount = count,
         .state = MemoryType::Free
     };
-    treemap.insert_or_assign(blockfd.begin().base(), block);
+    treemap.insert_or_assign(basemem.begin().base(), block);
 }

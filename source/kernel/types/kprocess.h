@@ -12,7 +12,7 @@ namespace FastNx::Kernel::Types {
         ProcessEntropy entropy;
 
         Memory::KMemory &memory;
-        std::span<U8> procfd;
+        std::span<U8> procmem;
     private:
         void Destroyed() override;
     };

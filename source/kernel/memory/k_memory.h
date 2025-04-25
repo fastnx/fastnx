@@ -19,20 +19,21 @@ namespace FastNx::Kernel::Memory {
         explicit KMemory(Kernel &_kernel);
         void InitializeProcessMemory(const Svc::CreateProcessParameter &proccfg);
 
-        // ReSharper disable once CppMemberFunctionMayBeConst
         auto *GetSegment(const SegmentType type) {
-            if (type == SegmentType::Code)
-                return &code;
-            if (type == SegmentType::Alias)
-                return &alias;
-            if (type == SegmentType::Heap)
-                return &heap;
-            if (type == SegmentType::Stack)
-                return &stack;
-            if (type == SegmentType::TlsIo)
-                return &tlsio;
-
-            std::unreachable();
+            switch (type) {
+                case SegmentType::Code:
+                    return &code;
+                case SegmentType::Alias:
+                    return &alias;
+                case SegmentType::Heap:
+                    return &heap;
+                case SegmentType::Stack:
+                    return &stack;
+                case SegmentType::TlsIo:
+                    return &tlsio;
+                default:
+                    std::unreachable();
+            }
         }
 
         std::span<U8> addrspace;

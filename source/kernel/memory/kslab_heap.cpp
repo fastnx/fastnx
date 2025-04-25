@@ -3,9 +3,9 @@
 
 
 namespace FastNx::Kernel::Memory {
-    KSlabHeap::KSlabHeap(const std::span<U8> &_slabfd, const U64 itemsize) : slabfd(_slabfd) {
-        auto *begin{slabfd.begin().base()};
-        const auto *end{slabfd.end().base()};
+    KSlabHeap::KSlabHeap(const std::span<U8> &slabbase, const U64 itemsize) : slabmem(slabbase) {
+        auto *begin{slabmem.begin().base()};
+        const auto *end{slabmem.end().base()};
         for (auto *itemlist{begin}; itemlist < end; itemlist += itemsize) {
             objects.emplace_back(itemlist);
         }
@@ -22,7 +22,7 @@ namespace FastNx::Kernel::Memory {
         return object;
     }
     void KSlabHeap::Free(void *pointer) {
-        if (slabfd.begin().base() >= pointer && pointer < slabfd.end().base())
+        if (slabmem.begin().base() >= pointer && pointer < slabmem.end().base())
             objects.emplace_front(pointer);
         else
             throw exception{"This object does not belong to this slab"};

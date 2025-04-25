@@ -16,7 +16,7 @@ namespace FastNx::Kernel {
     public:
         Kernel();
         U64 GetPid(const ProcessEntropy &processent);
-        std::map<U64, KAutoObject*> autorefs;
+        std::map<U64, KAutoObject *> autorefs;
 
 
         std::shared_ptr<Types::KProcess> CreateKProcess();
@@ -25,7 +25,7 @@ namespace FastNx::Kernel {
 
     private:
         U64 pidseed{InitialProcessId};
-        std::vector<std::pair<U64, const ProcessEntropy*>> pidslist;
+        std::vector<std::pair<U64, const ProcessEntropy *>> pidslist;
 
         std::optional<Memory::KSlabHeap> userslabs;
         std::list<std::shared_ptr<Types::KProcess>> liveprocs;

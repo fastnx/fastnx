@@ -39,11 +39,9 @@ namespace FastNx::Kernel::Memory {
 
     void KMemory::InitializeProcessMemory(const Svc::CreateProcessParameter &proccfg) {
         const auto width{GetWidthAs(proccfg.addrspace)};
-
         if (width < 39)
             return;
-        addrspace = std::span{static_cast<U8 *>(nullptr), 1ULL << width};
-        kernel.host->InitializeGuestAs(addrspace);
+        addrspace = kernel.host->InitializeGuestAs(1ULL << width);
 
         switch (width) {
             case 39:
@@ -64,7 +62,7 @@ namespace FastNx::Kernel::Memory {
 
         for (const auto &[type, offset]: aslrlist) {
             if (auto *segment{GetSegment(type)}; !segment->empty())
-                *segment = std::span{segment->begin().base() + offset, code.size()};
+                *segment = std::span{segment->begin().base() + offset, segment->size()};
         }
 
         ptblocks.Initialize(addrspace);
