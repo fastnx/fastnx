@@ -19,6 +19,10 @@ namespace FastNx::Kernel::Memory {
         explicit KMemory(Kernel &_kernel);
         void InitializeProcessMemory(const Svc::CreateProcessParameter &proccfg);
 
+        void MapCodeMemory(U64 begin, const std::vector<U8> &content);
+        void SetMemoryPermission(U64 begin, U64 _size, U32 permission);
+        void FillMemory(U64 begin, U8 constant, U64 size);
+
         auto *GetSegment(const SegmentType type) {
             switch (type) {
                 case SegmentType::Code:

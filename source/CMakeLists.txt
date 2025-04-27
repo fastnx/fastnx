@@ -33,6 +33,8 @@ target_sources(fastnx PRIVATE
     common/exception.h
     common/async_logger.cpp
     common/async_logger.h
+    common/memory.cpp
+    common/memory.h
     device/processor.cpp
     device/syslimits.cpp
     device/pages.cpp
@@ -47,8 +49,6 @@ target_sources(fastnx PRIVATE
     kernel/kauto_object.h
     kernel/ksynchronization_object.cpp
     kernel/ksynchronization_object.h
-    kernel/memory/device_memory.cpp
-    kernel/memory/device_memory.h
     kernel/memory/k_memory.cpp
     kernel/memory/k_memory.h
     kernel/memory/kmemory_block_manager.cpp

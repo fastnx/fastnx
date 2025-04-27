@@ -8,6 +8,8 @@ namespace FastNx::Horizon {
     public:
         explicit ProcessLoader(const std::shared_ptr<SwitchNs> &nx) : switchnx(nx) {}
 
+        void SetProcessMemory(Kernel::ProcessCodeLayout &&codeset) const;
+
         void Load();
         std::shared_ptr<Kernel::Types::KProcess> process;
 

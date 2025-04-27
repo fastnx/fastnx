@@ -32,6 +32,39 @@ namespace FastNx::Horizon {
         codeset.offset = baseoffset;
     }
 
+    void ProcessLoader::SetProcessMemory(Kernel::ProcessCodeLayout &&codeset) const {
+        const U64 startoffset{codeset.start};
+        U64 bintype{};
+        NX_ASSERT(codeset.procimage.size() % 3 == 0);
+
+        for (const auto &[offset, content]: codeset.procimage) {
+            const auto size{boost::alignment::align_up(content.size(), Kernel::SwitchPageSize)};
+            process->memory.MapCodeMemory(startoffset + offset, content);
+
+            const auto permission = [&] {
+                if (!bintype)
+                    return Kernel::Permission::Text;
+                if (bintype == 1)
+                    return Kernel::Permission::Ro;
+                return Kernel::Permission::Data;
+            }();
+
+            process->memory.SetMemoryPermission(startoffset + offset, size, permission);
+
+            if (permission != Kernel::Permission::Data)
+                continue;
+
+            const auto bssoffset{size};
+            process->memory.FillMemory(bssoffset, 0, codeset.bsslayoutsize.front());
+            codeset.bsslayoutsize.pop_front();
+            bintype = 0;
+        }
+    }
+
+    bool ValidateSet(const Kernel::ProcessCodeLayout &codeset) {
+        return codeset.offset && !codeset.procimage.empty() && !codeset.bsslayoutsize.empty();
+    }
+
     void ProcessLoader::Load() {
         if (const auto &kernel{switchnx->kernel})
             process = kernel->CreateKProcess();
@@ -73,5 +106,8 @@ namespace FastNx::Horizon {
 
         auto &memory{switchnx->kernel->memory};
         memory.InitializeProcessMemory(parameters);
+
+        if (ValidateSet(codeset))
+            SetProcessMemory(std::move(codeset));
     }
 }

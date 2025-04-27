@@ -3,7 +3,7 @@
 #include <memory>
 #include <mutex>
 
-#include <kernel/memory/device_memory.h>
+#include <common/memory.h>
 #include <kernel/memory/kslab_heap.h>
 #include <kernel/memory/k_memory.h>
 #include <kernel/types/kprocess.h>
@@ -20,7 +20,7 @@ namespace FastNx::Kernel {
 
 
         std::shared_ptr<Types::KProcess> CreateKProcess();
-        std::unique_ptr<Memory::DeviceMemory> host;
+        std::shared_ptr<SysVirtMemory> devlink;
         Memory::KMemory memory;
 
     private:

@@ -1,4 +1,5 @@
 #include <chrono>
+#include <cstring>
 #include <random>
 
 #include <boost/align/align_up.hpp>
@@ -41,7 +42,7 @@ namespace FastNx::Kernel::Memory {
         const auto width{GetWidthAs(proccfg.addrspace)};
         if (width < 39)
             return;
-        addrspace = kernel.host->InitializeGuestAs(1ULL << width);
+        ptblocks.Initialize(addrspace, 1ULL << width, kernel);
 
         switch (width) {
             case 39:
@@ -64,10 +65,38 @@ namespace FastNx::Kernel::Memory {
             if (auto *segment{GetSegment(type)}; !segment->empty())
                 *segment = std::span{segment->begin().base() + offset, segment->size()};
         }
-
-        ptblocks.Initialize(addrspace);
     }
 
+    void KMemory::MapCodeMemory(const U64 begin, const std::vector<U8> &content) {
+        U8 *memory{code.begin().base() + begin};
+        const auto size{boost::alignment::align_up(content.size(), SwitchPageSize)};
 
+        ptblocks.Map({memory, KMemoryBlock{
+            .pagescount = size / SwitchPageSize,
+            .state = MemoryTypeValues::Code
+        }});
+        std::memcpy(memory, content.data(), content.size());
+    }
 
+    void KMemory::SetMemoryPermission(const U64 begin, const U64 _size, const U32 permission) {
+        U8 *memory{code.begin().base() + begin};
+        const auto size{boost::alignment::align_up(_size, SwitchPageSize)};
+
+        auto callback = [&](KMemoryBlock &block) {
+            if (block.state.code)
+                block.permission = permission;
+        };
+
+        ptblocks.ForEach({memory, KMemoryBlock{
+            .pagescount = size / SwitchPageSize,
+        }}, callback);
+    }
+
+    void KMemory::FillMemory(const U64 begin, const U8 constant, const U64 size) {
+        U8 *memory{code.begin().base() + begin};
+
+        if (ptblocks.IsMappedInRange(memory, memory + size)) {
+            std::memset(memory, constant, size);
+        }
+    }
 }
