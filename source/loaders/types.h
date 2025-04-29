@@ -40,6 +40,10 @@ namespace FastNx::Loaders {
 
         const AppType type;
         LoaderStatus status{};
+
+        static AppType CheckFileType([[maybe_unused]] const FsSys::VfsBackingFilePtr &file) {
+            return AppType::None;
+        }
     protected:
         bool &isloaded;
         void Finish() const;

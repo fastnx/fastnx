@@ -50,4 +50,13 @@ namespace FastNx::Loaders {
     U64 NspEs::GetTitleId() {
         return subnsp->titleid;
     }
+
+    AppType NspEs::CheckFileType(const FsSys::VfsBackingFilePtr &file) {
+        if (file->GetSize() > 1_MBYTES)
+            if (const auto pfs{std::make_unique<FsSys::NxFmt::PartitionFileSystem>(file)})
+                if (pfs->GetFilesCount())
+                    return AppType::NspEs;
+
+        return AppType::None;
+    }
 }

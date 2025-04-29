@@ -39,7 +39,7 @@ namespace FastNx::Loaders {
             if (const auto &content{itsec->second}; !content.empty())
                 checksum.Update(content.data(), content.size());
             if (const auto result{checksum.Finish()}; !IsEqual(result, sectionhash))
-                throw exception("NSO section {} appears to be corrupted", FsSys::GetPathStr(nso));
+                throw exception{"NSO section {} appears to be corrupted", FsSys::GetPathStr(nso)};
         }
         Finish();
     }

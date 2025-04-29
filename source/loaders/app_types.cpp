@@ -1,4 +1,7 @@
+#include <common/exception.h>
+#include <loaders/nsp_es.h>
 #include <loaders/types.h>
+
 
 auto ProbApplicationFilename(const FastNx::FsSys::VfsBackingFilePtr &file) {
     if (is_directory(file->path))
@@ -11,16 +14,26 @@ auto ProbApplicationFilename(const FastNx::FsSys::VfsBackingFilePtr &file) {
     return FastNx::Loaders::AppType::None;
 }
 
+
 namespace FastNx::Loaders {
     void AppLoader::Finish() const {
         isloaded = type != AppType::None;
         if (isloaded)
             isloaded = status == LoaderStatus::Success;
     }
+    template <typename T> requires (std::derived_from<T, AppLoader>)
+    AppType GetAppType(const FsSys::VfsBackingFilePtr &file) {
+        const auto type{T::CheckFileType(file)};
+        return type;
+    }
+
 
     AppType GetApplicationType(const FsSys::VfsBackingFilePtr &file) {
-        const auto firstType{ProbApplicationFilename(file)};
-        return firstType;
+        const auto filenameType{ProbApplicationFilename(file)};
+        if (const auto _type{GetAppType<NspEs>(file)}; _type == filenameType)
+            return _type;
+
+        throw exception{"The file {} diverges in its format and extension", FsSys::GetPathStr(file)};
     }
     std::string AppTypeToString(const AppType type) {
         switch (type) {

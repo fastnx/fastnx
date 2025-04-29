@@ -20,7 +20,7 @@ namespace FastNx::Kernel {
 
 
         std::shared_ptr<Types::KProcess> CreateKProcess();
-        std::shared_ptr<SysVirtMemory> devlink;
+        std::shared_ptr<NxAllocator> nxalloc;
         Memory::KMemory memory;
 
     private:

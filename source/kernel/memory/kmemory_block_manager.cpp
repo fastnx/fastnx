@@ -6,8 +6,9 @@
 
 namespace FastNx::Kernel::Memory {
     void KMemoryBlockManager::Initialize(std::span<U8> &addrspace, const U64 assize, const Kernel &kernel) {
-        addrspace = kernel.devlink->InitializeGuestAs(assize);
-        allocator = kernel.devlink;
+        if (!allocator)
+            allocator = kernel.nxalloc;
+        addrspace = kernel.nxalloc->InitializeGuestAs(assize);
 
         if (addrspace.empty())
             throw exception{"Could not create the AS for the current process"};

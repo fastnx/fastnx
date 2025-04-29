@@ -13,7 +13,7 @@ namespace FastNx::Loaders {
         std::vector<U8> GetLogo() override;
         U64 GetTitleId() override;
 
-
+        static AppType CheckFileType(const FsSys::VfsBackingFilePtr &file);
         std::shared_ptr<FsSys::NxFmt::PartitionFileSystem> mainpfs;
     private:
         std::shared_ptr<FsSys::NxFmt::SubmissionPackage> subnsp;

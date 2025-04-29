@@ -12,7 +12,7 @@ namespace FastNx::Runtime {
         bool try_lock();
         void unlock();
 
-        std::atomic<U32> lockval{};
+        std::atomic_flag lockval{ATOMIC_FLAG_INIT};
     };
 
 }

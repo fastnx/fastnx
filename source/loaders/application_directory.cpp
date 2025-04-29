@@ -93,7 +93,7 @@ namespace FastNx::Loaders {
             for (U64 offset{}; offset < inputfile->GetSize(); ) {
                 const auto slice{std::min(inputfile->GetSize() - offset, buffer.size())};
                 if (inputfile->ReadSome(std::span{buffer.data(), slice}, offset) != slice)
-                    throw exception("Failed to read all {} bytes at offset {} from file {}", slice, offset, FsSys::GetPathStr(filepath));
+                    throw exception{"Failed to read all {} bytes at offset {} from file {}", slice, offset, FsSys::GetPathStr(filepath)};
 
                 outputfile->WriteSome(std::span{buffer.data(), slice}, offset);
                 offset += slice;

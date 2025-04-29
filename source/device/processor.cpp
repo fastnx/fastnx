@@ -26,7 +26,7 @@ namespace FastNx::Device {
             if ((cpuvals[2] & bit_XSAVE) == 0 || (cpuvals[2] & bit_OSXSAVE) == 0)
                 return {};
         // https://www.felixcloutier.com/x86/xgetbv
-        __asm__ volatile("XGETBV" : "=a"(cpuvals[0]), "=d"(cpuvals[1]) : "c"(0));
+        __asm__ volatile("xgetbv" : "=a"(cpuvals[0]), "=d"(cpuvals[1]) : "c"(0));
 
         std::string aspect;
         if ((cpuvals[0] & 6) == 6)

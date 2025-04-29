@@ -9,7 +9,7 @@
 namespace FastNx {
     constexpr auto FastNxSharedName{"fastnx_shared"};
 
-    SysVirtMemory::SysVirtMemory() : sharedfd(shm_open(FastNxSharedName, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR)) {
+    NxAllocator::NxAllocator() : sharedfd(shm_open(FastNxSharedName, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR)) {
         if (!sharedfd)
             throw exception{"Failed to open the shared object"};
 
@@ -24,7 +24,7 @@ namespace FastNx {
         if (mprotect(hostptr + size, 4096, PROT_NONE))
             if (errno == ERANGE) {}
     }
-    SysVirtMemory::~SysVirtMemory() {
+    NxAllocator::~NxAllocator() {
         Device::FreeMemory(hostptr, size);
         Device::FreeMemory(hostptr + size, 4096);
 
@@ -32,7 +32,7 @@ namespace FastNx {
             shm_unlink(FastNxSharedName);
     }
 
-    std::span<U8> SysVirtMemory::GetSpan(const U64 baseaddr, U64 offset, const bool ishost) const {
+    std::span<U8> NxAllocator::GetSpan(const U64 baseaddr, U64 offset, const bool ishost) const {
         if (!offset)
             offset = size;
         if (!ishost && !guestptr)
@@ -40,7 +40,7 @@ namespace FastNx {
         return ishost ? std::span{hostptr + baseaddr, offset} : std::span{guestptr + baseaddr, offset};
     }
 
-   std::span<U8> SysVirtMemory::InitializeGuestAs(const U64 aswidth) {
+   std::span<U8> NxAllocator::InitializeGuestAs(const U64 aswidth) {
         auto *memory{reinterpret_cast<void *>(aswidth)}; // We must preserve the number of leading zero bits
         auto *result{Device::AllocateGuestMemory(size, memory)};
 
@@ -50,7 +50,7 @@ namespace FastNx {
         return {};
     }
 
-   void SysVirtMemory::Map(U8 *guest, const U64 hostaddr, U64 size) {
+   void NxAllocator::Map(U8 *guest, const U64 hostaddr, U64 size) {
         if (GetSpan(hostaddr, 0, true).empty())
             return;
 
