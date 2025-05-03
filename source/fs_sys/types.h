@@ -26,7 +26,7 @@ namespace FastNx::FsSys {
         T Read(const U64 offset = {}) {
             T value;
             std::memset(&value, 0, sizeof(T));
-            ReadType(reinterpret_cast<U8 *>(&value), sizeof(T), offset);
+            NX_ASSERT(ReadType(reinterpret_cast<U8 *>(&value), sizeof(T), offset) == sizeof(value));
             return value;
         }
         template<typename T> requires (std::is_trivial_v<T>)

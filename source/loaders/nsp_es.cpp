@@ -1,9 +1,5 @@
-#include <fs_sys/npdm.h>
-
 #include <common/async_logger.h>
-
 #include <kernel/kernel.h>
-#include <kernel/types/kprocess.h>
 
 #include <loaders/nsp_es.h>
 

@@ -39,11 +39,10 @@ namespace FastNx::FsSys::ReFs {
                 return;
 
             for (std::filesystem::directory_iterator treewalk{entry}; treewalk != decltype(treewalk){}; ++treewalk) {
-                if (treewalk->is_regular_file()) {
+                if (treewalk->is_regular_file() || treewalk->is_symlink()) {
                     filepaths.emplace_back(treewalk->path());
-                    if (const auto result{faccessat(descriptor, GetDataArray(treewalk->path()), 0, AT_EACCESS)}; result == -1) {
+                    if (const auto result{faccessat(descriptor, GetDataArray(treewalk->path()), R_OK, AT_EACCESS)}; result == -1)
                         filepaths.pop_back();
-                    }
                 } else if (treewalk->is_directory()) {
                     ForeachAllFiles(*treewalk);
                 }

@@ -13,7 +13,7 @@ namespace FastNx::Runtime {
     }
     __attribute__((always_inline)) inline void Loop(const U64 count) {
         volatile U64 result{};
-        for (U64 index{}; index < count; index++)
+        for (U64 index{}; index < count * 10'000; index++)
             result += index;
     }
 

@@ -40,6 +40,7 @@ namespace FastNx::FsSys::NxFmt {
         NX_ASSERT(cnmt && cnmt->GetSize() > 0);
 
         Cnmt categorizer(cnmt);
+        requiredsdk.reserve(content.size());
 
         for (const auto &validfile: content) {
             if (corrupted || validfile.extension() != ".nca")
@@ -53,10 +54,14 @@ namespace FastNx::FsSys::NxFmt {
                 if (!titleid && nca->type == ContentType::Program)
                     titleid = nca->titleid;
 
+                requiredsdk.emplace_back(nca->sdkversion);
                 ncalist.emplace(std::make_pair(categorizer.type, nca->type), std::move(nca));
             }
         }
-
+        for (const auto sdkfsver: requiredsdk) {
+            if (sdkfsver != requiredsdk.front() || sdkfsver < 0x000B0000)
+                throw exception{"Unknown or unsupported SDK version"};
+        }
         NX_ASSERT(ncalist.begin()->second->size > 0);
 
         nsp.appdir = [&] -> std::shared_ptr<Loaders::ApplicationDirectory> {
@@ -118,12 +123,10 @@ namespace FastNx::FsSys::NxFmt {
         // https://switchbrew.org/wiki/NCA_Content_FS#NCA-type0
         auto GetContent = [&](const std::shared_ptr<ContentArchive> &nca, const ContentClassifier &type) -> bool {
             for (const auto &partition: nca->pfslist)
-                if (!Callback(partition, type))
-                    return {};
+                return Callback(partition, type);
             for (const auto &romfs: nca->romfslist)
-                if (!Callback(romfs, type))
-                    return {};
-            return true;
+                return Callback(romfs, type);
+            return {};
         };
 
         for (const auto info: EnumRange(ContentType::Program, ContentType::PublicData)) {

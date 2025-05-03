@@ -156,7 +156,7 @@ namespace FastNx::FsSys::NxFmt {
 
         bool encrypted{};
         ContentType type;
-        U32 version{};
+        U32 sdkversion{};
         U64 size{};
         U64 titleid{};
 

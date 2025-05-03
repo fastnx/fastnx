@@ -38,14 +38,14 @@ namespace FastNx {
             return static_cast<decltype(front)>(eval);
         });
     }
-    constexpr U64 operator"" _KBYTES(const long long unsigned size) {
+    constexpr U64 operator""_KBYTES(const long long unsigned size) {
         NX_ASSERT(size);
         return size * 1024;
     }
-    constexpr U64 operator"" _MBYTES(const long long unsigned size) {
+    constexpr U64 operator""_MBYTES(const long long unsigned size) {
         return size * 1024_KBYTES;
     }
-    constexpr U64 operator"" _GBYTES(const long long unsigned size) {
+    constexpr U64 operator""_GBYTES(const long long unsigned size) {
         return size * 1024_MBYTES;
     }
 }

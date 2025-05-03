@@ -84,6 +84,9 @@ namespace FastNx::Core {
 
     void Application::LoadFirstPickedGame() const {
         const auto gamefile = [&] -> std::optional<FsSys::FsPath> {
+            const auto files{assets->GetAllGames()};
+            if (files.empty())
+                return std::nullopt;
             const auto application{assets->GetAllGames().front()};
             if (application.empty())
                 return std::nullopt;

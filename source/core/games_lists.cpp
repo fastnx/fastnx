@@ -1,4 +1,6 @@
 #include <common/container.h>
+#include <common/exception.h>
+
 #include <fs_sys/refs/directory_file_access.h>
 #include <loaders/application_directory.h>
 #include <core/assets.h>
@@ -11,22 +13,25 @@ namespace FastNx::Core {
         };
 
         for (const auto &hardpath: gamesfiles) {
-            if (const auto realPath{FsSys::GetFullPath(hardpath)})
-                dirs.emplace_back(*realPath);
+            if (const auto realpath{FsSys::GetFullPath(hardpath)})
+                dirs.emplace_back(*realpath);
         }
         if (exists(assets->games->path))
             dirs.emplace_back(assets->games->path);
 
-        for (const auto &gameDir: dirs) {
-            FsSys::ReFs::DirectoryFileAccess directory{gameDir};
+        for (const auto &gamedir: dirs) {
+            FsSys::ReFs::DirectoryFileAccess directory{gamedir};
             if (!directory)
                 continue;
 
-            NX_ASSERT(is_directory(gameDir));
-            if (!AddTypedGame(gameDir)) {
+            NX_ASSERT(is_directory(gamedir));
+            if (!AddTypedGame(gamedir)) {
                 if (const auto &_roms{directory.ListAllFiles()}; !_roms.empty()) {
-                    for ([[maybe_unused]] const auto &gamefiles: _roms)
-                        NX_ASSERT(AddTypedGame(gamefiles) == true);
+                    for ([[maybe_unused]] const auto &gamefiles: _roms) {
+                        if (const auto path{FsSys::GetFullPath(gamefiles)})
+                            NX_ASSERT(AddTypedGame(*path) == true);
+                        else throw exception{"The file {} does not exist or is a broken symlink", FsSys::GetPathStr(gamefiles)};
+                    }
                 }
             }
         }

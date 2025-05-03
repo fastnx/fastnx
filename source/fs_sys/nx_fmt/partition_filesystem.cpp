@@ -12,25 +12,25 @@ namespace FastNx::FsSys::NxFmt {
             return;
         const auto pfs0hd{partfs->Read<Pfs0Header>()};
 
-        constexpr U64 _auxOffset{sizeof(pfs0hd)};
-        const auto _partsSize{pfs0hd.fileCount * sizeof(PartitionEntry)};
+        constexpr U64 offset{sizeof(pfs0hd)};
+        const auto partssize{pfs0hd.fileCount * sizeof(PartitionEntry)};
 
         std::vector<PartitionEntry> pents;
         pents.reserve(pfs0hd.fileCount);
 
-        U64 _nextOffset{_auxOffset};
+        U64 nexoffset{offset};
         for (U64 _peindex{}; _peindex < pfs0hd.fileCount; ++_peindex) {
-            pents.emplace_back(partfs->Read<PartitionEntry>(_nextOffset));
+            pents.emplace_back(partfs->Read<PartitionEntry>(nexoffset));
 
-            NX_ASSERT(_nextOffset - sizeof(pfs0hd) < _partsSize);
-            _nextOffset += sizeof(PartitionEntry);
+            NX_ASSERT(nexoffset - sizeof(pfs0hd) < partssize);
+            nexoffset += sizeof(PartitionEntry);
             if (_count >= MaxEntriesCount)
                 break;
             _count++;
         }
         files.reserve(_count);
-        const auto namestable{partfs->ReadSome<char>(pfs0hd.strTableSize, _nextOffset)};
-        const auto filedata{_nextOffset + namestable.size()};
+        const auto namestable{partfs->ReadSome<char>(pfs0hd.strTableSize, nexoffset)};
+        const auto filedata{nexoffset + namestable.size()};
 
         for (const auto &file: pents) {
             const auto *fileentry{namestable.data() + file.nameOffset};

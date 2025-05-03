@@ -50,6 +50,7 @@ namespace FastNx::FsSys::NxFmt {
         size = content.size;
         type = content.type;
         titleid = content.programId;
+        sdkversion = content.sdkAddonVersion;
 
         LoadAllContent(content);
     }

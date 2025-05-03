@@ -19,6 +19,7 @@ namespace FastNx::FsSys::NxFmt {
         U64 titleid{};
         VfsBackingFilePtr cnmt{nullptr};
         VfsBackingFilePtr corrupted{nullptr};
+        std::vector<U32> requiredsdk;
 
         std::shared_ptr<ContentArchive> GetContentNca(const ContentClassifier &type);
     private:
