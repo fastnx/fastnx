@@ -3,6 +3,7 @@
 #include <random>
 
 #include <boost/align/align_up.hpp>
+#include <boost/align/align_down.hpp>
 
 #include <kernel/kernel.h>
 #include <kernel/memory/k_memory.h>
@@ -42,7 +43,9 @@ namespace FastNx::Kernel::Memory {
         const auto width{GetWidthAs(proccfg.addrspace)};
         if (width < 39)
             return;
-        ptblocks.Initialize(addrspace, 1ULL << width, kernel);
+        if (!blockslist)
+            blockslist.emplace(kernel.poffset);
+        addrspace = blockslist->Initialize(1ULL << width, kernel);
 
         switch (width) {
             case 39:
@@ -57,6 +60,7 @@ namespace FastNx::Kernel::Memory {
                 std::unreachable();
         }
 
+        /*
         std::vector<std::pair<SegmentType, U64>> aslrlist;
         for (const auto _type: EnumRange(SegmentType::Code, SegmentType::TlsIo))
             aslrlist.emplace_back(_type, GetRandom(0x6400) * RegionAlignment);
@@ -65,37 +69,47 @@ namespace FastNx::Kernel::Memory {
             if (auto *segment{GetSegment(type)}; !segment->empty())
                 *segment = std::span{segment->begin().base() + offset, segment->size()};
         }
+        */
     }
 
-    void KMemory::MapCodeMemory(const U64 begin, const std::vector<U8> &content) {
+    void KMemory::MapCodeMemory(const U64 begin, const U64 size, const std::vector<U8> &content) {
         U8 *memory{code.begin().base() + begin};
-        const auto size{boost::alignment::align_up(content.size(), SwitchPageSize)};
+        NX_ASSERT(size > content.size());
+        const auto _size{boost::alignment::align_up(size, SwitchPageSize)};
 
-        ptblocks.Map({memory, KMemoryBlock{
-            .pagescount = size / SwitchPageSize,
-            .state = MemoryTypeValues::Code
+        blockslist->Map({memory, KMemoryBlock{
+            .pagescount = _size / SwitchPageSize,
+            .state = MemoryState{MemoryTypeValues::Code}
         }});
         std::memcpy(memory, content.data(), content.size());
     }
 
-    void KMemory::SetMemoryPermission(const U64 begin, const U64 _size, const U32 permission) {
+    void KMemory::SetMemoryPermission(const U64 begin, const U64 size, const I32 permission) {
         U8 *memory{code.begin().base() + begin};
-        const auto size{boost::alignment::align_up(_size, SwitchPageSize)};
+        const auto _size{boost::alignment::align_up(size, SwitchPageSize)};
 
-        auto callback = [&](KMemoryBlock &block) {
-            if (block.state.code)
-                block.permission = permission;
+        U64 reprotected{};
+        auto callback = [&](const KMemoryBlock &block) {
+            if (block.state == MemoryState{MemoryTypeValues::Code}) {
+                KMemoryBlock updateinfo{
+                    .pagescount = _size / SwitchPageSize,
+                    .permission = static_cast<U8>(permission),
+                };
+                if (block.permission != permission)
+                    blockslist->Reprotect({memory + reprotected, updateinfo});
+            }
+            reprotected += block.pagescount * SwitchPageSize;
         };
 
-        ptblocks.ForEach({memory, KMemoryBlock{
-            .pagescount = size / SwitchPageSize,
+        blockslist->ForEach({memory, KMemoryBlock{
+            .pagescount = _size / SwitchPageSize,
         }}, callback);
     }
 
     void KMemory::FillMemory(const U64 begin, const U8 constant, const U64 size) {
         U8 *memory{code.begin().base() + begin};
 
-        if (ptblocks.IsMappedInRange(memory, memory + size)) {
+        if (blockslist->IsMappedInRange(static_cast<U8 *>(boost::alignment::align_down(memory, SwitchPageSize)), static_cast<U8 *>(boost::alignment::align_up(memory + size, SwitchPageSize)))) {
             std::memset(memory, constant, size);
         }
     }

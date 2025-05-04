@@ -10,6 +10,8 @@
 namespace FastNx::Kernel::Memory {
     enum class MemoryType : U8 {
         Free,
+        Io,
+        Static,
         Code,
         Inaccessible
     };
@@ -22,8 +24,7 @@ namespace FastNx::Kernel::Memory {
 
     union MemoryState {
         MemoryState() = default;
-        // ReSharper disable once CppNonExplicitConvertingConstructor
-        MemoryState(const U32 type) : _type(type) {}
+        explicit MemoryState(const U32 type) : _type(type) {}
 
         struct {
             MemoryType type: 7;
@@ -37,6 +38,10 @@ namespace FastNx::Kernel::Memory {
             U32 unused: 11;
         };
         U32 _type;
+
+        bool operator==(const MemoryState &state) const {
+            return _type == state._type;
+        }
     };
     struct KMemoryBlock {
         U64 pagescount;
@@ -48,24 +53,28 @@ namespace FastNx::Kernel::Memory {
 
     class KMemoryBlockManager {
     public:
-        KMemoryBlockManager() = default;
+        explicit KMemoryBlockManager(const std::shared_ptr<KSlabHeap> &poffset) : hostslab(poffset) {}
 
-        void Initialize(std::span<U8> &addrspace, U64 assize, const Kernel &kernel);
+        std::span<U8> Initialize(U64 assize, const Kernel &kernel);
 
         void Map(const std::pair<U8 *, KMemoryBlock> &allocate);
         void ForEach(const std::pair<U8 *, KMemoryBlock> &blockdesc, std::function<void(KMemoryBlock&)> &&callback);
-        __attribute__((always_inline)) bool IsMappedInRange(U8 *begin, U8 *end) {
+        void Reprotect(const std::pair<U8 *, KMemoryBlock> &reprotect);
+        __attribute__((always_inline)) bool IsMappedInRange(const U8 *begin, const U8 *end) {
             auto first{FindBlock(begin)};
             const auto last{FindBlock(end)};
-            if (first && last)
-                for (; *first != *last; ++*first)
-                    return true;
-            return {};
+            for (; first && last && *first != *last; first = FindBlock(begin)) {
+                if ((*first)->state == MemoryState{MemoryTypeValues::Free})
+                    return {};
+                begin += (*first)->pagescount * SwitchPageSize;
+            }
+            return first && last;
         }
 
-        std::optional<KMemoryBlock *> FindBlock(U8 *guestptr);
+        std::optional<KMemoryBlock *> FindBlock(const U8 *guestptr);
 
         MemoryBackingPtr allocator;
-        std::map<U8 *, KMemoryBlock> treemap;
+        std::map<const U8 *, KMemoryBlock> treemap;
+        const std::shared_ptr<KSlabHeap> &hostslab;
     };
 }

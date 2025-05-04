@@ -5,10 +5,10 @@
 
 
 namespace FastNx::Kernel::Memory {
-    void KMemoryBlockManager::Initialize(std::span<U8> &addrspace, const U64 assize, const Kernel &kernel) {
+    std::span<U8> KMemoryBlockManager::Initialize(const U64 assize, const Kernel &kernel) {
         if (!allocator)
             allocator = kernel.nxalloc;
-        addrspace = kernel.nxalloc->InitializeGuestAs(assize);
+        const auto addrspace{kernel.nxalloc->InitializeGuestAs(assize)};
 
         if (addrspace.empty())
             throw exception{"Could not create the AS for the current process"};
@@ -16,31 +16,60 @@ namespace FastNx::Kernel::Memory {
         const auto count{static_cast<U64>(addrspace.end() - addrspace.begin()) / SwitchPageSize};
         treemap.insert_or_assign(addrspace.begin().base(), KMemoryBlock{
             .pagescount = count,
-            .state = MemoryTypeValues::Free
+            .state = MemoryState{MemoryTypeValues::Free}
         });
         // Fix to avoid breaking the std::map algorithm
         treemap.insert_or_assign(addrspace.begin().base() + count * SwitchPageSize, KMemoryBlock{
             .pagescount = {},
-            .state = MemoryTypeValues::Inaccessible
+            .state = MemoryState{MemoryTypeValues::Inaccessible}
         });
+
+        // ReSharper disable once CppDFALocalValueEscapesFunction
+        return addrspace;
     }
 
     void KMemoryBlockManager::Map(const std::pair<U8 *, KMemoryBlock> &allocate) {
         const auto first{treemap.lower_bound(allocate.first)};
         const auto neededpages{allocate.second.pagescount};
-        const auto offset{neededpages * SwitchPageSize};
+        const auto size{neededpages * SwitchPageSize};
 
-        const auto last{treemap.upper_bound(allocate.first + offset)};
+        const auto last{treemap.lower_bound(allocate.first + size)};
+        if (!allocator->CanAllocate(allocate.first, size))
+            throw exception{"Address already allocated"};
 
-        const auto ismapped{first->second.state.mapped};
+        bool reprotec{allocate.second.state != first->second.state};
+        if (!reprotec)
+            reprotec = allocate.second.permission != first->second.permission;
+
+
+        const bool isallocated{first->second.state != MemoryState{MemoryTypeValues::Free}};
 
         if (first == last) {
-            if (!ismapped) {}
+            first->second.pagescount -= neededpages;
 
-        } else if (first->first + offset < last->first) {
+            treemap.insert_or_assign(first->first + size, first->second);
+            treemap.insert_or_assign(allocate.first, allocate.second);
+
+        } else if (first->first + size < last->first && !isallocated) {
+            auto splited{first->second};
+            treemap.insert_or_assign(first->first, allocate.second);
+            splited.pagescount -= neededpages;
+            treemap.insert_or_assign(allocate.first + size, splited);
         } else {
-
+            // There is an allocated memory space at the end of this block
+            first->second.pagescount -= neededpages;
+            treemap.insert_or_assign(first->first + size, allocate.second);
         }
+
+        if (!isallocated) {
+            if (const auto *hostoffset{hostslab->Reserve(nullptr, size)}; hostoffset != MemoryFailValue)
+                allocator->Map(allocate.first, reinterpret_cast<U64>(hostoffset), size);
+            else throw exception{"Failed to reserve {} bytes in host memory", size};
+        }
+
+
+        if (const auto perms{allocate.second.permission}; reprotec && perms)
+            allocator->Reprotec(allocate.first, size, perms);
     }
 
     void KMemoryBlockManager::ForEach(const std::pair<U8 *, KMemoryBlock> &blockdesc, std::function<void(KMemoryBlock &)> &&callback) {
@@ -58,10 +87,22 @@ namespace FastNx::Kernel::Memory {
         }
     }
 
-    std::optional<KMemoryBlock *> KMemoryBlockManager::FindBlock(U8 *guestptr) {
+    void KMemoryBlockManager::Reprotect(const std::pair<U8 *, KMemoryBlock> &reprotect) {
+        const auto block{FindBlock(reprotect.first)};
+        if (!block)
+            return;
+        const auto permission{reprotect.second.permission};
+        const auto size{reprotect.second.pagescount * SwitchPageSize};
+        if (!size)
+            return;
+        allocator->Reprotec(reprotect.first, size, permission);
+        (*block)->permission = permission;
+    }
+
+    std::optional<KMemoryBlock *> KMemoryBlockManager::FindBlock(const U8 *guestptr) {
         const auto firstblk{treemap.lower_bound(guestptr)};
         if (firstblk != treemap.end()) {
-            if (firstblk->first == guestptr)
+            if (firstblk->first <= guestptr)
                 return &firstblk->second;
             if (const auto size{firstblk->second.pagescount})
                 if (firstblk->first >= guestptr && firstblk->first + size * SwitchPageSize <= guestptr)

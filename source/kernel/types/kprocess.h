@@ -11,7 +11,7 @@ namespace FastNx::Kernel::Types {
         U64 processid;
         ProcessEntropy entropy;
 
-        Memory::KMemory &memory;
+        std::shared_ptr<Memory::KMemory> &memory;
         std::span<U8> procmem;
     private:
         void Destroyed() override;

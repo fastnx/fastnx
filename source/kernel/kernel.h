@@ -21,13 +21,13 @@ namespace FastNx::Kernel {
 
         std::shared_ptr<Types::KProcess> CreateKProcess();
         std::shared_ptr<NxAllocator> nxalloc;
-        Memory::KMemory memory;
+        std::shared_ptr<Memory::KSlabHeap> poffset;
+        std::shared_ptr<Memory::KMemory> memory;
 
     private:
         U64 pidseed{InitialProcessId};
         std::vector<std::pair<U64, const ProcessEntropy *>> pidslist;
 
-        std::optional<Memory::KSlabHeap> userslabs;
         std::list<std::shared_ptr<Types::KProcess>> liveprocs;
 
         std::mutex pmutex;

@@ -7,7 +7,7 @@
 #include <common/memory.h>
 
 namespace FastNx {
-    constexpr auto FastNxSharedName{"fastnx_shared"};
+    constexpr auto FastNxSharedName{"/fastnx_shared"};
 
     NxAllocator::NxAllocator() : sharedfd(shm_open(FastNxSharedName, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR)) {
         if (!sharedfd)
@@ -17,7 +17,7 @@ namespace FastNx {
         if (ftruncate(sharedfd, totalsize))
             throw exception{"We don't have permissions to resize the shared object"};
 
-        if (hostptr = static_cast<U8 *>(Device::AllocateMemory(totalsize, nullptr, sharedfd, false, true)); !hostptr)
+        if (hostptr = static_cast<U8 *>(Device::AllocateMemory(totalsize, nullptr, sharedfd, true, true, true)); !hostptr)
             throw exception{"Could not map memory with this FD"};
 
         // Installing a guard page at the end of the memory
@@ -54,11 +54,46 @@ namespace FastNx {
         if (GetSpan(hostaddr, 0, true).empty())
             return;
 
-        if (alloclists.contains(hostaddr))
+        if (alloclists.contains({guest, hostaddr}))
             return;
 
-        if (mmap(guest, size, PROT_READ | PROT_WRITE, MAP_PRIVATE, sharedfd, hostaddr) != guest)
-            throw exception{"Could not map at this address [ guest: {}, host: {:X} ]", fmt::ptr(guest), hostaddr};
-        alloclists.emplace(hostaddr, size);
+        if (mmap(guest, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_FIXED, sharedfd, hostaddr) != guest)
+            throw exception{"Could not map at this address [ guest: {}, host: {:#x} ], errno: {}", fmt::ptr(guest), hostaddr, errno};
+        alloclists.emplace(std::make_pair(guest, hostaddr), size);
+
+#if !defined(NDEBUG)
+        std::memset(guest, 0, size);
+#endif
+   }
+
+   bool NxAllocator::CanAllocate(const U8 *region, const U64 size) {
+        for (const auto &[allocinfo, _size]: alloclists) {
+            const auto [guestmemory, _] = allocinfo;
+            if (guestmemory >= region && guestmemory + _size >= region + size)
+                if (_size && size)
+                    return {};
+        }
+        return true;
+   }
+
+   void NxAllocator::Reprotec(U8 *guest, const U64 size, const I32 protection) {
+        const auto prots = [&] {
+            I32 result{};
+            if (protection & 1)
+                result |= PROT_READ;
+            if (protection & 1 << 1)
+                result |= PROT_WRITE;
+
+            // Useless due to JIT
+            /*
+            if (protection & 1 << 2)
+                result |= PROT_EXEC;
+            */
+            return result;
+        }();
+
+        if (mprotect(guest, size, prots))
+            if (errno == ERANGE)
+                throw exception{"Could not re-protect at this address"};
    }
 }

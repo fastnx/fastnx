@@ -8,9 +8,9 @@
 #include <device/capabilities.h>
 #include <device/memory.h>
 namespace FastNx::Device {
-    void *AllocateMemory(U64 &size, void *fixed, const I32 file, bool enbhuge, const bool writable) {
+    void *AllocateMemory(U64 &size, void *fixed, const I32 file, bool enbhuge, const bool writable, const bool shared) {
         auto prots{PROT_READ};
-        auto flags{MAP_PRIVATE};
+        auto flags{shared ? MAP_SHARED : MAP_PRIVATE};
 
         enbhuge = file == -1 ? enbhuge : false;
         if (writable)
@@ -38,11 +38,12 @@ namespace FastNx::Device {
 
     void *AllocateGuestMemory(const U64 &size, void *fixed) {
         constexpr auto prots{PROT_READ | PROT_WRITE};
-        constexpr auto flags{MAP_NORESERVE | MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED};
+        constexpr auto flags{MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED};
 
         const auto result{mmap(fixed, size, prots, flags, -1, 0)};
         if (result == MAP_FAILED)
             throw std::bad_alloc{};
+        NX_ASSERT(madvise(result, size, MADV_DONTNEED) == 0);
         return result;
     }
 

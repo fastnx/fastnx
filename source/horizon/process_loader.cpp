@@ -38,8 +38,7 @@ namespace FastNx::Horizon {
         NX_ASSERT(codeset.procimage.size() % 3 == 0);
 
         for (const auto &[offset, content]: codeset.procimage) {
-            const auto size{boost::alignment::align_up(content.size(), Kernel::SwitchPageSize)};
-            process->memory.MapCodeMemory(startoffset + offset, content);
+            auto size{boost::alignment::align_up(content.size(), Kernel::SwitchPageSize)};
 
             const auto permission = [&] {
                 if (!bintype)
@@ -48,14 +47,19 @@ namespace FastNx::Horizon {
                     return Kernel::Permission::Ro;
                 return Kernel::Permission::Data;
             }();
+            bintype++;
+            U64 bsssize{};
+            if (permission == Kernel::Permission::Data) {
+                bsssize = codeset.bsslayoutsize.front();
+                size = boost::alignment::align_up(content.size() + bsssize, Kernel::SwitchPageSize);
+            }
+            process->memory->MapCodeMemory(startoffset + offset, size, content);
 
-            process->memory.SetMemoryPermission(startoffset + offset, size, permission);
+            process->memory->SetMemoryPermission(startoffset + offset, size, permission);
 
-            if (permission != Kernel::Permission::Data)
+            if (!bsssize)
                 continue;
-
-            const auto bssoffset{size};
-            process->memory.FillMemory(bssoffset, 0, codeset.bsslayoutsize.front());
+            process->memory->FillMemory(startoffset + offset + content.size(), 0, bsssize);
             codeset.bsslayoutsize.pop_front();
             bintype = 0;
         }
@@ -104,8 +108,8 @@ namespace FastNx::Horizon {
 
         parameters.enbaslr = true;
 
-        auto &memory{switchnx->kernel->memory};
-        memory.InitializeProcessMemory(parameters);
+        const auto &memory{switchnx->kernel->memory};
+        memory->InitializeProcessMemory(parameters);
 
         if (ValidateSet(codeset))
             SetProcessMemory(std::move(codeset));
