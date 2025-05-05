@@ -20,6 +20,8 @@ namespace FastNx::Kernel::Memory {
         void InitializeProcessMemory(const Svc::CreateProcessParameter &proccfg);
 
         void MapCodeMemory(U64 begin, U64 size, const std::vector<U8> &content);
+        void MapTlsMemory(U64 begin, U64 size);
+
         void SetMemoryPermission(U64 begin, U64 size, I32 permission);
         void FillMemory(U64 begin, U8 constant, U64 size);
 

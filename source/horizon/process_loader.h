@@ -1,5 +1,6 @@
 #pragma once
 #include <loaders/nso_fmt.h>
+#include <fs_sys/npdm.h>
 
 namespace FastNx::Horizon {
     class SwitchNs;
@@ -12,6 +13,7 @@ namespace FastNx::Horizon {
 
         void Load();
         std::shared_ptr<Kernel::Types::KProcess> process;
+        std::optional<FsSys::Npdm> npdm;
 
     private:
         static void GetCodeSet(Kernel::ProcessCodeLayout &codeset, const std::shared_ptr<Loaders::NsoFmt> &nso);

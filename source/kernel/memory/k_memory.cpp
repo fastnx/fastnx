@@ -84,6 +84,18 @@ namespace FastNx::Kernel::Memory {
         std::memcpy(memory, content.data(), content.size());
     }
 
+    void KMemory::MapTlsMemory(const U64 begin, U64 size) {
+        U8 *memory{tlsio.begin().base() + begin};
+        if (!size)
+            size = reinterpret_cast<U64>(tlsio.end().base() - begin);
+        blockslist->Map({memory, KMemoryBlock{
+            .pagescount = size / SwitchPageSize,
+            .state = MemoryState{MemoryTypeValues::ThreadLocal}
+        }});
+
+        std::memset(memory, 0, size);
+    }
+
     void KMemory::SetMemoryPermission(const U64 begin, const U64 size, const I32 permission) {
         U8 *memory{code.begin().base() + begin};
         const auto _size{boost::alignment::align_up(size, SwitchPageSize)};
@@ -109,8 +121,9 @@ namespace FastNx::Kernel::Memory {
     void KMemory::FillMemory(const U64 begin, const U8 constant, const U64 size) {
         U8 *memory{code.begin().base() + begin};
 
-        if (blockslist->IsMappedInRange(static_cast<U8 *>(boost::alignment::align_down(memory, SwitchPageSize)), static_cast<U8 *>(boost::alignment::align_up(memory + size, SwitchPageSize)))) {
+        const auto *beginpage{static_cast<U8 *>(boost::alignment::align_down(memory, SwitchPageSize))};
+        const auto *endpage{static_cast<U8 *>(boost::alignment::align_up(memory + size, SwitchPageSize))};
+        if (blockslist->IsMappedInRange(beginpage, endpage))
             std::memset(memory, constant, size);
-        }
     }
 }

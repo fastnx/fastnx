@@ -41,5 +41,7 @@ namespace FastNx::FsSys {
 
         Flags procflags;
         U32 stacksize;
+        U8 priority;
+        U8 maincore;
     };
 }

@@ -5,6 +5,7 @@
 #include <common/types.h>
 #include <common/memory.h>
 #include <kernel/types.h>
+#include <kernel/memory/kslab_heap.h>
 
 
 namespace FastNx::Kernel::Memory {
@@ -20,6 +21,7 @@ namespace FastNx::Kernel::Memory {
         constexpr auto Free{0U};
         constexpr auto Code{0x00DC7E03U};
         constexpr auto Inaccessible{0x00000010U};
+        constexpr auto ThreadLocal{0x0040200C};
     }
 
     union MemoryState {

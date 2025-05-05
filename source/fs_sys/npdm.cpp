@@ -18,6 +18,8 @@ namespace FastNx::FsSys {
 
         procflags = meta.flags;
         stacksize = meta.mainthreadstack;
+        priority = meta.mainthread;
+        maincore = meta.mainthreadcore;
     }
 
 }

@@ -100,14 +100,17 @@ namespace FastNx::Kernel::Memory {
     }
 
     std::optional<KMemoryBlock *> KMemoryBlockManager::FindBlock(const U8 *guestptr) {
-        const auto firstblk{treemap.lower_bound(guestptr)};
+        auto firstblk{treemap.lower_bound(guestptr)};
         if (firstblk != treemap.end()) {
             if (firstblk->first <= guestptr)
                 return &firstblk->second;
-            if (const auto size{firstblk->second.pagescount})
-                if (firstblk->first >= guestptr && firstblk->first + size * SwitchPageSize <= guestptr)
+            if (const auto size{firstblk->second.pagescount * SwitchPageSize})
+                if (firstblk->first >= guestptr && firstblk->first + size < guestptr)
                     return &firstblk->second;
         }
+        if (firstblk->first > guestptr)
+            if (--firstblk != treemap.end())
+                return &firstblk->second;
         return std::nullopt;
     }
 }

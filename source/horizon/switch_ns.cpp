@@ -13,6 +13,14 @@ namespace FastNx::Horizon {
     SwitchNs::SwitchNs(const std::shared_ptr<KeySet> &ks) : keys(ks),
         kernel(std::make_shared<Kernel::Kernel>()) {}
 
+    void StartProcess(std::optional<ProcessLoader> &loader) {
+        const auto stacksize{loader->npdm->stacksize};
+        Kernel::ThreadPriority priority{loader->npdm->priority};
+        const auto optiomalcore{loader->npdm->maincore};
+
+        loader->process->Initialize(stacksize, priority, optiomalcore);
+    }
+
     void SwitchNs::LoadApplicationFile(const FsSys::FsPath &apppath) {
         for (const auto &apploader: loaders) {
             if (FsSys::GetPathStr(apploader->backing) == apppath)
@@ -31,6 +39,8 @@ namespace FastNx::Horizon {
         if (!procloader)
             procloader.emplace(shared_from_this());
         procloader->Load();
+
+        StartProcess(procloader);
     }
 
     void SwitchNs::GetLoaders(const std::vector<FsSys::FsPath> &apps) {

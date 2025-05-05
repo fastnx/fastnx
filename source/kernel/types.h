@@ -12,6 +12,9 @@ namespace FastNx::Kernel {
         class KThread;
         class KProcess;
     }
+    namespace Threads {
+        class KScheduler;
+    }
 
     using ProcessEntropy = std::array<U64, 4>;
 
@@ -52,5 +55,15 @@ namespace FastNx::Kernel {
 
     constexpr auto SwitchPageSize{1 << 12};
 
+    struct ThreadPriority {
+        U8 min, max;
+    };
+
     // https://switchbrew.org/wiki/Memory_layout
+    // https://switchbrew.org/wiki/Memory_layout
+    constexpr auto BaseAddr{0x80000000};
+    namespace SlabHeap {
+        constexpr auto BaseAddress{BaseAddr + 0xE5000};
+        constexpr auto Size{0xA21000};
+    };
 }

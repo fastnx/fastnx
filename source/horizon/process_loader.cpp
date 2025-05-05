@@ -6,7 +6,6 @@
 #include <horizon/process_loader.h>
 
 #include <kernel/svc/types.h>
-#include <fs_sys/npdm.h>
 
 
 
@@ -75,7 +74,6 @@ namespace FastNx::Horizon {
 
 
         const auto loader{switchnx->loader};
-        std::optional<FsSys::Npdm> npdm;
         if (const auto npdmfile{loader->appdir->GetNpdm()})
             npdm.emplace(npdmfile);
 
