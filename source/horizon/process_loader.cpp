@@ -70,7 +70,7 @@ namespace FastNx::Horizon {
 
     void ProcessLoader::Load() {
         if (const auto &kernel{switchnx->kernel})
-            process = kernel->CreateKProcess();
+            process = kernel->CreateProcess();
 
 
         const auto loader{switchnx->loader};

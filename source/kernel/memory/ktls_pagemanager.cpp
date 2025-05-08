@@ -2,6 +2,10 @@
 
 namespace FastNx::Kernel::Memory {
     KTlsPageManager::KTlsPageManager(U8 *tlsr) : tlsbase(tlsr) {
+        freeslots.resize(TlsSlotCount);
+        NX_ASSERT(freeslots.size() == TlsSlotCount);
+
+
         std::ranges::fill(freeslots, 1);
     }
 

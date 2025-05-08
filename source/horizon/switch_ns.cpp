@@ -13,9 +13,9 @@ namespace FastNx::Horizon {
     SwitchNs::SwitchNs(const std::shared_ptr<KeySet> &ks) : keys(ks),
         kernel(std::make_shared<Kernel::Kernel>()) {}
 
-    void StartProcess(std::optional<ProcessLoader> &loader) {
+    void StartProcess(const std::optional<ProcessLoader> &loader) {
         const auto stacksize{loader->npdm->stacksize};
-        Kernel::ThreadPriority priority{loader->npdm->priority};
+        const Kernel::ThreadPriority priority{loader->npdm->priority};
         const auto optiomalcore{loader->npdm->maincore};
 
         loader->process->Initialize(stacksize, priority, optiomalcore);

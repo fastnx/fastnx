@@ -17,6 +17,6 @@ namespace FastNx::Kernel::Memory {
         U8 *tlsbase{};
     private:
 
-        boost::container::small_vector<U8, TlsSlotCount> freeslots{TlsSlotCount};
+        boost::container::small_vector<U8, TlsSlotCount> freeslots;
     };
 }

@@ -57,7 +57,7 @@ namespace FastNx::Kernel::Memory {
     public:
         explicit KMemoryBlockManager(const std::shared_ptr<KSlabHeap> &poffset) : hostslab(poffset) {}
 
-        std::span<U8> Initialize(U64 assize, const Kernel &kernel);
+        std::span<U8> Initialize(U64 width, U64 assize, const Kernel &kernel);
 
         void Map(const std::pair<U8 *, KMemoryBlock> &allocate);
         void ForEach(const std::pair<U8 *, KMemoryBlock> &blockdesc, std::function<void(KMemoryBlock&)> &&callback);

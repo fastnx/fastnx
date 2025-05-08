@@ -14,7 +14,7 @@ namespace FastNx::Kernel::Types {
 
         tlsarea = AllocateTls();
 
-        auto mainthread{std::make_unique<KThread>(kernel)};
+        auto mainthread{kernel.CreateThread()};
         if (!mainthread)
             return;
         mainthread->Initialize(this, entrypoint, nullptr, tlsarea);
@@ -22,11 +22,11 @@ namespace FastNx::Kernel::Types {
     }
 
     U8 * KProcess::AllocateTls() {
-        U8 *threadstorage{};
+        U8 *threadstorage{nullptr};
         if (!freetlslist.empty()) {
             const auto tls{freetlslist.begin()};
             if ((threadstorage = tls->Allocate()) != nullptr)
-                if (tls->Allocatable())
+                if (!tls->Allocatable())
                     fulltlslist.splice(fulltlslist.begin(), freetlslist, tls);
         } else {
             const auto tlsaddr{reinterpret_cast<U64>(kernel.userslabs->Allocate())};

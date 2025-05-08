@@ -36,13 +36,14 @@ namespace FastNx::Device {
         return result;
     }
 
-    void *AllocateGuestMemory(const U64 &size, void *fixed) {
+    void *AllocateGuestMemory(const U64 size, void *fixed) {
         constexpr auto prots{PROT_READ | PROT_WRITE};
-        constexpr auto flags{MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED};
+        constexpr auto flags{MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED | MAP_NORESERVE};
 
         const auto result{mmap(fixed, size, prots, flags, -1, 0)};
         if (result == MAP_FAILED)
-            throw std::bad_alloc{};
+            if (errno == ENOMEM)
+                throw std::bad_alloc{};
         NX_ASSERT(madvise(result, size, MADV_DONTNEED) == 0);
         return result;
     }

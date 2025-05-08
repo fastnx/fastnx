@@ -5,10 +5,10 @@
 
 
 namespace FastNx::Kernel::Memory {
-    std::span<U8> KMemoryBlockManager::Initialize(const U64 assize, const Kernel &kernel) {
+    std::span<U8> KMemoryBlockManager::Initialize(const U64 width, const U64 assize, const Kernel &kernel) {
         if (!allocator)
             allocator = kernel.nxalloc;
-        const auto addrspace{kernel.nxalloc->InitializeGuestAs(assize)};
+        const auto addrspace{kernel.nxalloc->InitializeGuestAs(width, assize)};
 
         if (addrspace.empty())
             throw exception{"Could not create the AS for the current process"};
@@ -29,10 +29,12 @@ namespace FastNx::Kernel::Memory {
     }
 
     void KMemoryBlockManager::Map(const std::pair<U8 *, KMemoryBlock> &allocate) {
-        const auto first{treemap.lower_bound(allocate.first)};
+        auto first{treemap.lower_bound(allocate.first)};
         const auto neededpages{allocate.second.pagescount};
         const auto size{neededpages * SwitchPageSize};
 
+        if (first == std::prev(treemap.end()))
+            --first;
         const auto last{treemap.lower_bound(allocate.first + size)};
         if (!allocator->CanAllocate(allocate.first, size))
             throw exception{"Address already allocated"};
@@ -52,9 +54,15 @@ namespace FastNx::Kernel::Memory {
 
         } else if (first->first + size < last->first && !isallocated) {
             auto splited{first->second};
-            treemap.insert_or_assign(first->first, allocate.second);
-            splited.pagescount -= neededpages;
-            treemap.insert_or_assign(allocate.first + size, splited);
+            if (allocate.first > first->first) {
+                splited.pagescount -= neededpages;
+                treemap.insert_or_assign(first->first, splited);
+                treemap.insert_or_assign(allocate.first, allocate.second);
+            } else {
+                treemap.insert_or_assign(first->first, allocate.second);
+                splited.pagescount -= neededpages;
+                treemap.insert_or_assign(allocate.first + size, splited);
+            }
         } else {
             // There is an allocated memory space at the end of this block
             first->second.pagescount -= neededpages;

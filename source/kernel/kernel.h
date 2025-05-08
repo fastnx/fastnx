@@ -16,10 +16,14 @@ namespace FastNx::Kernel {
     public:
         Kernel();
         U64 GetPid(const ProcessEntropy &processent);
+
+
         std::map<U64, KAutoObject *> autorefs;
 
 
-        std::shared_ptr<Types::KProcess> CreateKProcess();
+        std::shared_ptr<Types::KProcess> CreateProcess();
+        std::shared_ptr<Types::KThread> CreateThread();
+
         std::shared_ptr<NxAllocator> nxalloc;
         std::shared_ptr<Memory::KSlabHeap> poffset;
         std::shared_ptr<Memory::KSlabHeap> userslabs;

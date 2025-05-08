@@ -20,9 +20,11 @@ namespace FastNx::Kernel::Memory {
         constexpr auto StackSize{2_GBYTES};
         constexpr auto TlsIoSize{64_GBYTES};
 
+        constexpr auto TotalSize{AliasSize + HeapSize + StackSize + TlsIoSize};
+
     }
 
-    auto GetWidthAs(const ProcessAddressSpace addrspace) -> U32 {
+    auto GetWidthAs(const ProcessAddressSpace addrspace) -> U64 {
         if (addrspace == ProcessAddressSpace::AddressSpace32Bit)
             return 36;
         if (addrspace == ProcessAddressSpace::AddressSpace64Bit)
@@ -45,11 +47,12 @@ namespace FastNx::Kernel::Memory {
             return;
         if (!blockslist)
             blockslist.emplace(kernel.poffset);
-        addrspace = blockslist->Initialize(1ULL << width, kernel);
+        const auto codesize{boost::alignment::align_up(proccfg.codenumpages * SwitchPageSize, RegionAlignment)};
 
         switch (width) {
             case 39:
-                code = std::span{addrspace.begin().base(), boost::alignment::align_up(addrspace.size(), RegionAlignment)};
+                addrspace = blockslist->Initialize(1ULL << width, AddressSpace64Bits::TotalSize + codesize, kernel);
+                code = std::span{addrspace.begin().base(), codesize};
                 alias = std::span{code.end().base(), AddressSpace64Bits::AliasSize};
                 heap = std::span{alias.end().base(), AddressSpace64Bits::HeapSize};
                 stack = std::span{heap.end().base(), AddressSpace64Bits::StackSize};
@@ -60,11 +63,11 @@ namespace FastNx::Kernel::Memory {
                 std::unreachable();
         }
 
-        /*
         std::vector<std::pair<SegmentType, U64>> aslrlist;
         for (const auto _type: EnumRange(SegmentType::Code, SegmentType::TlsIo))
             aslrlist.emplace_back(_type, GetRandom(0x6400) * RegionAlignment);
 
+        /*
         for (const auto &[type, offset]: aslrlist) {
             if (auto *segment{GetSegment(type)}; !segment->empty())
                 *segment = std::span{segment->begin().base() + offset, segment->size()};

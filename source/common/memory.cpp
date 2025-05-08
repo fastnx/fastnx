@@ -40,13 +40,13 @@ namespace FastNx {
         return ishost ? std::span{hostptr + baseaddr, offset} : std::span{guestptr + baseaddr, offset};
     }
 
-   std::span<U8> NxAllocator::InitializeGuestAs(const U64 aswidth) {
+   std::span<U8> NxAllocator::InitializeGuestAs(const U64 aswidth, const U64 assize) {
         auto *memory{reinterpret_cast<void *>(aswidth)}; // We must preserve the number of leading zero bits
-        auto *result{Device::AllocateGuestMemory(size, memory)};
+        auto *result{Device::AllocateGuestMemory(assize, memory)};
 
         if (result == memory)
             if (guestptr = static_cast<U8 *>(result); guestptr)
-                return std::span{guestptr, size};
+                return std::span{guestptr, assize};
         return {};
     }
 

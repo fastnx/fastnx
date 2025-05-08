@@ -23,7 +23,7 @@ namespace FastNx::Kernel::Types {
         std::shared_ptr<Memory::KMemory> &memory;
         std::span<U8> procmem{};
 
-        std::list<std::unique_ptr<KThread>> threads{};
+        std::list<std::shared_ptr<KThread>> threads{};
         bool hasstarted{};
 
         void *entrypoint{};
