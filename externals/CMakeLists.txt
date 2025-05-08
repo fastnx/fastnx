@@ -19,4 +19,7 @@ set(LZ4_BUILD_CLI CACHE FORCE "Build lz4 program" OFF)
 
 add_subdirectory(lz4/build/cmake)
 
+set(PUGIXML_INSTALL CACHE FORCE "Enable installation rules" OFF)
+add_subdirectory(pugixml)
+
 

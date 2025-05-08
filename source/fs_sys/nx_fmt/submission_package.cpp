@@ -1,4 +1,6 @@
 #include <print>
+#include <fmt/ranges.h>
+#include <pugixml.hpp>
 
 #include <crypto/types.h>
 #include <common/async_logger.h>
@@ -13,22 +15,31 @@ namespace FastNx::FsSys::NxFmt {
     SubmissionPackage::SubmissionPackage(Loaders::NspEs &nsp, const std::shared_ptr<Horizon::KeySet> &_keys) : pfs(nsp.mainpfs), keys(_keys)  {
         auto files{pfs->ListAllFiles()};
 
-        for (auto subit{files.begin()}; subit != files.end() && !cnmt; ++subit) {
+        VfsBackingFilePtr cnmtxml{};
+        for (auto subit{files.begin()}; subit != files.end() && (!cnmt || !cnmtxml); ) {
             bool erase{};
             if (subit->extension() == ".tik") {
                 keys->AddTicket(pfs->OpenFile(*subit));
                 erase = true;
             }
+
             if (const auto &subpath{subit->stem()}; subit->has_stem())
                 if (subpath.has_extension() && subpath.extension() == ".cnmt") {
+                    if (subit->extension() == ".xml") {
+                        cnmtxml = pfs->OpenFile(*subit);
+                        continue;
+                    }
                     const auto cnmtnca{std::make_unique<ContentArchive>(pfs->OpenFile(*subit), keys)};
                     if (const auto pfsinner{cnmtnca->pfslist.front()}; (cnmt = pfsinner->OpenFile(pfsinner->ListAllFiles().front())))
                         erase = true;
                 }
 
             if (erase)
-                files.erase(subit);
+                subit = files.erase(subit);
+            else ++subit;
         }
+        if (cnmtxml)
+            ParserContentXml(std::move(cnmtxml));
 
         GetAll(nsp, cnmt, files);
 
@@ -46,6 +57,9 @@ namespace FastNx::FsSys::NxFmt {
             if (corrupted || validfile.extension() != ".nca")
                 continue;
             if (const auto ncafile{pfs->OpenFile(validfile)}) {
+                if (const auto ncaid{ncafile->path.stem()}; !ncaid.empty())
+                    if (contentsize.contains(ncaid))
+                        NX_ASSERT(contentsize[ncaid] == ncafile->GetSize());
                 if (!Crypto::CheckNcaIntegrity(ncafile))
                     corrupted = ncafile;
 
@@ -83,6 +97,30 @@ namespace FastNx::FsSys::NxFmt {
         if (const auto content{ncalist.find(type)}; content != ncalist.end())
             return content->second;
         return nullptr;
+    }
+
+    void SubmissionPackage::ParserContentXml(const VfsBackingFilePtr &metaxml) {
+        auto content{metaxml->ReadSome<char>(metaxml->GetSize())};
+
+        pugi::xml_document xml;
+        const auto result{xml.load_buffer_inplace(content.data(), content.size())};
+        if (!result)
+            return;
+        std::string lastid;
+        for (const auto &attribute: xml) {
+            for (const auto &contentchild: attribute.children("Content")) {
+                U64 lastsize{};
+                for (const auto &contentnode: contentchild) {
+                    if (std::string_view{contentnode.name()} == "Id")
+                        lastid = contentnode.first_child().value();
+                    else if (std::string_view{contentnode.name()} == "Size")
+                        lastsize = strtoul(contentnode.first_child().value(), nullptr, 10);
+
+                    if (lastsize && !lastid.empty())
+                        contentsize.insert_or_assign(std::move(lastid), lastsize);
+                }
+            }
+        }
     }
 
     std::optional<FsPath> GetAppDirectoryDir(const ContentClassifier &type, const std::vector<FsPath> &files) {
