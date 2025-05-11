@@ -1,6 +1,9 @@
 #include <runtime/entropy.h>
 #include <kernel/kernel.h>
+
+#include <kernel/threads/kscheduler.h>
 #include <kernel/types/kprocess.h>
+
 
 
 namespace FastNx::Kernel::Types {
@@ -9,19 +12,35 @@ namespace FastNx::Kernel::Types {
         processid = kernel.GetPid(entropy);
     }
 
-    void KProcess::Initialize([[maybe_unused]] U64 stack, [[maybe_unused]] const ThreadPriority &thprior, [[maybe_unused]] U8 desiredcore) {
+    void KProcess::Initialize([[maybe_unused]] U64 stack, [[maybe_unused]] const ThreadPriority &priority, [[maybe_unused]] U8 desiredcore) {
         entrypoint = memory->code.begin().base();
-
-        tlsarea = AllocateTls();
+        kernelexcepttls = AllocateTls();
 
         auto mainthread{kernel.CreateThread()};
         if (!mainthread)
             return;
-        mainthread->Initialize(this, entrypoint, nullptr, tlsarea);
+        std::scoped_lock lock{threadind};
+        mainthread->Initialize(this, entrypoint, nullptr, kernelexcepttls);
         threads.emplace_back(std::move(mainthread));
     }
 
+    void KProcess::Start() const {
+        // At this point, we will not return until the process has finished
+        if (threads.empty())
+            return; // No work to be done
+        kernel.scheduler->Reeschedule();
+    }
+
+    void KProcess::Kill() {
+        for (const auto &livethread: threads) {
+            kernel.scheduler->KillThread(livethread);
+        }
+        threads.clear();
+    }
+
     U8 * KProcess::AllocateTls() {
+        std::scoped_lock lock{threadind};
+
         U8 *threadstorage{nullptr};
         if (!freetlslist.empty()) {
             const auto tls{freetlslist.begin()};
@@ -39,5 +58,6 @@ namespace FastNx::Kernel::Types {
     }
 
     void KProcess::Destroyed() {
+        threads.clear();
     }
 }

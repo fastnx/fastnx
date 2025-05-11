@@ -1,19 +1,31 @@
 #pragma once
+#include <condition_variable>
 #include <kernel/ksynchronization_object.h>
 namespace FastNx::Kernel::Types {
+
     class KThread final : public KSynchronizationObject {
     public:
         explicit KThread(Kernel &_kernel) : KSynchronizationObject(KAutoType::KThread, _kernel) {}
 
-        void StartThread() const;
         void Initialize(KProcess *process, void *ep, void *_stack, void *_tls);
+        void ResumeThread();
 
         void *entrypoint{};
         void *stack{};
-        void *tls{};
+        void *exceptiontls{};
+        void *usertls{};
         U64 threadid{};
+
+        U32 desiredcpu{};
+
+        U32 state{};
+        std::mutex condmutex;
+        std::condition_variable condsched;
+
+    private:
         std::list<KSynchronizationObject *> syncobjs;
-        KSynchronizationObject *procowner{}; // Process this thread belongs to
+        KSynchronizationObject *parent{}; // Process this thread belongs to
+
 
     protected:
         void Destroyed() override;

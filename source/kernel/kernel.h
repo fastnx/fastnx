@@ -16,10 +16,8 @@ namespace FastNx::Kernel {
     public:
         Kernel();
         U64 GetPid(const ProcessEntropy &processent);
-
-
+        U64 GetThreadId();
         std::map<U64, KAutoObject *> autorefs;
-
 
         std::shared_ptr<Types::KProcess> CreateProcess();
         std::shared_ptr<Types::KThread> CreateThread();
@@ -32,10 +30,10 @@ namespace FastNx::Kernel {
 
     private:
         U64 pidseed{InitialProcessId};
+        U64 threadseed{};
         std::vector<std::pair<U64, const ProcessEntropy *>> pidslist;
 
         std::list<std::shared_ptr<Types::KProcess>> liveprocs;
-
         std::mutex pmutex;
     };
 }

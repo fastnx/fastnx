@@ -6,26 +6,43 @@
 
 
 namespace FastNx::Kernel::Types {
-    void KThread::StartThread() const {
+    using namespace std::literals::chrono_literals;
+    void KThread::ResumeThread() {
         const auto &scheduler{kernel.scheduler};
-        scheduler->SetThreadName(fmt::format("HOS-Thread {}", threadid));
 
-        using namespace std::literals::chrono_literals;
-        for (U32 count{}; count < 10; count++)
-            scheduler->Sleep(10ms);
-        scheduler->Quit();
+        state++;
+        U64 count{};
+        for (; state; count++) {
+            scheduler->SetThreadName(fmt::format("HOS-Thread {:02}", threadid));
+            // Simulating some work in this thread
+            scheduler->Sleep(100ms);
+        }
     }
 
     void KThread::Initialize(KProcess *process, void *ep, void *_stack, void *_tls) {
-        procowner = dynamic_cast<KSynchronizationObject *>(process);
-        if (procowner)
-            procowner->IncreaseLifetime();
+        if (process)
+            if ((parent = dynamic_cast<KSynchronizationObject *>(process)))
+                parent->IncreaseLifetime();
 
+        threadid = kernel.GetThreadId();
         entrypoint = ep;
         stack = _stack;
-        tls = _tls;
+        exceptiontls = _tls;
+
+        if (!process)
+            return;
+        // https://switchbrew.org/wiki/Thread_Local_Region
+        usertls = process->AllocateTls();
     }
 
     void KThread::Destroyed() {
+        if (!parent)
+            return;
+
+        const auto process{dynamic_cast<KProcess *>(parent)};
+        auto threadsit{process->threads.begin()};
+        for (; threadsit != process->threads.end(); ++threadsit) {
+            NX_ASSERT((*threadsit)->threadid != threadid);
+        }
     }
 }

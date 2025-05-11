@@ -19,13 +19,16 @@ namespace FastNx::Kernel {
         throw exception{"Could not allocate a PID for the process"};
     }
 
+    U64 Kernel::GetThreadId() {
+        std::scoped_lock lock{pmutex};
+        return threadseed++;
+    }
     std::shared_ptr<Types::KThread> Kernel::CreateThread() {
         const auto thread{std::make_shared<Types::KThread>(*this)};
         if (thread)
             scheduler->Emplace(thread);
         return thread;
     }
-
     std::shared_ptr<Types::KProcess> Kernel::CreateProcess() {
         const auto process{std::make_shared<Types::KProcess>(*this)};
         if (process)

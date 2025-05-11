@@ -10,7 +10,9 @@ namespace FastNx::Kernel::Types {
     class KProcess final : public KSynchronizationObject {
     public:
         explicit KProcess(Kernel &_kernel);
-        void Initialize(U64 stack, const ThreadPriority &thprior, U8 desiredcore);
+        void Initialize(U64 stack, const ThreadPriority &priority, U8 desiredcore);
+        void Start() const;
+        void Kill(); // Interrupts all running threads associated with this process
 
 
         std::list<Memory::KTlsPageManager> freetlslist;
@@ -24,10 +26,11 @@ namespace FastNx::Kernel::Types {
         std::span<U8> procmem{};
 
         std::list<std::shared_ptr<KThread>> threads{};
+        std::recursive_mutex threadind;
         bool hasstarted{};
 
         void *entrypoint{};
-        U8 *tlsarea{};
+        U8 *kernelexcepttls{};
     private:
         void Destroyed() override;
     };
