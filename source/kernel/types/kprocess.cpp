@@ -27,8 +27,17 @@ namespace FastNx::Kernel::Types {
     void KProcess::Start() const {
         // At this point, we will not return until the process has finished
         if (threads.empty())
-            return; // No work to be done
-        kernel.scheduler->Reeschedule();
+            return;
+        const auto &scheduler{kernel.scheduler};
+        if (!scheduler->ismultithread) {
+            bool running{true};
+            while (running) {
+                auto firstfiber{boost::fibers::fiber(&Threads::KScheduler::Reeschedule, scheduler)};
+                if ((running = firstfiber.joinable()))
+                    firstfiber.join();
+            }
+        }
+        scheduler->Reeschedule();
     }
 
     void KProcess::Kill() {

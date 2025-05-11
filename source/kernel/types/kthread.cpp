@@ -10,12 +10,13 @@ namespace FastNx::Kernel::Types {
     void KThread::ResumeThread() {
         const auto &scheduler{kernel.scheduler};
 
-        state++;
         U64 count{};
         for (; state; count++) {
             scheduler->SetThreadName(fmt::format("HOS-Thread {:02}", threadid));
             // Simulating some work in this thread
             scheduler->Sleep(100ms);
+
+            scheduler->Reeschedule();
         }
     }
 
@@ -33,6 +34,8 @@ namespace FastNx::Kernel::Types {
             return;
         // https://switchbrew.org/wiki/Thread_Local_Region
         usertls = process->AllocateTls();
+
+        state++;
     }
 
     void KThread::Destroyed() {

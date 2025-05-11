@@ -19,6 +19,11 @@ namespace FastNx::Horizon {
         const auto optiomalcore{loader->npdm->maincore};
 
         loader->process->Initialize(stacksize, priority, optiomalcore);
+
+        if (loader) {
+            if (loader->process)
+                loader->process->Start();
+        }
     }
 
     void SwitchNs::LoadApplicationFile(const FsSys::FsPath &apppath) {

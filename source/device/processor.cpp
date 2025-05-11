@@ -6,6 +6,13 @@
 #include <algorithm>
 #include <device/capabilities.h>
 namespace FastNx::Device {
+    void SetCore(const U32 coreid) {
+        cpu_set_t cpuset;
+        CPU_ZERO(&cpuset);
+        CPU_ISSET(coreid, &cpuset);
+        pthread_setaffinity_np(pthread_self(), sizeof(cpuset), &cpuset);
+    }
+
     std::pair<std::string, I32> GetArchAspects() {
         cpu_set_t cpus;
         U64 activated{};
