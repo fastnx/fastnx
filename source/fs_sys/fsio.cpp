@@ -19,7 +19,7 @@ namespace FastNx::FsSys {
         static std::map<U64, U64> sizes;
         static std::mutex mutex;
 
-        std::lock_guard lock(mutex);
+        std::lock_guard lock{mutex};
 
         const auto fsn{GetFileFsn(fd)};
         if (fsn && sizes.contains(fsn)) // The `strace` output was being flooded with seeks

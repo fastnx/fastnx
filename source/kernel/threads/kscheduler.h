@@ -11,7 +11,7 @@ namespace FastNx::Kernel::Threads {
         std::condition_variable available;
         bool enable{true};
 
-        std::shared_ptr<Types::KThread> osthread;
+        std::list<std::shared_ptr<Types::KThread>> preempting;
     };
 
     class KScheduler {
@@ -21,11 +21,13 @@ namespace FastNx::Kernel::Threads {
         void StartThread(U32 idealcore);
 
         void Emplace(const std::shared_ptr<Types::KThread> &thread);
-        void PreemptNextThread(U32 idealcore, const std::shared_ptr<Types::KThread> &thread);
+        void PreemptThread(U32 idealcore, const std::shared_ptr<Types::KThread> &thread);
         void KillThread(const std::shared_ptr<Types::KThread> &thread);
 
         void SetThreadName(const std::string &threadname);
         void Sleep(const std::chrono::milliseconds &value) const;
+        void Yield();
+
         void Reeschedule();
         void Quit();
 

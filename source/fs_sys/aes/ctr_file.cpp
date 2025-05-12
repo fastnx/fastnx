@@ -39,7 +39,7 @@ namespace FastNx::FsSys::Aes {
         if (offset + size > GetSize())
             return {};
 
-        std::scoped_lock guard(shared);
+        std::scoped_lock lock{shared};
         const auto startblock{offset - aligment};
 
         if (!aligment) {

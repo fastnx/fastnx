@@ -112,7 +112,7 @@ namespace FastNx::FsSys::ReFs {
         if (create && is_regular_file(openpath))
             remove(openpath);
 
-        std::lock_guard guard(spinlock);
+        std::lock_guard lock{spinlock};
         if (const auto file{filelist.find(openpath)}; file != filelist.end()) {
             if (file->second->mode == mode)
                 return file->second;

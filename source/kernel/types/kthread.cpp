@@ -10,13 +10,12 @@ namespace FastNx::Kernel::Types {
     void KThread::ResumeThread() {
         const auto &scheduler{kernel.scheduler};
 
+        scheduler->SetThreadName(fmt::format("HOS-Thread {}", threadid));
         U64 count{};
-        for (; state; count++) {
-            scheduler->SetThreadName(fmt::format("HOS-Thread {:02}", threadid));
+        for (; state && count < 100; count++) {
             // Simulating some work in this thread
-            scheduler->Sleep(100ms);
-
-            scheduler->Reeschedule();
+            scheduler->Sleep(10ms);
+            scheduler->Yield();
         }
     }
 

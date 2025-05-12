@@ -24,21 +24,24 @@ namespace FastNx::Kernel::Threads {
                 threadit->available.wait(lock);
             }
 
-            if (threadit->osthread)
-                threadit->osthread->ResumeThread();
+            auto &preemplist{threadit->preempting};
+            if (!preemplist.empty()) {
+                const auto &thread{preemplist.begin()};
+                (*thread)->ResumeThread();
+
+                preemplist.splice(preemplist.end(), preemplist, thread);
+            }
             else if (!ismultithread)
                 boost::this_fiber::yield();
         }
         Quit();
     }
-
     void KScheduler::Emplace(const std::shared_ptr<Types::KThread> &thread) {
         std::scoped_lock lock{schedulermutex};
         preemplist.emplace_back(thread);
     }
 
-    void KScheduler::PreemptNextThread(const U32 idealcore, const std::shared_ptr<Types::KThread> &thread) {
-        // Searching for one or more threads that were just created
+    void KScheduler::PreemptThread(const U32 idealcore, const std::shared_ptr<Types::KThread> &thread) {
         std::shared_lock lock{schedulermutex};
 
         auto coresit{coresctx.begin()};
@@ -51,14 +54,18 @@ namespace FastNx::Kernel::Threads {
 
         {
             std::scoped_lock threadlock{coresit->mutex};
-            if (coresit->osthread != thread)
-                coresit->osthread = thread;
+            coresit->preempting.emplace_front(thread);
             coresit->available.notify_one();
         }
 
-        if (!ismultithread)
-            if (fiberlist.contains(&*coresit))
-                fiberlist[&*coresit].join();
+        if (ismultithread)
+            return;
+        auto fiberit{fiberlist.begin()};
+        while (fiberit->first != &*coresit)
+            ++fiberit;
+
+        if (fiberit->second.joinable())
+            fiberit->second.join();
     }
 
     void KScheduler::KillThread(const std::shared_ptr<Types::KThread> &thread) {
@@ -92,12 +99,15 @@ namespace FastNx::Kernel::Threads {
             if (fiber.get_id() == boost::this_fiber::get_id())
                 fiber.detach();
     }
-
     void KScheduler::Sleep(const std::chrono::milliseconds &value) const {
         if (ismultithread)
             std::this_thread::sleep_for(value);
         else
             boost::this_fiber::sleep_for(value);
+    }
+
+    void KScheduler::Yield() {
+        Reeschedule();
     }
 
     void KScheduler::Reeschedule() {
@@ -106,14 +116,28 @@ namespace FastNx::Kernel::Threads {
             if (!osthread->state)
                 if (threadit = preemplist.erase(threadit); threadit != preemplist.end())
                     continue;
-            if (!osthread->usertls || !osthread->entrypoint)
+            if (!osthread->usertls || !osthread->entrypoint) {
+                preemplist.splice(preemplist.end(), preemplist, threadit);
+                continue;
+            }
+
+            for (const auto &[cpuid, context]: std::ranges::views::enumerate(coresctx)) {
+                const auto optionalcore{osthread->desiredcpu};
+                if (optionalcore != cpuid)
+                    continue;
+
+                bool preempted{};
+                for (const auto &thread: context.preempting)
+                    if (thread == osthread)
+                        preempted = true;
+
+                if (preempted)
+                    break;
+                last = std::exchange(next, osthread);
                 preemplist.splice(preemplist.end(), preemplist, threadit);
 
-            last = std::exchange(next, osthread);
-            preemplist.splice(preemplist.end(), preemplist, threadit);
-
-            const auto optionalcore{osthread->desiredcpu};
-            PreemptNextThread(optionalcore, osthread);
+                PreemptThread(optionalcore, osthread);
+            }
 
             ++threadit;
         }

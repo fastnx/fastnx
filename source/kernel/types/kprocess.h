@@ -23,7 +23,6 @@ namespace FastNx::Kernel::Types {
         ProcessEntropy entropy{};
 
         std::shared_ptr<Memory::KMemory> &memory;
-        std::span<U8> procmem{};
 
         std::list<std::shared_ptr<KThread>> threads{};
         std::recursive_mutex threadind;
