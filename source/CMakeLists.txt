@@ -59,6 +59,8 @@ target_sources(fastnx PRIVATE
     kernel/memory/ktls_pagemanager.h
     kernel/types/kprocess.cpp
     kernel/types/kprocess.h
+    kernel/types/khandle_table.cpp
+    kernel/types/khandle_table.h
     kernel/types/kthread.cpp
     kernel/types/kthread.h
     kernel/svc/types.h

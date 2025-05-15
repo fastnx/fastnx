@@ -3,8 +3,10 @@
 #include <kernel/types.h>
 #include <kernel/ksynchronization_object.h>
 #include <kernel/memory/ktls_pagemanager.h>
+#include <kernel/types/khandle_table.h>
 #include <kernel/memory/k_memory.h>
 #include <kernel/types/kthread.h>
+
 
 namespace FastNx::Kernel::Types {
     class KProcess final : public KSynchronizationObject {
@@ -24,12 +26,14 @@ namespace FastNx::Kernel::Types {
 
         std::shared_ptr<Memory::KMemory> &memory;
 
-        std::list<std::shared_ptr<KThread>> threads{};
+        std::list<std::shared_ptr<KThread>> threads;
         std::recursive_mutex threadind;
         bool hasstarted{};
 
         void *entrypoint{};
         U8 *kernelexcepttls{};
+
+        KHandleTable handletable;
     private:
         void Destroyed() override;
     };

@@ -21,7 +21,11 @@ namespace FastNx::Kernel::Types {
             return;
         std::scoped_lock lock{threadind};
         mainthread->Initialize(this, entrypoint, nullptr, kernelexcepttls);
+
+        const auto firstthread{handletable.Allocate(mainthread)};
         threads.emplace_back(std::move(mainthread));
+
+        NX_ASSERT(handletable.GetObject<KThread>(firstthread));
     }
 
     void KProcess::Start() const {
@@ -67,6 +71,7 @@ namespace FastNx::Kernel::Types {
     }
 
     void KProcess::Destroyed() {
+        handletable.CloseAll();
         threads.clear();
     }
 }
