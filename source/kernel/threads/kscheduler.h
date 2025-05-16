@@ -31,7 +31,7 @@ namespace FastNx::Kernel::Threads {
         void Reeschedule();
         void Quit();
 
-        std::list<CoreContext> coresctx;
+        std::list<CoreContext> coreslist;
 
         std::shared_ptr<Types::KThread> last;
         std::shared_ptr<Types::KThread> next;

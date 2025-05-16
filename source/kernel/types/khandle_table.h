@@ -28,9 +28,9 @@ namespace FastNx::Kernel::Types {
             const auto handleid{handle >> 15};
 
             std::lock_guard lock{tablem};
-            auto entryit{itemstable.begin()};
-            while (entryit != itemstable.end() && entryit->listindex != listindex)
-                ++entryit;
+            auto entryit{itemstable.rbegin()};
+            while (entryit != itemstable.rend() && entryit->listindex != listindex)
+                ++entryit;  
 
             if (entryit->handle != handleid)
                 return nullptr;

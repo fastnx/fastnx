@@ -44,7 +44,6 @@ target_sources(fastnx PRIVATE
     kernel/types.h
     kernel/kernel.cpp
     kernel/kernel.h
-    kernel/routines.cpp
     kernel/kauto_object.cpp
     kernel/kauto_object.h
     kernel/ksynchronization_object.cpp

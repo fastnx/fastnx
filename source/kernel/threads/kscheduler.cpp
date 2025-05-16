@@ -9,14 +9,16 @@
 
 namespace FastNx::Kernel::Threads {
     KScheduler::KScheduler(Kernel &_kernel) : kernel(_kernel) {
-        coresctx.resize(4);
+        coreslist.resize(4);
     }
     void KScheduler::StartThread(U32 idealcore) {
-        Device::SetCore(idealcore);
-
-        auto threadit{coresctx.begin()};
+        auto threadit{coreslist.begin()};
         while (idealcore--)
             ++threadit;
+
+        if (threadit == coreslist.end())
+            return;
+        Device::SetCore(idealcore);
 
         while (threadit->enable) {
             if (ismultithread) {
@@ -25,14 +27,13 @@ namespace FastNx::Kernel::Threads {
             }
 
             auto &preemplist{threadit->preempting};
-            if (!preemplist.empty()) {
+            while (!preemplist.empty()) {
                 const auto &thread{preemplist.begin()};
                 (*thread)->ResumeThread();
-
                 preemplist.splice(preemplist.end(), preemplist, thread);
             }
-            else if (!ismultithread)
-                boost::this_fiber::yield();
+
+            Yield();
         }
         Quit();
     }
@@ -44,7 +45,7 @@ namespace FastNx::Kernel::Threads {
     void KScheduler::PreemptThread(const U32 idealcore, const std::shared_ptr<Types::KThread> &thread) {
         std::shared_lock lock{schedulermutex};
 
-        auto coresit{coresctx.begin()};
+        auto coresit{coreslist.begin()};
         for (U32 start{}; start < idealcore; ++start)
             ++coresit;
         if (ismultithread && !rthrlist.contains(&*coresit)) {
@@ -121,7 +122,7 @@ namespace FastNx::Kernel::Threads {
                 continue;
             }
 
-            for (const auto &[cpuid, context]: std::ranges::views::enumerate(coresctx)) {
+            for (const auto &[cpuid, context]: std::ranges::views::enumerate(coreslist)) {
                 const auto optionalcore{osthread->desiredcpu};
                 if (optionalcore != cpuid)
                     continue;

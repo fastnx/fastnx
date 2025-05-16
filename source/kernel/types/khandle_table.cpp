@@ -28,9 +28,9 @@ namespace FastNx::Kernel::Types {
     }
 
     void KHandleTable::Free(const U32 handle) {
-        const auto index{handle & 0x7FFF};
+        const auto handlecnt{handle >> 15};
         auto table{itemstable.begin()};
-        while (table != itemstable.end() && table->handle != index)
+        while (table != itemstable.end() && table->handle != handlecnt)
             ++table;
         if (table == itemstable.end())
             return;

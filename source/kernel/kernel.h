@@ -15,7 +15,7 @@ namespace FastNx::Kernel {
     class Kernel {
     public:
         Kernel();
-        U64 GetPid(const ProcessEntropy &processent);
+        U64 GetPid(const ProcessEntropy &entropy);
         U64 GetThreadId();
         std::map<U64, KAutoObject *> autorefs;
 
