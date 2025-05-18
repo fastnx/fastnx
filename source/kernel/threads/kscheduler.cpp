@@ -3,6 +3,7 @@
 #include <common/container.h>
 #include <device/capabilities.h>
 
+#include <kernel/kernel.h>
 #include <kernel/types/kthread.h>
 #include <kernel/threads/kscheduler.h>
 
@@ -11,14 +12,15 @@ namespace FastNx::Kernel::Threads {
     KScheduler::KScheduler(Kernel &_kernel) : kernel(_kernel) {
         coreslist.resize(4);
     }
-    void KScheduler::StartThread(U32 idealcore) {
+    void KScheduler::StartThread(const U32 idealcore) {
         auto threadit{coreslist.begin()};
-        while (idealcore--)
+        for (auto index{idealcore}; index; index--)
             ++threadit;
 
         if (threadit == coreslist.end())
             return;
         Device::SetCore(idealcore);
+        kernel.CreateJit(idealcore);
 
         while (threadit->enable) {
             if (ismultithread) {

@@ -75,28 +75,39 @@ namespace FastNx::Kernel::Memory {
         */
     }
 
-    void KMemory::MapCodeMemory(const U64 begin, const U64 size, const std::vector<U8> &content) {
-        U8 *memory{code.begin().base() + begin};
-        NX_ASSERT(size > content.size());
-        const auto _size{boost::alignment::align_up(size, SwitchPageSize)};
+    void KMemory::MapSegmentMemory(const std::span<U8> &memseg, const U64 begin, U64 size, const bool fill, const KMemoryBlock &block) {
+        U8* memory{memseg.begin().base() + begin};
+        if (!size)
+            size = reinterpret_cast<U64>(memseg.end().base() - begin);
 
-        blockslist->Map({memory, KMemoryBlock{
+        blockslist->Map({memory, block});
+        if (fill)
+            std::memset(memory, 0, size);
+    }
+    void KMemory::MapCodeMemory(const U64 begin, const U64 size, const std::vector<U8> &content) {
+        const auto _size{boost::alignment::align_up(size, SwitchPageSize)};
+        NX_ASSERT(_size > content.size());
+
+        MapSegmentMemory(code, begin, _size, false, KMemoryBlock{
             .pagescount = _size / SwitchPageSize,
             .state = MemoryState{MemoryTypeValues::Code}
-        }});
+        });
+        U8 *memory{code.begin().base() + begin};
         std::memcpy(memory, content.data(), content.size());
     }
 
-    void KMemory::MapTlsMemory(const U64 begin, U64 size) {
-        U8 *memory{tlsio.begin().base() + begin};
-        if (!size)
-            size = reinterpret_cast<U64>(tlsio.end().base() - begin);
-        blockslist->Map({memory, KMemoryBlock{
+    void KMemory::MapTlsMemory(const U64 begin, const U64 size) {
+        MapSegmentMemory(tlsio, begin, size, true, KMemoryBlock{
             .pagescount = size / SwitchPageSize,
             .state = MemoryState{MemoryTypeValues::ThreadLocal}
-        }});
+        });
+    }
 
-        std::memset(memory, 0, size);
+    void KMemory::MapStackMemory(const U64 begin, const U64 size) {
+        MapSegmentMemory(stack, begin, size, true, KMemoryBlock{
+            .pagescount = size / SwitchPageSize,
+            .state = MemoryState{MemoryTypeValues::Stack}
+        });
     }
 
     void KMemory::SetMemoryPermission(const U64 begin, const U64 size, const I32 permission) {

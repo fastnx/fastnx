@@ -14,16 +14,22 @@ namespace FastNx::Kernel::Types {
         U64 count{};
         for (; state && count < 100; count++) {
             // Simulating some work in this thread
-            scheduler->Sleep(10ms);
+            if (const auto &jit{kernel.GetJit(desiredcpu)}) {
+                if (!jit->initialized)
+                    jit->Initialize(Jit::JitThreadContext{stack, entrypoint});
+
+                jit->Run();
+            }
             scheduler->Yield();
         }
     }
 
-    void KThread::Initialize(KProcess *process, void *ep, void *_stack, void *_tls) {
+    void KThread::Initialize(KProcess *process, void *ep, void *_stack, void *_tls, const U32 firstcpu) {
         if (process)
-            if ((parent = dynamic_cast<KSynchronizationObject *>(process)))
+            if (parent = dynamic_cast<KSynchronizationObject *>(process); parent)
                 parent->IncreaseLifetime();
 
+        desiredcpu = firstcpu;
         threadid = kernel.GetThreadId();
         entrypoint = ep;
         stack = _stack;

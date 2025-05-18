@@ -57,7 +57,7 @@ namespace FastNx::Core {
         for (const auto &[_pid, _program]: _procs) {
             static const auto fastpid{getpid()};
             if (_pid != fastpid && _program.contains(process))
-                throw exception{"More than one instance of Fastnx cannot coexist at the same time"};
+                throw exception{"More than one instance of FastNx cannot coexist at the same time"};
         }
 
         assets = std::make_shared<Assets>();

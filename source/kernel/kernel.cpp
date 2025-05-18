@@ -3,6 +3,7 @@
 #include <kernel/kernel.h>
 
 
+
 namespace FastNx::Kernel {
     Kernel::Kernel() :
             nxalloc(std::make_shared<NxAllocator>()),
@@ -43,6 +44,29 @@ namespace FastNx::Kernel {
             scheduler->Emplace(thread);
         return thread;
     }
+
+    static std::map<U32, std::shared_ptr<Jit::JitDynarmicJitController>> jits;
+    void Kernel::CreateJit(U32 cpunumber) {
+        if (jits.contains(cpunumber))
+            return;
+
+        if (const auto &process{GetCurrentProcess()})
+            jits.emplace(cpunumber, std::make_shared<Jit::JitDynarmicJitController>(process->memory));
+    }
+
+    // ReSharper disable once CppMemberFunctionMayBeStatic
+    std::shared_ptr<Jit::JitDynarmicJitController> Kernel::GetJit(const U32 corenumber) {
+        if (jits.contains(corenumber))
+            return jits[corenumber];
+        return nullptr;
+    }
+
+    std::shared_ptr<Types::KProcess> Kernel::GetCurrentProcess() {
+        if (liveprocs.empty())
+            return nullptr;
+        return liveprocs.back();
+    }
+
     std::shared_ptr<Types::KProcess> Kernel::CreateProcess() {
         const auto process{std::make_shared<Types::KProcess>(*this)};
         if (process)

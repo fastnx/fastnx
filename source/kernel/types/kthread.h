@@ -7,7 +7,7 @@ namespace FastNx::Kernel::Types {
     public:
         explicit KThread(Kernel &_kernel) : KSynchronizationObject(KAutoType::KThread, _kernel) {}
 
-        void Initialize(KProcess *process, void *ep, void *_stack, void *_tls);
+        void Initialize(KProcess *process, void *ep, void *_stack, void *_tls, U32 firstcpu);
         void ResumeThread();
 
         void *entrypoint{};

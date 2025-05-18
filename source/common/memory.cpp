@@ -69,7 +69,7 @@ namespace FastNx {
    bool NxAllocator::CanAllocate(const U8 *region, const U64 size) {
         for (const auto &[allocinfo, _size]: alloclists) {
             const auto [guestmemory, _] = allocinfo;
-            if (guestmemory >= region && guestmemory + _size >= region + size)
+            if (guestmemory <= region && guestmemory + _size > region)
                 if (_size && size)
                     return {};
         }

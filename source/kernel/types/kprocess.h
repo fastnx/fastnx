@@ -12,7 +12,7 @@ namespace FastNx::Kernel::Types {
     class KProcess final : public KSynchronizationObject {
     public:
         explicit KProcess(Kernel &_kernel);
-        void Initialize(U64 stack, const ThreadPriority &priority, U8 desiredcore);
+        void Initialize(U64 stacksize, const ThreadPriority &priority, U8 desiredcore);
         void Start() const;
         void Kill(); // Interrupts all running threads associated with this process
 

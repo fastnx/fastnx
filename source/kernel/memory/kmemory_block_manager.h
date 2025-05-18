@@ -14,7 +14,26 @@ namespace FastNx::Kernel::Memory {
         Io,
         Static,
         Code,
-        Inaccessible
+        CodeData,
+        Normal,
+        Shared,
+        Alias,
+        AliasCode,
+        AliasCodeData,
+        Ipc,
+        Stack,
+        ThreadLocal,
+        Transfered,
+        SharedTransfered,
+        SharedCode,
+        Inaccessible,
+        NonSecureIpc,
+        NonDeviceIpc,
+        Kernel,
+        GeneratedCode,
+        CodeOut,
+        Corevare, // [13.0.0+] Coverage
+        Insecure // [15.0.0+] Insecure
     };
 
     namespace MemoryTypeValues {
@@ -22,6 +41,7 @@ namespace FastNx::Kernel::Memory {
         constexpr auto Code{0x00DC7E03U};
         constexpr auto Inaccessible{0x00000010U};
         constexpr auto ThreadLocal{0x0040200C};
+        constexpr auto Stack{0x005C3C0B};
     }
 
     union MemoryState {

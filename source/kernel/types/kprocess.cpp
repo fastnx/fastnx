@@ -12,7 +12,7 @@ namespace FastNx::Kernel::Types {
         processid = kernel.GetPid(entropy);
     }
 
-    void KProcess::Initialize([[maybe_unused]] U64 stack, [[maybe_unused]] const ThreadPriority &priority, [[maybe_unused]] U8 desiredcore) {
+    void KProcess::Initialize(const U64 stacksize, [[maybe_unused]] const ThreadPriority &priority, const U8 desiredcore) {
         entrypoint = memory->code.begin().base();
         kernelexcepttls = AllocateTls();
 
@@ -20,8 +20,9 @@ namespace FastNx::Kernel::Types {
         if (!mainthread)
             return;
         std::scoped_lock lock{threadind};
-        mainthread->Initialize(this, entrypoint, nullptr, kernelexcepttls);
 
+        memory->MapStackMemory(0, stacksize);
+        mainthread->Initialize(this, entrypoint, memory->stack.begin().base() + stacksize, kernelexcepttls, desiredcore);
         const auto firstthread{handletable.Allocate(mainthread)};
         threads.emplace_back(std::move(mainthread));
 

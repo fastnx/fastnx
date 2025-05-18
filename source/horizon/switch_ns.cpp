@@ -16,9 +16,9 @@ namespace FastNx::Horizon {
     void StartProcess(const std::optional<ProcessLoader> &loader) {
         const auto stacksize{loader->npdm->stacksize};
         const Kernel::ThreadPriority priority{loader->npdm->priority};
-        const auto optiomalcore{loader->npdm->maincore};
+        const auto firstcore{loader->npdm->maincore};
 
-        loader->process->Initialize(stacksize, priority, optiomalcore);
+        loader->process->Initialize(stacksize, priority, firstcore);
 
         if (loader) {
             if (loader->process)
