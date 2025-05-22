@@ -7,6 +7,10 @@ namespace FastNx::Core {
     enum class AssetsType {
         Games
     };
+    enum class AssetFileType {
+        Setupfile
+    };
+
     class Assets : public std::enable_shared_from_this<Assets> {
     public:
         Assets();
@@ -24,5 +28,8 @@ namespace FastNx::Core {
 
         std::optional<GamesLists> gamesLists;
         std::map<AssetsType, FsSys::FsPath> paths;
+
+
+        FsSys::VfsBackingFilePtr GetFile(AssetFileType type);
     };
 }

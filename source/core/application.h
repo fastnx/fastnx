@@ -1,8 +1,11 @@
 #pragma once
 
 #include <core/assets.h>
+#include <core/app_setup.h>
 #include <horizon/switch_ns.h>
 #include <horizon/key_set.h>
+
+
 namespace FastNx::Core {
     class Application {
     public:
@@ -16,6 +19,7 @@ namespace FastNx::Core {
     private:
         std::shared_ptr<Assets> assets;
         std::shared_ptr<Horizon::KeySet> keys;
+        std::shared_ptr<AppSetup> settings;
         std::shared_ptr<Horizon::SwitchNs> switchnx;
     };
 }

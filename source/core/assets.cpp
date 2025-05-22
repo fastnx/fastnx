@@ -4,6 +4,8 @@
 #include <common/exception.h>
 #include <core/assets.h>
 
+#include <fs_sys/refs/buffered_file.h>
+
 namespace FastNx::Core {
     auto ContainsPath(const FsSys::FsPath &dest, const FsSys::FsPath &src) {
         bool result{};
@@ -44,6 +46,14 @@ namespace FastNx::Core {
         }
 
         return result;
+    }
+    FsSys::VfsBackingFilePtr Assets::GetFile(const AssetFileType type) {
+        switch (type) {
+            case AssetFileType::Setupfile:
+                return directory->OpenFile(directory->path / "fastnx.xml", FsSys::FileModeType::ReadWrite);
+            default:
+                return nullptr;
+        }
     }
 
     void Assets::Initialize() {

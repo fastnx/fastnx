@@ -66,6 +66,7 @@ namespace FastNx::Core {
         assets->Initialize();
 
         keys = std::make_shared<Horizon::KeySet>(*assets->keys, *assets->tiks);
+        settings = std::make_shared<AppSetup>(assets);
         switchnx = std::make_shared<Horizon::SwitchNs>(keys);
 
         switchnx->GetLoaders(assets->GetAllGames());
