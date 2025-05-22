@@ -7,6 +7,7 @@
 #include <fs_sys/types.h>
 namespace FastNx::FsSys::NxFmt {
 
+#pragma pack(push, 1)
     // https://switchbrew.org/wiki/NCA
     struct Pfs0Header {
         U32 magic;
@@ -14,17 +15,22 @@ namespace FastNx::FsSys::NxFmt {
         U32 strTableSize;
         [[deprecated("This field is usually zeroed")]] U32 zeroed;
     };
-    struct PartitionEntry {
+    struct FileEntryBase {
         U64 offset, size;
         U32 nameOffset;
-        [[deprecated]] U32 version;
     };
+    struct PartitionEntry : FileEntryBase {
+        U32 version;
+    };
+    struct FileEntryTable : FileEntryBase {
+        U32 hashregionsize;
+        U64 reserved;
+        std::array<U8, 0x20> regionhash; // SHA-256 hash of the first (size of hashed region) bytes of filedata
+    };
+#pragma pack(pop)
     static_assert(IsSizeOf<Pfs0Header, 16>);
     static_assert(IsSizeOf<PartitionEntry, 0x14 + 0x4>);
 
-    struct FileEntryMetadata {
-        U64 offset, size;
-    };
     class PartitionFileSystem final : public VfsReadOnlyDirectory {
     public:
         static constexpr auto MaxEntriesCount{0x10};
@@ -44,7 +50,11 @@ namespace FastNx::FsSys::NxFmt {
 
         VfsBackingFilePtr partfs;
     private:
-        boost::container::flat_map<std::string, FileEntryMetadata> files;
+        std::vector<std::variant<PartitionEntry, FileEntryTable>> pents;
+
+        boost::container::flat_map<std::string, FileEntryBase> files;
+        bool ishashfs{}; // FileEntryTable
+        U32 dataoffset{};
         U64 _count{};
         U64 bytesused{}; // Byte counter used by the data of all files in this partition
     };

@@ -48,4 +48,20 @@ namespace FastNx {
     constexpr U64 operator""_GBYTES(const long long unsigned size) {
         return size * 1024_MBYTES;
     }
+
+    // https://www.reddit.com/r/cpp/comments/815zr5/stdvariant_and_accessing_baseclass_stdgetbaseclass/
+    template <typename T, typename V>
+    const T& get_derived(const V &v) {
+        const T* p{};
+        // ReSharper disable once CppUseFamiliarTemplateSyntaxForGenericLambdas
+        std::visit([&p](const auto &&x) {
+            using X = decltype(x);
+            if constexpr (std::is_base_of_v<T, std::decay_t<X>>) {
+                p = std::addressof(x);
+            } else {
+                throw std::bad_variant_access{};
+            }
+        }, std::forward<const V>(v));
+        return *p;
+    }
 }

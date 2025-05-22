@@ -32,7 +32,7 @@ namespace FastNx::Kernel::Memory {
         Kernel,
         GeneratedCode,
         CodeOut,
-        Corevare, // [13.0.0+] Coverage
+        Coverage, // [13.0.0+] Coverage
         Insecure // [15.0.0+] Insecure
     };
 
