@@ -59,6 +59,7 @@ namespace FastNx::FsSys {
 
         virtual explicit operator bool() const = 0;
         virtual U64 GetSize() const = 0;
+        virtual void SetSize(U64 newsize) = 0;
 
         FsPath path;
         FileModeType mode;

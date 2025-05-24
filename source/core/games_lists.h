@@ -17,6 +17,8 @@ namespace FastNx::Core {
         std::shared_ptr<Assets> assets;
 
         bool AddTypedGame(const FsSys::FsPath &gamefiles);
+
+        static bool IsFormatAllowed(GamePathType type);
         std::vector<FsSys::FsPath> GetAllGamesPaths(GamePathType type) const;
 
         std::list<FsSys::FsPath> dirs;

@@ -16,9 +16,13 @@ namespace FastNx::Core {
     class AppSetup {
     public:
         explicit AppSetup(const std::shared_ptr<Assets> &assets);
+        void WriteToFile() const;
         ~AppSetup();
 
         FsSys::VfsBackingFilePtr sfile;
-        pugi::xml_document rawsettings;
+        pugi::xml_document xmlset;
+        std::vector<char> filecontent;
+
+        bool enablensps;
     };
 }

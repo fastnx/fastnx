@@ -18,7 +18,6 @@ namespace FastNx {
             return user->pw_dir;
         return {};
     }
-
     bool IsProcessPrivileged() {
         const auto uid{getuid()};
         return !uid || geteuid() != uid;
@@ -71,7 +70,7 @@ I32 main(const I32 argc, const char **argv) {
         AsyncLogger::Success("Features supported by the Host system: {}, Your rank {}", aspects, ranking);
     }
 
-    if (const auto application{std::make_shared<Core::Application>()}) {
+    if (const auto &application{Core::GetContext()}) {
         application->Initialize();
         // application->DumpAllLogos();
         application->LoadFirstPickedGame();

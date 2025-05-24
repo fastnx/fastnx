@@ -10,6 +10,7 @@ namespace FastNx::FsSys::Aes {
 
         explicit operator bool() const override;
         U64 GetSize() const override;
+        void SetSize(U64 newsize) override;
 
         VfsBackingFilePtr encfile{};
         std::optional<Crypto::AesCipher> encrypt{};

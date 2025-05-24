@@ -29,6 +29,9 @@ namespace FastNx::FsSys::Aes {
     U64 XtsFile::GetSize() const {
         return encfile->GetSize();
     }
+    void XtsFile::SetSize(U64 newsize) {
+        std::terminate();
+    }
 
     U64 XtsFile::ReadTypeImpl(U8 *dest, const U64 size, const U64 offset) {
         std::optional<std::vector<U8>> ebuffer;

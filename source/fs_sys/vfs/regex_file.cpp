@@ -40,6 +40,9 @@ namespace FastNx::FsSys::Vfs {
     U64 RegexFile::GetSize() const {
         return file->GetSize();
     }
+    void RegexFile::SetSize(U64 newsize) {
+        std::terminate();
+    }
     U64 RegexFile::ReadTypeImpl(U8 *dest, const U64 size, U64 offset) {
         auto line{matches.begin()};
         U64 lastoff{};

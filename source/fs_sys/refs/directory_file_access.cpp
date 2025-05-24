@@ -109,8 +109,10 @@ namespace FastNx::FsSys::ReFs {
         }
         if (is_directory(openpath))
             return nullptr;
+#if 0
         if (create && is_regular_file(openpath))
             remove(openpath);
+#endif
 
         std::lock_guard lock{spinlock};
         if (const auto file{filelist.find(openpath)}; file != filelist.end()) {

@@ -9,6 +9,9 @@ namespace FastNx::FsSys::Vfs {
     U64 StandardFile::GetSize() const {
         return _size;
     }
+    void StandardFile::SetSize(U64 newsize) {
+        std::terminate();
+    }
     U64 StandardFile::ReadTypeImpl(U8 *dest, const U64 size, const U64 offset) {
         std::unreachable(); std::terminate();
     }

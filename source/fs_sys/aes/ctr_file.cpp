@@ -25,6 +25,9 @@ namespace FastNx::FsSys::Aes {
     U64 CtrFile::GetSize() const {
         return encfile->GetSize();
     }
+    void CtrFile::SetSize(U64 newsize) {
+        std::terminate();
+    }
 
     void CtrFile::UpdateCtr(const U64 offset) {
         U64 sector{offset / CtrSectorSize + ctroffset};

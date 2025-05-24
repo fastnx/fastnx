@@ -69,6 +69,7 @@ namespace FastNx::Core {
         settings = std::make_shared<AppSetup>(assets);
         switchnx = std::make_shared<Horizon::SwitchNs>(keys);
 
+        assets->LoadGamesLists();
         switchnx->GetLoaders(assets->GetAllGames());
     }
 
@@ -98,5 +99,12 @@ namespace FastNx::Core {
         }();
         if (gamefile)
             switchnx->LoadApplicationFile(*gamefile);
+    }
+
+    std::shared_ptr<Application> GetContext() {
+        static std::shared_ptr<Application> context{};
+        if (!context)
+            context = std::make_shared<Application>();
+        return context;
     }
 }

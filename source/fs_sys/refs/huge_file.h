@@ -11,6 +11,7 @@ namespace FastNx::FsSys::ReFs {
 
         U64 GetSize() const override;
         U64 ReadTypeFaster(U8 *dest, U64 size, U64 offset);
+        void SetSize(U64 newsize) override;
     private:
         U64 ReadTypeImpl(U8 *dest, U64 size, U64 offset) override;
         U64 WriteTypeImpl(const U8 *source, U64 size, U64 offset) override;

@@ -33,15 +33,17 @@ namespace FastNx::Core {
     }
 
     void Assets::Destroy() {
-        gamesLists->assets.reset();
+        gameslists->assets.reset();
     }
-
+    void Assets::LoadGamesLists() {
+        gameslists.emplace(shared_from_this());
+    }
     std::vector<FsSys::FsPath> Assets::GetAllGames() const {
         std::vector<FsSys::FsPath> result;
         NX_ASSERT(EnumRange(GamePathType::ApplicationDirectory, GamePathType::Card).front());
 
         for (const auto _type: EnumRange(GamePathType::Homebrew, GamePathType::Shop)) {
-            if (const auto _titles{gamesLists->GetAllGamesPaths(_type)}; !_titles.empty())
+            if (const auto _titles{gameslists->GetAllGamesPaths(_type)}; !_titles.empty())
                 std::ranges::copy(_titles, std::back_inserter(result));
         }
 
@@ -67,7 +69,5 @@ namespace FastNx::Core {
 
         if (keys->ListAllFiles().empty())
             throw exception{"No keys found on the system"};
-
-        gamesLists.emplace(shared_from_this());
     }
 }

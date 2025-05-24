@@ -57,6 +57,12 @@ namespace FastNx::FsSys::ReFs {
         return GetSizeBySeek(descriptor);
     }
 
+    void BufferedFile::SetSize(const U64 newsize) {
+        if (buffer.size() > newsize)
+            buffer.resize(newsize);
+        ftruncate(descriptor, newsize);
+    }
+
     U64 BufferedFile::ReadTypeImpl(U8 *dest, const U64 size, const U64 offset) {
         if (const auto &bufopt{buffer}; !bufopt.empty()) {
             const auto *source{bufopt.data()};

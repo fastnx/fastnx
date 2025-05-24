@@ -1,10 +1,14 @@
+#include <common/async_logger.h>
 #include <common/container.h>
 #include <common/exception.h>
 
 #include <fs_sys/refs/directory_file_access.h>
 #include <loaders/application_directory.h>
+
+#include <core/application.h>
 #include <core/assets.h>
 #include <core/games_lists.h>
+
 
 namespace FastNx::Core {
     GamesLists::GamesLists(const std::shared_ptr<Assets> &_assets) : assets(_assets) {
@@ -27,10 +31,13 @@ namespace FastNx::Core {
             NX_ASSERT(is_directory(gamedir));
             if (!AddTypedGame(gamedir)) {
                 if (const auto &_roms{directory.ListAllFiles()}; !_roms.empty()) {
-                    for ([[maybe_unused]] const auto &gamefiles: _roms) {
-                        if (const auto path{FsSys::GetFullPath(gamefiles)})
-                            NX_ASSERT(AddTypedGame(*path) == true);
-                        else throw exception{"The file {} does not exist or is a broken symlink", FsSys::GetPathStr(gamefiles)};
+                    for (const auto &gamefiles: _roms) {
+                        if (const auto path{FsSys::GetFullPath(gamefiles)}) {
+                            if (!AddTypedGame(*path))
+                                AsyncLogger::Info("The file {} was filtered out from the selection", FsSys::GetPathStr(*path));
+                        } else {
+                            throw exception{"The file {} does not exist or is a broken symlink", FsSys::GetPathStr(gamefiles)};
+                        }
                     }
                 }
             }
@@ -48,12 +55,19 @@ namespace FastNx::Core {
             else
                 _type = GamePathType::Shop;
         }
-        if (_type != GamePathType::Unrecognized) {
+        if (_type != GamePathType::Unrecognized && IsFormatAllowed(_type)) {
             gamespaths.emplace_back(_type, gamefiles);
             return true;
         }
 
         return {};
+    }
+    bool GamesLists::IsFormatAllowed(const GamePathType type) {
+        if (!GetContext()->settings->enablensps)
+            if (type == GamePathType::Shop)
+                return {};
+
+        return true;
     }
 
     std::vector<FsSys::FsPath> GamesLists::GetAllGamesPaths(const GamePathType type) const {

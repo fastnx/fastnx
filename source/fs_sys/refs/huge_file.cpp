@@ -72,6 +72,10 @@ namespace FastNx::FsSys::ReFs {
         return copied;
     }
 
+    void HugeFile::SetSize(const U64 newsize) {
+        ftruncate(descriptor, newsize);
+    }
+
     U64 HugeFile::ReadTypeImpl(U8 *dest, const U64 size, const U64 offset) {
         static const auto pagesize{Device::GetHostPageSize()};
         if (!memory)

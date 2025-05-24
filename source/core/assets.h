@@ -17,6 +17,7 @@ namespace FastNx::Core {
 
         void Initialize();
         void Destroy();
+        void LoadGamesLists();
 
         std::vector<FsSys::FsPath> GetAllGames() const;
 
@@ -26,7 +27,7 @@ namespace FastNx::Core {
         std::optional<FsSys::ReFs::DirectoryFileAccess> keys;
         std::optional<FsSys::ReFs::DirectoryFileAccess> tiks;
 
-        std::optional<GamesLists> gamesLists;
+        std::optional<GamesLists> gameslists;
         std::map<AssetsType, FsSys::FsPath> paths;
 
 

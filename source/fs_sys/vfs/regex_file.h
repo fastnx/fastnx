@@ -8,6 +8,7 @@ namespace FastNx::FsSys::Vfs {
 
         explicit operator bool() const override;
         U64 GetSize() const override;
+        void SetSize(U64 newsize) override;
 
         auto GetAllMatches() {
             file = nullptr;

@@ -17,6 +17,9 @@ namespace FastNx::FsSys::Vfs {
             return std::min(_source->GetSize(), eof - begin);
         return size;
     }
+    void OffsetFile::SetSize(U64 newsize) {
+        std::terminate();
+    }
     U64 OffsetFile::ReadTypeImpl(U8 *dest, const U64 size, const U64 offset) {
         if (begin + offset + size > eof)
             return {};
