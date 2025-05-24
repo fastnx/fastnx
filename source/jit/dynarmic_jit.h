@@ -14,9 +14,9 @@ namespace FastNx::Jit {
         void Run() override;
         void Initialize(const JitThreadContext &context) override;
 
+        void GetRegisters(const std::span<U64> &jitregs) override;
 
-        std::shared_ptr<Kernel::Memory::KMemory> memory;
-        Dynarmic::A64::UserConfig jitconfigs;
+        Dynarmic::A64::UserConfig jitconfigs{};
         DynarmicCallbacks callbacks;
         std::unique_ptr<Dynarmic::A64::Jit> jitcore;
 

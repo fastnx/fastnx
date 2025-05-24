@@ -7,20 +7,17 @@ namespace FastNx::Core {
         const std::span content{static_cast<const char *>(data), size};
         const std::string_view lines{content.data(), size};
 
-        if (!lines.starts_with("<?xml version=\"1.0\"?>"))
+        if (!lines.starts_with("<?xml version=\"1.0\" "))
             return;
         if (file->GetSize() != content.size())
             file->SetSize(content.size());
         file->WriteSome(content);
     }
     void GetDefault(pugi::xml_document &sets) {
-        const std::string blankxml{
-            "<?xml version=1.0 encoding=UTF-8?>"
-            "<FastNx>"
-            "</FastNx>"
-        };
-        if (const auto &deferror{sets.load_string(blankxml.data())}; !deferror)
-            throw std::format_error{deferror.description()};
+        auto xmlbegin{sets.append_child(pugi::node_declaration)};
+        xmlbegin.append_attribute("version") = "1.0";
+        xmlbegin.append_attribute("encoding") = "UTF-8";
+        sets.append_child("FastNx");
     }
     template <typename T>
     void LoadOrSetGlobal(pugi::xml_document &sets, const char *attribute, T &result, T defval) {

@@ -21,7 +21,10 @@ namespace FastNx::Jit {
             const auto *aligned{boost::alignment::align_down(const_cast<void *>(useraddr), Kernel::SwitchPageSize)};
             const auto offset{reinterpret_cast<U64>(useraddr) - reinterpret_cast<U64>(aligned)};
 
-            std::memcpy(&type, static_cast<U8 *>(table[reinterpret_cast<U64>(aligned)]) + offset, sizeof(T));
+            if (aligned)
+                std::memcpy(&type, static_cast<U8 *>(table[reinterpret_cast<U64>(aligned) / Kernel::SwitchPageSize]) + offset, sizeof(T));
+            else
+                std::memcpy(&type, static_cast<U8 *>(table[0]) + offset, sizeof(T));
             return type;
         }
         std::vector<void *> table;

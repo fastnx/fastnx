@@ -1,4 +1,6 @@
 #include <mutex>
+
+#include <fmt/chrono.h>
 #include <common/async_logger.h>
 #include <jit/dynarmic_callbacks.h>
 
@@ -24,9 +26,10 @@ namespace FastNx::Jit {
     }
 
     void DynarmicCallbacks::CallSVC(U32 swi) {
-        AsyncLogger::Info("SYSTEM CALL");
         Runtime::SpinLock mutex;
         std::unique_lock lock{mutex};
+
+        AsyncLogger::Info("System call number {} occurred at {}", swi, std::chrono::system_clock::now());
         // ReSharper disable once CppDFAEndlessLoop
         while (true) {
             std::unique_lock _lock{mutex};

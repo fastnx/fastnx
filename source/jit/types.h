@@ -14,6 +14,8 @@ namespace FastNx::Jit {
         virtual void Initialize(const JitThreadContext &context) = 0;
         virtual void Run() = 0;
 
+        virtual void GetRegisters(const std::span<U64> &jitregs) = 0;
+
         bool initialized{};
     };
 }
