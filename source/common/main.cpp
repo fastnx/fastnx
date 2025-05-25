@@ -42,7 +42,7 @@ I32 main(const I32 argc, const char **argv) {
 
     if (vm.contains("help")) {
         fastopts.print(std::cerr);
-        return 0;
+        return EXIT_SUCCESS;
     }
     disableswap = vm.contains("disable-disk-swap");
     if (disableswap)
@@ -67,7 +67,7 @@ I32 main(const I32 argc, const char **argv) {
 
     BuildAsyncLogger();
     if (const auto &[aspects, ranking] = Device::GetArchAspects(); !aspects.empty()) {
-        AsyncLogger::Success("Features supported by the Host system: {}, Your rank {}", aspects, ranking);
+        AsyncLogger::Success("Features supported by the host system: {}, your rank {}", aspects, ranking);
     }
 
     if (const auto &application{Core::GetContext()}) {

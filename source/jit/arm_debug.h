@@ -7,7 +7,7 @@ namespace FastNx::Jit {
         ScopedSignalHandler();
         ~ScopedSignalHandler();
     private:
-        static void SetSignalHandler(I32 signal);
+        static void InstallSignalHandler(I32 signal);
     };
     void PrintArm(const std::span<U64> &armlist);
 }

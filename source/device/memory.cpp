@@ -38,7 +38,9 @@ namespace FastNx::Device {
 
     void *AllocateGuestMemory(const U64 size, void *fixed) {
         constexpr auto prots{PROT_READ | PROT_WRITE};
-        constexpr auto flags{MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED | MAP_NORESERVE};
+        auto flags{MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE};
+        if (fixed)
+            flags |= MAP_FIXED;
 
         const auto result{mmap(fixed, size, prots, flags, -1, 0)};
         if (result == MAP_FAILED)

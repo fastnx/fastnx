@@ -41,12 +41,15 @@ namespace FastNx {
     }
 
    std::span<U8> NxAllocator::InitializeGuestAs(const U64 aswidth, const U64 assize) {
-        auto *memory{reinterpret_cast<void *>(aswidth)}; // We must preserve the number of leading zero bits
+        constexpr auto AsanAvailableMap{0x600000000000};
+        auto *memory{reinterpret_cast<void *>(aswidth + AsanAvailableMap)}; // We must preserve the number of leading zero bits
         auto *result{Device::AllocateGuestMemory(assize, memory)};
 
         if (result == memory)
             if (guestptr = static_cast<U8 *>(result); guestptr)
                 return std::span{guestptr, assize};
+        if (guestptr = static_cast<U8 *>(Device::AllocateGuestMemory(assize)); guestptr)
+            return {guestptr, assize};
         return {};
     }
 

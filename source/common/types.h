@@ -8,8 +8,8 @@
 
 #define NX_ASSERT BOOST_VERIFY
 
-static_assert(sizeof(void*) == sizeof(size_t));
-static_assert(sizeof(std::uintptr_t) == sizeof(void*));
+static_assert(sizeof(void *) == sizeof(size_t));
+static_assert(sizeof(std::uintptr_t) == sizeof(void *));
 
 static_assert(std::endian::native == std::endian::little);
 
