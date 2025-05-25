@@ -23,7 +23,7 @@ namespace FastNx::Kernel {
         std::shared_ptr<Types::KProcess> CreateProcess();
         std::shared_ptr<Types::KThread> CreateThread();
         void CreateJit(U32 cpunumber);
-        std::shared_ptr<Jit::JitDynarmicJitController> GetJit(U32 corenumber);
+        std::shared_ptr<Jit::JitDynarmicController> GetJit(U32 corenumber);
 
         std::shared_ptr<Types::KProcess> GetCurrentProcess();
 

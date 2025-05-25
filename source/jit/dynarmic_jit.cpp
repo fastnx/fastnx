@@ -7,13 +7,12 @@
 
 namespace FastNx::Jit {
 
-    JitDynarmicJitController::JitDynarmicJitController(
-        const std::shared_ptr<Kernel::Memory::KMemory> &jitmemory) :
-            pagination(std::make_shared<PageTable>(jitmemory)) {
+    JitDynarmicController::JitDynarmicController(
+        const std::shared_ptr<Kernel::Types::KProcess> &process) :
+            pagination(std::make_shared<PageTable>(process)) {
 
         jitconfigs.hook_hint_instructions = true;
         callbacks.ptable = pagination;
-        jitconfigs.callbacks = &callbacks;
 #if !NDEBUG
         jitconfigs.check_halt_on_memory_access = true;
         jitconfigs.detect_misaligned_access_via_page_table = 8 | 16 | 32 | 64 | 128;
@@ -22,12 +21,12 @@ namespace FastNx::Jit {
         jitconfigs.tpidrro_el0 = &tpidrro_el0;
         jitconfigs.absolute_offset_page_table = true;
     }
-    void JitDynarmicJitController::Run() {
+    void JitDynarmicController::Run() {
         for (U64 counter{}; counter < 10; counter++) {
             if (!callbacks.GetTicksRemaining())
                 callbacks.ticksleft += 500 * std::max(counter, 1UL);
 
-            boost::container::small_vector<U64, 12> regs64(12);
+            boost::container::small_vector<U64, 102> regs64(102);
             if (jitcore && initialized) {
                 ScopedSignalHandler installactions;
                 jitcore->ClearExclusiveState();
@@ -43,26 +42,38 @@ namespace FastNx::Jit {
         }
     }
 
-    void JitDynarmicJitController::Initialize(const JitThreadContext &context) {
+    void JitDynarmicController::Initialize(const JitThreadContext &context) {
         // jitconfigs.page_table = pagination->table.data();
         // jitconfigs.page_table_address_space_bits = 39;
 
         tpidr_el0 = reinterpret_cast<U64>(context.exceptiontls);
         tpidrro_el0 = reinterpret_cast<U64>(context.usertls);
 
+        callbacks.jitctrl = shared_from_this();
+        jitconfigs.callbacks = &callbacks;
         jitcore = std::make_unique<Dynarmic::A64::Jit>(jitconfigs);
         jitcore->ClearCache();
-        jitcore->SetPC(0);
-        // jitcore->SetSP(0xBEEFC0DE);
+        jitcore->SetPC(pagination->GetPage(context.entry));
+        jitcore->SetSP(pagination->GetPage(context.stack));
 
         initialized = true;
     }
 
-    void JitDynarmicJitController::GetRegisters(const std::span<U64> &jitregs) {
-        for (U32 regindex{}; regindex < 8; ++regindex)
-            jitregs[regindex] = jitcore->GetRegister(regindex);
+    void JitDynarmicController::GetRegisters(const std::span<U64> &regslist) {
+        U64 regit{};
+        for (; regit < 31; ++regit)
+            regslist[regit] = jitcore->GetRegister(regit);
 
-        jitregs[9] = jitcore->GetSP();
-        jitregs[10] = jitcore->GetPC();
+        for (const auto &simdpair: jitcore->GetVectors()) {
+            regslist[regit++] = simdpair[0];
+            regslist[regit++] = simdpair[1];
+        }
+
+        regslist[regit++] = jitcore->GetFpcr();
+        regslist[regit++] = jitcore->GetFpsr();
+        regslist[regit++] = jitcore->GetPC();
+        regslist[regit++] = jitcore->GetPstate();
+        regslist[regit++] = jitcore->GetSP();
+        NX_ASSERT(regit < regslist.size());
     }
 }

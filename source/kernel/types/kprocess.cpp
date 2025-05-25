@@ -12,9 +12,10 @@ namespace FastNx::Kernel::Types {
         processid = kernel.GetPid(entropy);
     }
 
-    void KProcess::Initialize(const U64 stacksize, [[maybe_unused]] const ThreadPriority &priority, const U8 desiredcore) {
+    void KProcess::Initialize(const U64 stack, [[maybe_unused]] const ThreadPriority &priority, const U8 desiredcore) {
         entrypoint = memory->code.begin().base();
         kernelexcepttls = AllocateTls();
+        stacksize = stack;
 
         auto mainthread{kernel.CreateThread()};
         if (!mainthread)

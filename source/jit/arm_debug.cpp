@@ -28,11 +28,13 @@ namespace FastNx::Jit {
     }
 
     void PrintArm(const std::span<U64> &armlist) {
-        for (const auto [index, regval]: armlist | std::ranges::views::enumerate)
+        for (const auto [index, regval]: armlist | std::ranges::views::enumerate) {
             if (index <= 8)
                 AsyncLogger::Puts("R{}, Value: {:#X} ", index, regval);
-            else
-                AsyncLogger::Puts("{}: Value: {:#X} ", index == 9 ? "SP" : index == 10 ? "PC" : "?", regval);
+
+            if (index == 97 || index == 99)
+                AsyncLogger::Puts("{}: Value: {:#X} ", index == 97 ? "SP" : index == 99 ? "PC" : "?", regval);
+        }
         AsyncLogger::Puts("\n");
     }
 }

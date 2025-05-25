@@ -16,7 +16,7 @@ namespace FastNx::Kernel::Types {
             // Simulating some work in this thread
             if (const auto &jit{kernel.GetJit(desiredcpu)}) {
                 if (!jit->initialized)
-                    jit->Initialize(Jit::JitThreadContext{usertls, exceptiontls});
+                    jit->Initialize(Jit::JitThreadContext{usertls, exceptiontls, entrypoint, stack});
 
                 jit->Run();
             }

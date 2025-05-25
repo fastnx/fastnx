@@ -4,6 +4,8 @@
 #include <jit/page_table.h>
 
 namespace FastNx::Jit {
+    class JitDynarmicController;
+
     class DynarmicCallbacks final : public Dynarmic::A64::UserCallbacks {
     public:
         U8 MemoryRead8(Dynarmic::A64::VAddr vaddr) override;
@@ -35,14 +37,17 @@ namespace FastNx::Jit {
         }
 
         void MemoryWrite128(Dynarmic::A64::VAddr vaddr, Dynarmic::A64::Vector value) override;
-        void InterpreterFallback(Dynarmic::A64::VAddr pc, size_t num_instructions) override;
-        void CallSVC(U32 swi) override;
+        void InterpreterFallback(Dynarmic::A64::VAddr pc, U64 instructions) override;
+        void CallSVC(U32 syscall) override;
         void ExceptionRaised(Dynarmic::A64::VAddr pc, Dynarmic::A64::Exception exception) override;
         void AddTicks(U64 ticks) override;
         U64 GetTicksRemaining() override;
         U64 GetCNTPCT() override;
 
+        bool Validate(Dynarmic::A64::VAddr vaddr, U64 size, bool read) const;
+
         U64 ticksleft{};
+        std::shared_ptr<JitDynarmicController> jitctrl;
         std::shared_ptr<PageTable> ptable;
     };
 }

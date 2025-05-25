@@ -45,17 +45,17 @@ namespace FastNx::Kernel {
         return thread;
     }
 
-    static std::map<U32, std::shared_ptr<Jit::JitDynarmicJitController>> jits;
+    static std::map<U32, std::shared_ptr<Jit::JitDynarmicController>> jits;
     void Kernel::CreateJit(U32 cpunumber) {
         if (jits.contains(cpunumber))
             return;
 
         if (const auto &process{GetCurrentProcess()})
-            jits.emplace(cpunumber, std::make_shared<Jit::JitDynarmicJitController>(process->memory));
+            jits.emplace(cpunumber, std::make_shared<Jit::JitDynarmicController>(process));
     }
 
     // ReSharper disable once CppMemberFunctionMayBeStatic
-    std::shared_ptr<Jit::JitDynarmicJitController> Kernel::GetJit(const U32 corenumber) {
+    std::shared_ptr<Jit::JitDynarmicController> Kernel::GetJit(const U32 corenumber) {
         if (jits.contains(corenumber))
             return jits[corenumber];
         return nullptr;

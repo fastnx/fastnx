@@ -5,6 +5,8 @@ namespace FastNx::Jit {
     struct JitThreadContext {
         void *usertls;
         void *exceptiontls;
+        void *entry;
+        void *stack;
     };
 
     class JitCallBack {

@@ -2,15 +2,19 @@
 #include <cstring>
 #include <vector>
 #include <common/types.h>
-#include <kernel/memory/k_memory.h>
+
+#include <kernel/types/kprocess.h>
 
 namespace FastNx::Jit {
     class PageTable {
     public:
-        explicit PageTable(const std::shared_ptr<Kernel::Memory::KMemory> &memory);
+        explicit PageTable(const std::shared_ptr<Kernel::Types::KProcess> &process);
         void CreateTable(void *begin, U64 size);
 
+        bool Contains(void *usertable, U64 size) const;
         U8 *GetTable(const void *useraddr) const;
+
+        U64 GetPage(const void *begin);
 
         template<typename T>
         T Read(const void *useraddr) {
