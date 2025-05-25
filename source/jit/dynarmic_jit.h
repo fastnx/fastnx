@@ -20,7 +20,8 @@ namespace FastNx::Jit {
         DynarmicCallbacks callbacks;
         std::unique_ptr<Dynarmic::A64::Jit> jitcore;
 
-
+        // https://developer.arm.com/documentation/ddi0601/2025-03/AArch64-Registers/TPIDR-EL0--EL0-Read-Write-Software-Thread-ID-Register
+        U64 tpidrro_el0{}, tpidr_el0{};
         std::shared_ptr<PageTable> pagination;
     };
 }

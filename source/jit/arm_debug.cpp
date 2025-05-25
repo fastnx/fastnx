@@ -1,10 +1,12 @@
+#include <signal.h>
+
 #include <jit/arm_debug.h>
 namespace FastNx::Jit {
     std::map<I32, struct sigaction> oldsigs;
 
     void GlobalJitHandle(const I32 signal, siginfo_t *siginfo, void *context) {
-        const ucontext_t* ucontext{static_cast<ucontext_t*>(context)};
-        fmt::println("R12: {:#x}, R11: {:#x}", static_cast<U64>(ucontext->uc_mcontext.gregs[REG_R12]), static_cast<U64>(ucontext->uc_mcontext.gregs[REG_R11]));
+        const auto *ucontext{static_cast<ucontext_t *>(context)};
+        fmt::println("Stack Pointer: {:#x}", static_cast<U64>(ucontext->uc_mcontext.gregs[REG_RSP]));
         oldsigs[signal].sa_sigaction(signal, siginfo, context);
     }
     void ScopedSignalHandler::SetSignalHandler(const I32 signal) {
@@ -15,6 +17,10 @@ namespace FastNx::Jit {
         sigaction(signal, &installsig, &oldsigs[signal]);
     }
 
+    ScopedSignalHandler::ScopedSignalHandler() {
+        SetSignalHandler(SIGSEGV);
+        SetSignalHandler(SIGABRT);
+    }
     ScopedSignalHandler::~ScopedSignalHandler() {
         for (const auto &[signal, handler]: oldsigs)
             sigaction(signal, &handler, nullptr);
@@ -23,9 +29,9 @@ namespace FastNx::Jit {
     void PrintArm(const std::span<U64> &armlist) {
         for (const auto [index, regval]: armlist | std::ranges::views::enumerate)
             if (index <= 8)
-                AsyncLogger::Puts("R{}, Value: {} ", index, regval);
+                AsyncLogger::Puts("R{}, Value: {:#x} ", index, regval);
             else
-                AsyncLogger::Puts("{}: Value: {} ", index == 9 ? "SP" : index == 10 ? "PC" : "?", regval);
+                AsyncLogger::Puts("{}: Value: {:#x} ", index == 9 ? "SP" : index == 10 ? "PC" : "?", regval);
         AsyncLogger::Puts("\n");
     }
 }

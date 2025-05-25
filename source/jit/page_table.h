@@ -1,13 +1,8 @@
 #pragma once
 #include <cstring>
 #include <vector>
-
-#include <boost/align/align_down.hpp>
-
 #include <common/types.h>
 #include <kernel/memory/k_memory.h>
-#include <kernel/types.h>
-
 
 namespace FastNx::Jit {
     class PageTable {
@@ -15,17 +10,17 @@ namespace FastNx::Jit {
         explicit PageTable(const std::shared_ptr<Kernel::Memory::KMemory> &memory);
         void CreateTable(void *begin, U64 size);
 
+        U8 *GetTable(const void *useraddr) const;
+
         template<typename T>
         T Read(const void *useraddr) {
             T type;
-            const auto *aligned{boost::alignment::align_down(const_cast<void *>(useraddr), Kernel::SwitchPageSize)};
-            const auto offset{reinterpret_cast<U64>(useraddr) - reinterpret_cast<U64>(aligned)};
-
-            if (aligned)
-                std::memcpy(&type, static_cast<U8 *>(table[reinterpret_cast<U64>(aligned) / Kernel::SwitchPageSize]) + offset, sizeof(T));
-            else
-                std::memcpy(&type, static_cast<U8 *>(table[0]) + offset, sizeof(T));
+            std::memcpy(&type, GetTable(useraddr), sizeof(T));
             return type;
+        }
+        template<typename T>
+        void Write(const void *useraddr, const T &value) {
+            std::memcpy(GetTable(useraddr), &value, sizeof(T));
         }
         std::vector<void *> table;
     };

@@ -14,34 +14,46 @@ namespace FastNx::Jit {
         jitconfigs.hook_hint_instructions = true;
         callbacks.ptable = pagination;
         jitconfigs.callbacks = &callbacks;
+#if !NDEBUG
+        jitconfigs.check_halt_on_memory_access = true;
+        jitconfigs.detect_misaligned_access_via_page_table = 8 | 16 | 32 | 64 | 128;
+#endif
+        jitconfigs.tpidr_el0 = &tpidr_el0;
+        jitconfigs.tpidrro_el0 = &tpidrro_el0;
+        jitconfigs.absolute_offset_page_table = true;
     }
-
     void JitDynarmicJitController::Run() {
-        if (!callbacks.GetTicksRemaining())
-            callbacks.ticksleft = 100;
+        for (U64 counter{}; counter < 10; counter++) {
+            if (!callbacks.GetTicksRemaining())
+                callbacks.ticksleft += 500 * std::max(counter, 1UL);
 
-        boost::container::small_vector<U64, 12> REGS(12);
-
-        if (jitcore && initialized) {
-            ScopedSignalHandler installactions;
-            for (U64 counter{}; callbacks.GetTicksRemaining(); counter++) {
-                [[unlikely]] if (!(counter % 10)) {
-                    GetRegisters(ToSpan(REGS));
-                    PrintArm(ToSpan(REGS));
+            boost::container::small_vector<U64, 12> regs64(12);
+            if (jitcore && initialized) {
+                ScopedSignalHandler installactions;
+                jitcore->ClearExclusiveState();
+                switch (jitcore->Run()) {
+                    case Dynarmic::HaltReason::MemoryAbort:
+                    default: {}
                 }
-                jitcore->Step();
+            }
+            if (!(counter % 10)) {
+                GetRegisters(ToSpan(regs64));
+                PrintArm(ToSpan(regs64));
             }
         }
     }
 
     void JitDynarmicJitController::Initialize(const JitThreadContext &context) {
-        jitconfigs.page_table = pagination->table.data();
-        jitconfigs.page_table_address_space_bits = 39;
+        // jitconfigs.page_table = pagination->table.data();
+        // jitconfigs.page_table_address_space_bits = 39;
+
+        tpidr_el0 = reinterpret_cast<U64>(context.exceptiontls);
+        tpidrro_el0 = reinterpret_cast<U64>(context.usertls);
+
         jitcore = std::make_unique<Dynarmic::A64::Jit>(jitconfigs);
-
-
-        // jitcore->SetPC(reinterpret_cast<U64>(context.pc));
-        jitcore->SetSP(0xBEEFC0DE);
+        jitcore->ClearCache();
+        jitcore->SetPC(0);
+        // jitcore->SetSP(0xBEEFC0DE);
 
         initialized = true;
     }

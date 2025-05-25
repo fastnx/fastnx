@@ -94,6 +94,8 @@ namespace FastNx::Kernel::Memory {
         });
         U8 *memory{code.begin().base() + begin};
         std::memcpy(memory, content.data(), content.size());
+        // Touching the pages adjacent to the content
+        std::memset(memory + content.size(), 0, _size - content.size());
     }
 
     void KMemory::MapTlsMemory(const U64 begin, const U64 size) {

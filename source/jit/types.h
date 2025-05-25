@@ -3,8 +3,8 @@
 #include <common/types.h>
 namespace FastNx::Jit {
     struct JitThreadContext {
-        void *stack{};
-        void *pc{};
+        void *usertls;
+        void *exceptiontls;
     };
 
     class JitCallBack {
