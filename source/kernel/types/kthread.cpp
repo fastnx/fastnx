@@ -16,9 +16,9 @@ namespace FastNx::Kernel::Types {
             // Simulating some work in this thread
             if (const auto &jit{kernel.GetJit(desiredcpu)}) {
                 if (!jit->initialized)
-                    jit->Initialize(Jit::JitThreadContext{usertls, exceptiontls, entrypoint, stack});
+                    jit->Initialize(exceptiontls, usertls);
 
-                jit->Run();
+                jit->Run(jitload);
             }
             scheduler->Yield();
         }
@@ -34,6 +34,10 @@ namespace FastNx::Kernel::Types {
         entrypoint = ep;
         stack = _stack;
         exceptiontls = _tls;
+
+        // Sets up the JIT parameters
+        jitload.stack = stack;
+        jitload.pc_counter = entrypoint;
 
         if (!process)
             return;

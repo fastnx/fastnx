@@ -32,12 +32,12 @@ namespace FastNx::Jit {
         std::unique_lock lock{mutex};
 
         AsyncLogger::Info("System call number {} occurred at {}", syscall, std::chrono::system_clock::now());
-        std::array<U64, 102> svc64list;
-        jitctrl->GetRegisters(svc64list);
+        std::array<U64, 102> svclist;
+        jitctrl->GetRegisters(svclist);
 
         // ReSharper disable once CppDFAEndlessLoop
         for (; ;) {
-            std::unique_lock _lock{mutex};
+            std::unique_lock inner{mutex};
         }
     }
 

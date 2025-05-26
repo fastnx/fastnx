@@ -1,8 +1,10 @@
 #pragma once
 #include <condition_variable>
-#include <kernel/ksynchronization_object.h>
-namespace FastNx::Kernel::Types {
 
+#include <jit/types.h>
+#include <kernel/ksynchronization_object.h>
+
+namespace FastNx::Kernel::Types {
     class KThread final : public KSynchronizationObject {
     public:
         explicit KThread(Kernel &_kernel) : KSynchronizationObject(KAutoType::KThread, _kernel) {}
@@ -22,11 +24,10 @@ namespace FastNx::Kernel::Types {
         std::mutex condmutex;
         std::condition_variable condsched;
 
+        Jit::JitThreadContext jitload{};
     private:
         std::list<KSynchronizationObject *> syncobjs;
         KSynchronizationObject *parent{}; // Process this thread belongs to
-
-
     protected:
         void Destroyed() override;
     };

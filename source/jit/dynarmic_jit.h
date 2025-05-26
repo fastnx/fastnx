@@ -5,16 +5,16 @@
 #include <jit/dynarmic_callbacks.h>
 #include <jit/page_table.h>
 
-#include <kernel/types.h>
 
 namespace FastNx::Jit {
     class JitDynarmicController final : public JitCallBack, public std::enable_shared_from_this<JitDynarmicController> {
     public:
         explicit JitDynarmicController(const std::shared_ptr<Kernel::Types::KProcess> &process);
-        void Run() override;
-        void Initialize(const JitThreadContext &context) override;
+        void Run(JitThreadContext &context) override;
+        void Initialize(void *excepttls, void *usertls) override;
 
         void GetRegisters(const std::span<U64> &regslist) override;
+        void SetRegisters(const std::span<U64> &regslist) override;
 
         Dynarmic::A64::UserConfig jitconfigs{};
         DynarmicCallbacks callbacks;

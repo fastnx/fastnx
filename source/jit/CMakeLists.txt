@@ -7,8 +7,8 @@ target_sources(fastnx PRIVATE
     dynarmic_callbacks.h
     dynarmic_jit.cpp
     dynarmic_jit.h
-    arm_debug.cpp
-    arm_debug.h
+    scoped_signal_handler.cpp
+    scoped_signal_handler.h
     page_table.cpp
     page_table.h
 )

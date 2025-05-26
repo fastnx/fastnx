@@ -1,6 +1,6 @@
 #include <signal.h>
 
-#include <jit/arm_debug.h>
+#include <jit/scoped_signal_handler.h>
 namespace FastNx::Jit {
     std::map<I32, struct sigaction> oldsigs;
 
@@ -25,16 +25,5 @@ namespace FastNx::Jit {
     ScopedSignalHandler::~ScopedSignalHandler() {
         for (const auto &[signal, handler]: oldsigs)
             sigaction(signal, &handler, nullptr);
-    }
-
-    void PrintArm(const std::span<U64> &armlist) {
-        for (const auto [index, regval]: armlist | std::ranges::views::enumerate) {
-            if (index <= 8)
-                AsyncLogger::Puts("R{}, Value: {:#X} ", index, regval);
-
-            if (index == 97 || index == 99)
-                AsyncLogger::Puts("{}: Value: {:#X} ", index == 97 ? "SP" : index == 99 ? "PC" : "?", regval);
-        }
-        AsyncLogger::Puts("\n");
     }
 }

@@ -9,5 +9,4 @@ namespace FastNx::Jit {
     private:
         static void InstallSignalHandler(I32 signal);
     };
-    void PrintArm(const std::span<U64> &armlist);
 }
