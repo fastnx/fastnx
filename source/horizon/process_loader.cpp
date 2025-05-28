@@ -56,8 +56,13 @@ namespace FastNx::Horizon {
             process->memory->MapCodeMemory(startoffset + offset, size, content);
 #if !NDEBUG
             if (permission == Kernel::Permission::Ro) {
-                if (const auto &strings{Strings(process->memory->code.begin().base() + startoffset + offset, size)}; strings.size())
-                    AsyncLogger::Info("Readable content mapped in memory: {}", std::string_view(strings.data(), strings.size()));
+                const auto &strings{Strings(process->memory->code.begin().base() + startoffset + offset, size)};
+                const std::string_view _contentstr{strings.data(), strings.size()};
+                if (_contentstr.empty())
+                    return;
+
+                AsyncLogger::Info("Readable content mapped in memory: {}", std::string_view(strings.data(), strings.size()));
+                Sfit(_contentstr);
             }
 #endif
 
