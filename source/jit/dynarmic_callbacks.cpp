@@ -37,6 +37,7 @@ namespace FastNx::Jit {
 
         // ReSharper disable once CppDFAEndlessLoop
         for (; ;) {
+            logger->FlushBuffers();
             std::unique_lock inner{mutex};
         }
     }

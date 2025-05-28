@@ -7,6 +7,7 @@
 
 #include <kernel/svc/types.h>
 
+#include <common/debug_memory.h>
 
 
 namespace FastNx::Horizon {
@@ -53,6 +54,12 @@ namespace FastNx::Horizon {
                 size = boost::alignment::align_up(content.size() + bsssize, Kernel::SwitchPageSize);
             }
             process->memory->MapCodeMemory(startoffset + offset, size, content);
+#if !NDEBUG
+            if (permission == Kernel::Permission::Ro) {
+                if (const auto &strings{Strings(process->memory->code.begin().base() + startoffset + offset, size)}; strings.size())
+                    AsyncLogger::Info("Readable content mapped in memory: {}", std::string_view(strings.data(), strings.size()));
+            }
+#endif
 
             process->memory->SetMemoryPermission(startoffset + offset, size, permission);
 
