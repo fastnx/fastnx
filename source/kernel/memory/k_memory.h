@@ -42,6 +42,9 @@ namespace FastNx::Kernel::Memory {
                     std::unreachable();
             }
         }
+
+        KMemoryBlock * QueryMemory(const U8 *begin);
+
         std::span<U8> addrspace;
         std::span<U8> code;
         std::span<U8> alias;

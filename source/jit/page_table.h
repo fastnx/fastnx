@@ -3,8 +3,8 @@
 #include <vector>
 #include <common/types.h>
 
-#include <kernel/types/kprocess.h>
-
+// ReSharper disable once CppUnusedIncludeDirective
+#include <kernel/types.h>
 namespace FastNx::Jit {
     class PageTable {
     public:

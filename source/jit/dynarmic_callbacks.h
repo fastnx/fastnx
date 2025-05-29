@@ -47,7 +47,7 @@ namespace FastNx::Jit {
         bool Validate(Dynarmic::A64::VAddr vaddr, U64 size, bool read) const;
 
         U64 ticksleft{};
-        std::shared_ptr<JitDynarmicController> jitctrl;
         std::shared_ptr<PageTable> ptable;
+        std::shared_ptr<JitDynarmicController> jitctrl;
     };
 }

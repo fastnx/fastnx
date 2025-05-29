@@ -1,5 +1,6 @@
 #pragma once
 
+#include <jit/types.h>
 #include <kernel/types.h>
 
 namespace FastNx::Kernel::Svc {
@@ -35,4 +36,6 @@ namespace FastNx::Kernel::Svc {
         U32 systemnumpages;
     };
 #pragma pack(pop)
+
+    void Syscall(U32 table, const Jit::HosThreadContext &context);
 }

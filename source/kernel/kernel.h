@@ -4,6 +4,7 @@
 #include <mutex>
 
 #include <common/memory.h>
+#include <jit/page_table.h>
 #include <kernel/memory/kslab_heap.h>
 #include <kernel/memory/k_memory.h>
 #include <kernel/types/kprocess.h>
@@ -32,6 +33,8 @@ namespace FastNx::Kernel {
         std::shared_ptr<Memory::KSlabHeap> userslabs;
         std::shared_ptr<Memory::KMemory> memory;
         std::shared_ptr<Threads::KScheduler> scheduler;
+
+        std::shared_ptr<Jit::PageTable> pagetable;
 
     private:
         U64 pidseed{InitialProcessId};

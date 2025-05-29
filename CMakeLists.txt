@@ -11,4 +11,13 @@ add_executable(fastnx)
 
 add_subdirectory(externals)
 add_subdirectory(source)
-target_link_libraries(fastnx PRIVATE Boost::regex Boost::align Boost::endian Boost::algorithm Boost::container Boost::program_options Boost::interprocess Boost::fiber MbedTLS::mbedcrypto fmt::fmt lz4 pugixml::pugixml dynarmic)
+
+target_link_libraries(fastnx PRIVATE
+    Boost::regex Boost::align Boost::endian Boost::algorithm Boost::container Boost::program_options Boost::interprocess Boost::fiber
+    MbedTLS::mbedcrypto
+    fmt::fmt
+    lz4
+    pugixml::pugixml
+    dynarmic
+    tsl::robin_map
+)

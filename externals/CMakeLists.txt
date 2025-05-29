@@ -26,3 +26,6 @@ if (${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "x86_64")
     add_subdirectory(dynarmic)
     target_compile_options(dynarmic PRIVATE -Wno-stack-usage)
 endif ()
+
+
+add_subdirectory(robin-map)

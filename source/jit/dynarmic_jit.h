@@ -13,8 +13,8 @@ namespace FastNx::Jit {
         void Run(JitThreadContext &context) override;
         void Initialize(void *excepttls, void *usertls) override;
 
-        void GetRegisters(const std::span<U64> &regslist) override;
-        void SetRegisters(const std::span<U64> &regslist) override;
+        void GetRegisters(HosThreadContext &jitregs) override;
+        void SetRegisters(const HosThreadContext &jitregs) override;
 
         Dynarmic::A64::UserConfig jitconfigs{};
         DynarmicCallbacks callbacks;

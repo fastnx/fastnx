@@ -1,10 +1,11 @@
 #include <boost/container/small_vector.hpp>
 #include <common/container.h>
+
+#include <kernel/types/kprocess.h>
+#include <kernel/kernel.h>
+
 #include <jit/scoped_signal_handler.h>
 #include <jit/dynarmic_jit.h>
-
-
-
 namespace FastNx::Jit {
 
     JitDynarmicController::JitDynarmicController(
@@ -12,6 +13,8 @@ namespace FastNx::Jit {
             pagination(std::make_shared<PageTable>(process)) {
 
         jitconfigs.hook_hint_instructions = true;
+        if (!process->kernel.pagetable)
+            process->kernel.pagetable = pagination;
         callbacks.ptable = pagination;
 #if !NDEBUG
         jitconfigs.check_halt_on_memory_access = true;
@@ -21,13 +24,12 @@ namespace FastNx::Jit {
         jitconfigs.tpidrro_el0 = &tpidrro_el0;
         jitconfigs.absolute_offset_page_table = true;
     }
-    void PrintArm(const std::span<U64> &armlist) {
-        for (const auto [index, regval]: armlist | std::ranges::views::enumerate) {
-            if (index <= 8)
-                AsyncLogger::Puts("R{}, Value: {:#X} ", index, regval);
-            if (index == 97 || index == 99)
-                AsyncLogger::Puts("{}: Value: {:#X} ", index == 97 ? "SP" : index == 99 ? "PC" : "?", regval);
-        }
+    void PrintArm(const HosThreadContext &context) {
+        for (const auto [index, value]: std::ranges::views::enumerate(context.gprlist | std::views::drop(8)))
+            AsyncLogger::Puts("R{}, Value: {:X} ", index, value);
+
+        AsyncLogger::Puts("SP, Value: {:X} ", context.sp);
+        AsyncLogger::Puts("PC, Value: {:X} ", context.pc);
         AsyncLogger::Puts("\n");
     }
 
@@ -47,9 +49,9 @@ namespace FastNx::Jit {
                 ScopedSignalHandler installactions;
                 jitcore->ClearExclusiveState();
                 if (jitcore->Run() == Dynarmic::HaltReason::MemoryAbort)
-                    PrintArm(ToSpan(context.arm_reglist));
+                    PrintArm(context.arm_reglist);
             }
-            GetRegisters(ToSpan(context.arm_reglist));
+            GetRegisters(context.arm_reglist);
         }
     }
 
@@ -68,37 +70,36 @@ namespace FastNx::Jit {
         initialized = true;
     }
 
-    void JitDynarmicController::GetRegisters(const std::span<U64> &regslist) {
-        U64 regit{};
-        for (; regit < 31; ++regit)
-            regslist[regit] = jitcore->GetRegister(regit);
-
-        for (const auto &simdpair: jitcore->GetVectors()) {
-            regslist[regit++] = simdpair[0];
-            regslist[regit++] = simdpair[1];
+    void JitDynarmicController::GetRegisters(HosThreadContext &jitregs) {
+        boost::container::small_vector<U64, 31> regsvalues;
+        for (const auto value: jitcore->GetRegisters()) {
+            regsvalues.emplace_back(value);
         }
-        regslist[regit++] = jitcore->GetFpcr();
-        regslist[regit++] = jitcore->GetFpsr();
-        regslist[regit++] = jitcore->GetPC();
-        regslist[regit++] = jitcore->GetPstate();
-        regslist[regit++] = jitcore->GetSP();
-        NX_ASSERT(regit < regslist.size() && regit < PackedRegistersListSize);
+
+        Copy(jitregs.gprlist, regsvalues);
+        jitregs.sp = jitregs.gprlist[29];
+        jitregs.pc = jitregs.gprlist[30];
+
+        jitregs.floats = jitcore->GetVectors();
+
+        jitregs.fpcr = jitcore->GetFpcr();
+        jitregs.fpsr = jitcore->GetFpsr();
+        jitregs.pstate = jitcore->GetPstate();
     }
 
-    void JitDynarmicController::SetRegisters(const std::span<U64> &regslist) {
-        U64 regit{};
-        for (; regit < 31; ++regit)
-            jitcore->SetRegister(regit, regslist[regit]);
-        const std::span vectors{regslist.subspan(31, 64)};
-        for (const auto &[index, simdpair]: std::ranges::views::enumerate(vectors | std::views::chunk(2))) {
-            jitcore->SetVector(index, {simdpair[0], simdpair[1]});
-        }
-        regit += vectors.size();
+    void JitDynarmicController::SetRegisters(const HosThreadContext &jitregs) {
+        jitcore->SetRegisters(jitregs.gprlist);
 
-        jitcore->SetFpcr(regslist[regit++]);
-        jitcore->SetFpsr(regslist[regit++]);
-        jitcore->SetPC(regslist[regit++]);
-        jitcore->SetPstate(regslist[regit++]);
-        jitcore->SetSP(regslist[regit++]);
+        auto vectors{jitcore->GetVectors()};
+        for (const auto &[index, value128]: std::views::enumerate(jitregs.floats)) {
+            Copy(vectors[index], value128);
+        }
+        jitcore->SetVectors(vectors);
+        jitcore->SetSP(jitregs.sp);
+        jitcore->SetPC(jitregs.pc);
+
+        jitcore->SetPstate(jitregs.pstate);
+        jitcore->SetFpsr(jitregs.fpsr);
+        jitcore->SetFpsr(jitregs.fpsr);
     }
 }

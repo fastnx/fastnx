@@ -18,10 +18,10 @@ namespace FastNx::Core {
         void LoadFirstPickedGame() const;
 
         std::shared_ptr<AppSetup> settings;
+        std::shared_ptr<Horizon::SwitchNs> switchnx;
     private:
         std::shared_ptr<Assets> assets;
         std::shared_ptr<Horizon::KeySet> keys;
-        std::shared_ptr<Horizon::SwitchNs> switchnx;
     };
 
     std::shared_ptr<Application> GetContext();

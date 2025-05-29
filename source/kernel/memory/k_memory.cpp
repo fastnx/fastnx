@@ -142,4 +142,10 @@ namespace FastNx::Kernel::Memory {
         if (blockslist->IsMappedInRange(beginpage, endpage))
             std::memset(memory, constant, size);
     }
+
+    KMemoryBlock * KMemory::QueryMemory(const U8 *begin) {
+        if (const auto block{blockslist->FindBlock(begin)})
+            return *block;
+        return nullptr;
+    }
 }
