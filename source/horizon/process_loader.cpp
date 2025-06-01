@@ -11,10 +11,18 @@
 
 
 namespace FastNx::Horizon {
+    std::map<U64, FsSys::FsPath> nsolist;
+    FsSys::FsPath GetNsoName(const U64 basenso) {
+        if (nsolist.contains(basenso))
+            return nsolist[basenso];
+        return {};
+    }
+
     void ProcessLoader::GetCodeSet(Kernel::ProcessCodeLayout &codeset, const std::shared_ptr<Loaders::NsoFmt> &nso) {
         auto baseoffset{codeset.offset};
 
         AsyncLogger::Puts("Loading NSO: {:^8}", GetPathStr(nso->backing));
+        nsolist.emplace(baseoffset, GetPathStr(nso->backing));
         for (const auto &[type, section]: nso->secsalign) {
             const auto [offset, size] = section;
 
@@ -37,6 +45,7 @@ namespace FastNx::Horizon {
         U64 bintype{};
         NX_ASSERT(codeset.procimage.size() % 3 == 0);
 
+        U64 basetextoffset{};
         for (const auto &[offset, content]: codeset.procimage) {
             auto size{boost::alignment::align_up(content.size(), Kernel::SwitchPageSize)};
 
@@ -47,6 +56,8 @@ namespace FastNx::Horizon {
                     return Kernel::Permission::Ro;
                 return Kernel::Permission::Data;
             }();
+            if (!bintype)
+                basetextoffset = offset;
             bintype++;
             U64 bsssize{};
             if (permission == Kernel::Permission::Data) {
@@ -62,7 +73,7 @@ namespace FastNx::Horizon {
                     return;
 
                 AsyncLogger::Info("Readable content mapped in memory: {}", std::string_view(strings.data(), strings.size()));
-                Sfit(_contentstr);
+                PrintTopics(_contentstr, GetNsoName(basetextoffset));
             }
 #endif
 

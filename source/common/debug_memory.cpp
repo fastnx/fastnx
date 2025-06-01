@@ -1,3 +1,5 @@
+#include <fmt/ranges.h>
+
 #include <common/async_logger.h>
 #include <common/debug_memory.h>
 
@@ -34,12 +36,27 @@ namespace FastNx {
         return result;
     }
 
-    void Sfit(const std::string_view &strings) {
-        auto SearchForWord = [&](const char *cuteword, const char *message) {
-            if (strings.contains(cuteword))
-                AsyncLogger::Info("Sfit: {}, {}", cuteword, message);
+    void PrintTopics(const std::string_view &strings, const FsSys::FsPath &nsoname) {
+        U64 count{};
+        auto SearchForTopic = [&](const std::initializer_list<const char *> topics, const char *message) {
+            std::vector<const char *> matches;
+
+            for (const auto *topic: topics)
+                if (strings.contains(topic))
+                    matches.emplace_back(topic);
+            if (!matches.empty())
+                AsyncLogger::Puts("(Found: {} - {}) ", fmt::join(matches, ", "), message);
+            count += matches.size();
         };
-        SearchForWord("android", "Some symbol or feature for the Android platform found");
-        SearchForWord("musl", "musl libc library found");
+        AsyncLogger::Puts("Searching for topics in NSO {}: ", FsSys::GetPathStr(nsoname));
+
+        SearchForTopic({"android"}, "Some symbol or feature for the Android platform found");
+        SearchForTopic({"musl"}, "musl libc library found");
+        SearchForTopic({"memcpy", "memmove", "putc", "printf"}, "C library found");
+
+        if (count)
+            AsyncLogger::Puts("\n");
+        else
+            AsyncLogger::ClearLine();
     }
 }
