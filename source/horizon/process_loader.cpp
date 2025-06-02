@@ -7,7 +7,7 @@
 
 #include <kernel/svc/types.h>
 
-#include <common/debug_memory.h>
+#include <debug/readonly_buffer.h>
 
 
 namespace FastNx::Horizon {
@@ -67,13 +67,13 @@ namespace FastNx::Horizon {
             process->memory->MapCodeMemory(startoffset + offset, size, content);
 #if !NDEBUG
             if (permission == Kernel::Permission::Ro) {
-                const auto &strings{Strings(process->memory->code.begin().base() + startoffset + offset, size)};
+                const auto &strings{Debug::Strings(process->memory->code.begin().base() + startoffset + offset, size)};
                 const std::string_view _contentstr{strings.data(), strings.size()};
                 if (_contentstr.empty())
                     return;
 
                 AsyncLogger::Info("Readable content mapped in memory: {}", std::string_view(strings.data(), strings.size()));
-                PrintTopics(_contentstr, GetNsoName(basetextoffset));
+                Debug::PrintTopics(_contentstr, GetNsoName(basetextoffset));
             }
 #endif
 

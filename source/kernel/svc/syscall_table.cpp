@@ -1,9 +1,11 @@
 #include <functional>
 #include <tsl/robin_map.h>
 
+#include <debug/process_calltracer.h>
 #include <core/application.h>
 #include <kernel/types/kprocess.h>
 #include <kernel/types/kthread.h>
+
 
 namespace FastNx::Kernel::Svc {
 
@@ -33,6 +35,8 @@ namespace FastNx::Kernel::Svc {
         static auto &kernel{application->switchnx->kernel};
 
         const auto &process{kernel->GetCurrentProcess()};
+        Debug::ProcessCalltracer tracer(process);
+
         if (syscall_table.contains(table))
             syscall_table.at(table).operator()({process, process->threads.front()}, context);
 

@@ -1,10 +1,10 @@
 #include <fmt/ranges.h>
 
 #include <common/async_logger.h>
-#include <common/debug_memory.h>
+#include <debug/readonly_buffer.h>
 
 
-namespace FastNx {
+namespace FastNx::Debug {
     // https://linux.die.net/man/1/strings
     // Dumps all readable content up to N strings from the specified address
     fmt::memory_buffer Strings(const void *begin, const U64 size, const U64 strings) {
@@ -37,24 +37,24 @@ namespace FastNx {
     }
 
     void PrintTopics(const std::string_view &strings, const FsSys::FsPath &nsoname) {
-        U64 count{};
-        auto SearchForTopic = [&](const std::initializer_list<const char *> topics, const char *message) {
+        U64 found{};
+        auto SearchForTopics = [&](const std::initializer_list<const char *> topics, const char *message) {
             std::vector<const char *> matches;
 
             for (const auto *topic: topics)
                 if (strings.contains(topic))
                     matches.emplace_back(topic);
             if (!matches.empty())
-                AsyncLogger::Puts("(Found: {} - {}) ", fmt::join(matches, ", "), message);
-            count += matches.size();
+                AsyncLogger::Puts("Topics({} - {}) ", fmt::join(matches, ", "), message);
+            found += matches.size();
         };
         AsyncLogger::Puts("Searching for topics in NSO {}: ", FsSys::GetPathStr(nsoname));
 
-        SearchForTopic({"android"}, "Some symbol or feature for the Android platform found");
-        SearchForTopic({"musl"}, "musl libc library found");
-        SearchForTopic({"memcpy", "memmove", "putc", "printf"}, "C library found");
+        SearchForTopics({"android"}, "Some symbol or feature for the Android platform found");
+        SearchForTopics({"musl"}, "musl libc library found");
+        SearchForTopics({"memcpy", "memmove", "putc", "printf"}, "C library found");
 
-        if (count)
+        if (found)
             AsyncLogger::Puts("\n");
         else
             AsyncLogger::ClearLine();

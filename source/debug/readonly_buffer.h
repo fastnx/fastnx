@@ -2,7 +2,7 @@
 #include <fmt/format.h>
 #include <common/types.h>
 
-namespace FastNx {
+namespace FastNx::Debug {
 
     constexpr U64 StringsCounter{128};
     fmt::memory_buffer Strings(const void *begin, U64 size, U64 strings = StringsCounter);

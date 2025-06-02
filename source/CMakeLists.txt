@@ -35,8 +35,10 @@ target_sources(fastnx PRIVATE
     common/async_logger.h
     common/memory.cpp
     common/memory.h
-    common/debug_memory.cpp
-    common/debug_memory.h
+    debug/readonly_buffer.cpp
+    debug/readonly_buffer.h
+    debug/process_calltracer.cpp
+    debug/process_calltracer.h
     device/processor.cpp
     device/syslimits.cpp
     device/pages.cpp
