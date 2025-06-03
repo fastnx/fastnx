@@ -5,14 +5,14 @@ namespace FastNx::Jit {
     struct HosThreadContext {
         union GuestRegister {
             explicit operator U64() const {
-                return x;
+                return X;
             }
-            U64 x;
-            U32 w;
+            U64 X;
+            U32 W;
         };
         union {
             struct {
-                GuestRegister r0, r1, r2;
+                GuestRegister R0, R1, R2;
             };
             std::array<U64, 31> gprlist{};
         };

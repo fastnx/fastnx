@@ -1,7 +1,6 @@
 #include <cxxabi.h>
-#include <elf.h>
 #include <common/values.h>
-#include <common/async_logger.h>
+#include <common/exception.h>
 
 #include <debug/process_calltracer.h>
 
@@ -11,23 +10,22 @@ namespace FastNx::Debug {
         U64 basetext{};
         while (true) {
             const auto *texthost{memory->code.begin().base() + basetext};
-            const auto *textinfo{memory->QueryMemory(texthost)};
-            if (!textinfo || !textinfo->state.code)
+            const auto textinfo{memory->QueryMemory(texthost)};
+            if (!textinfo->base || !Kernel::Memory::MemoryState{textinfo->type}.code)
                 break;
 
             if (textinfo->permission == Kernel::Permission::Text)
                 GetMod0(texthost);
 
-            basetext += textinfo->pagescount * Kernel::SwitchPageSize;
+            basetext += textinfo->size;
         }
     }
 
     void ProcessCalltracer::GetMod0(const U8 *begin) {
         const auto *modheader{begin + *reinterpret_cast<const U32 *>(begin + 4)};
-        if (*reinterpret_cast<const U32 *>(modheader) != ConstMagicValue<U32>("MOD0")) {
-            AsyncLogger::Info("Failed to locate the MOD0 section at address {}", fmt::ptr(modheader));
-            return;
-        }
+        if (*reinterpret_cast<const U32 *>(modheader) != ConstMagicValue<U32>("MOD0"))
+            throw exception{"Failed to locate the MOD0 section at address {}", fmt::ptr(modheader)};
+
         // https://docs.oracle.com/cd/E23824_01/html/819-0690/chapter6-42444.html
         const auto *dynentries{reinterpret_cast<const Elf64_Dyn *>(modheader + *reinterpret_cast<const U32 *>(modheader + 0x4))};
         static_assert(sizeof(Elf64_Dyn) == 0x10);
@@ -46,21 +44,16 @@ namespace FastNx::Debug {
         }
 
         NX_ASSERT(entrysize == sizeof(Elf64_Sym));
-        for (; symbols; symbols++) {
+        for (; reinterpret_cast<const char *>(symbols) < stringtable; symbols++) {
             boost::container::small_vector<char, 4096> demangled(4096);
             const auto *strmangled{&stringtable[symbols->st_name]};
-            if (!strlen(strmangled))
-                continue;
 
             U64 len{demangled.size()};
             I32 status;
             __cxxabiv1::__cxa_demangle(strmangled, demangled.data(), &len, &status);
-
-            if (status)
-                if (status != -2)
-                    continue;
-
-            solvedsyms.emplace(symbols->st_value, std::make_pair(symbols->st_info, std::string{!status ? demangled.data() : strmangled}));
+            if (status && status != -2)
+                continue;
+            solvedsyms.push_back(std::make_pair(symbols, std::string{!status ? demangled.data() : strmangled}));
         }
 
     }

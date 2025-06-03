@@ -35,7 +35,7 @@ namespace FastNx::Kernel {
         AddressSpace32BitNoReserved,
         AddressSpace64Bit
     };
-    enum class MemoryPermission : I32 {
+    enum class MemoryPermission : U32 {
         Read = 1,
         Write = 1 << 1,
         Execute = 1 << 2
@@ -43,13 +43,13 @@ namespace FastNx::Kernel {
     inline auto *MemoryFailValue{reinterpret_cast<void *>(std::numeric_limits<U64>::max())};
 
     // ReSharper disable once CppDFAConstantParameter
-    constexpr I32 operator | (const MemoryPermission lhs, const MemoryPermission rhs) {
+    constexpr U32 operator | (const MemoryPermission lhs, const MemoryPermission rhs) {
         return static_cast<U32>(lhs) | static_cast<U32>(rhs);
     }
 
     namespace Permission {
         constexpr auto Text{MemoryPermission::Read | MemoryPermission::Execute};
-        constexpr auto Ro{static_cast<I32>(MemoryPermission::Read)};
+        constexpr auto Ro{std::to_underlying(MemoryPermission::Read)};
         constexpr auto Data{MemoryPermission::Read | MemoryPermission::Write};
     }
 

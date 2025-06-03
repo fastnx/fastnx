@@ -1,6 +1,7 @@
 #pragma once
 
-#include <map>
+#include <list>
+#include <elf.h>
 #include <common/types.h>
 
 #include <kernel/types/kprocess.h>
@@ -14,6 +15,6 @@ namespace FastNx::Debug {
 
     private:
         void GetMod0(const U8 *begin);
-        std::map<U64, std::pair<U8, std::string>> solvedsyms;
+        std::list<std::pair<const Elf64_Sym *, std::string>> solvedsyms;
     };
 }

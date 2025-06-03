@@ -85,7 +85,7 @@ namespace FastNx::Kernel::Memory {
         if (!first)
             throw std::out_of_range{"Block not found"};
 
-        auto *blockit{first.value()};
+        auto *blockit{first.value().second};
         U64 pages{blockdesc.second.pagescount};
         for (; pages; ++blockit) {
             callback(*blockit);
@@ -104,21 +104,21 @@ namespace FastNx::Kernel::Memory {
         if (!size)
             return;
         allocator->Reprotec(reprotect.first, size, permission);
-        (*block)->permission = permission;
+        block->second->permission = permission;
     }
 
-    std::optional<KMemoryBlock *> KMemoryBlockManager::FindBlock(const U8 *guestptr) {
+    std::optional<std::pair<const U8 *, KMemoryBlock *>> KMemoryBlockManager::FindBlock(const U8 *guestptr) {
         auto firstblk{treemap.lower_bound(guestptr)};
         if (firstblk != treemap.end()) {
             if (firstblk->first <= guestptr)
-                return &firstblk->second;
+                return std::make_pair(firstblk->first, &firstblk->second);
             if (const auto size{firstblk->second.pagescount * SwitchPageSize})
                 if (firstblk->first >= guestptr && firstblk->first + size < guestptr)
-                    return &firstblk->second;
+                    return std::make_pair(firstblk->first, &firstblk->second);
         }
         if (firstblk->first > guestptr)
             if (--firstblk != treemap.end())
-                return &firstblk->second;
+                return std::make_pair(firstblk->first, &firstblk->second);
         return std::nullopt;
     }
 }

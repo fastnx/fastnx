@@ -143,9 +143,18 @@ namespace FastNx::Kernel::Memory {
             std::memset(memory, constant, size);
     }
 
-    KMemoryBlock * KMemory::QueryMemory(const U8 *begin) {
+    std::optional<MemoryInfo> KMemory::QueryMemory(const U8 *begin) {
         if (const auto block{blockslist->FindBlock(begin)})
-            return *block;
-        return nullptr;
+            return MemoryInfo{
+                .base = block->first,
+                .size = block->second->pagescount * SwitchPageSize,
+                .type = block->second->state._type,
+                .attribute = {},
+                .permission = block->second->permission,
+                .ipcrefcount = {},
+                .devrefcount = {},
+                .padding = {}
+            };
+        return {};
     }
 }

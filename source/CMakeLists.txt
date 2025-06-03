@@ -67,7 +67,9 @@ target_sources(fastnx PRIVATE
     kernel/types/kthread.cpp
     kernel/types/kthread.h
     kernel/svc/types.h
-    kernel/svc/syscall_table.cpp
+    kernel/svc/memory.cpp
+    kernel/svc/syscall.cpp
+    kernel/svc/syscall.h
     kernel/threads/kscheduler.cpp
     kernel/threads/kscheduler.h
     runtime/spin_lock.cpp

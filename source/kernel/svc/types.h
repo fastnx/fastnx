@@ -4,6 +4,10 @@
 #include <kernel/types.h>
 
 namespace FastNx::Kernel::Svc {
+    enum class Result : U32 {
+        Success
+    };
+
     // https://switchbrew.org/wiki/SVC#Result
     enum class MemoryRegion {
         Application,
@@ -36,6 +40,4 @@ namespace FastNx::Kernel::Svc {
         U32 systemnumpages;
     };
 #pragma pack(pop)
-
-    void Syscall(U32 table, const Jit::HosThreadContext &context);
 }

@@ -3,18 +3,22 @@
 #include <vector>
 #include <common/types.h>
 
-// ReSharper disable once CppUnusedIncludeDirective
-#include <kernel/types.h>
+#include <kernel/types/kprocess.h>
 namespace FastNx::Jit {
+    enum class TableType : U32 {
+        None,
+        Code,
+        Stack
+    };
     class PageTable {
     public:
         explicit PageTable(const std::shared_ptr<Kernel::Types::KProcess> &process);
-        void CreateTable(void *begin, U64 size);
+        void CreateTable(TableType type, void *begin, U64 size);
 
-        bool Contains(void *usertable, U64 size) const;
+        TableType Contains(void *usertable, U64 size) const;
         U8 *GetTable(const void *useraddr) const;
 
-        U64 GetPage(const void *begin);
+        U64 GetPage(const void *begin) const;
 
         template<typename T>
         T Read(const void *useraddr) {
@@ -27,5 +31,6 @@ namespace FastNx::Jit {
             std::memcpy(GetTable(useraddr), &value, sizeof(T));
         }
         std::vector<void *> table;
+        std::map<TableType, std::pair<U64, U64>> tableinfo;
     };
 }

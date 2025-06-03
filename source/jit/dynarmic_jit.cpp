@@ -43,7 +43,7 @@ namespace FastNx::Jit {
 
         for (U64 counter{}; counter < 100; counter++) {
             if (!callbacks.GetTicksRemaining())
-                callbacks.ticksleft += 500 * std::max(counter, 1UL);
+                callbacks.ticksleft += 10'000;
 
             if (jitcore && initialized) {
                 ScopedSignalHandler installactions;
@@ -51,8 +51,8 @@ namespace FastNx::Jit {
                 if (jitcore->Run() == Dynarmic::HaltReason::MemoryAbort)
                     PrintArm(context.arm_reglist);
             }
-            GetRegisters(context.arm_reglist);
         }
+        GetRegisters(context.arm_reglist);
     }
 
     void JitDynarmicController::Initialize(void *excepttls, void *usertls) {
@@ -91,8 +91,8 @@ namespace FastNx::Jit {
         jitcore->SetRegisters(jitregs.gprlist);
 
         auto vectors{jitcore->GetVectors()};
-        for (const auto &[index, value128]: std::views::enumerate(jitregs.floats)) {
-            Copy(vectors[index], value128);
+        for (const auto &[index, floats]: std::views::enumerate(jitregs.floats)) {
+            Copy(vectors[index], floats);
         }
         jitcore->SetVectors(vectors);
         jitcore->SetSP(jitregs.sp);
@@ -100,6 +100,6 @@ namespace FastNx::Jit {
 
         jitcore->SetPstate(jitregs.pstate);
         jitcore->SetFpsr(jitregs.fpsr);
-        jitcore->SetFpsr(jitregs.fpsr);
+        jitcore->SetFpcr(jitregs.fpcr);
     }
 }

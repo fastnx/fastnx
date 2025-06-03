@@ -14,6 +14,25 @@ namespace FastNx::Kernel::Memory {
         Aslr
     };
 
+    struct MemoryAttribute {
+        unsigned locked: 1;
+        unsigned ipclocked: 1;
+        unsigned devicedshared: 1;
+        unsigned uncached: 1;
+        unsigned permlocked: 1;
+    };
+    struct MemoryInfo {
+        const void *base;
+        U64 size;
+        U32 type;
+        MemoryAttribute attribute;
+        U32 permission;
+        U32 ipcrefcount;
+        U32 devrefcount;
+        U32 padding;
+    };
+    static_assert(sizeof(MemoryInfo) == 0x24 + 4);
+
     class KMemory {
     public:
         explicit KMemory(Kernel &_kernel);
@@ -43,7 +62,7 @@ namespace FastNx::Kernel::Memory {
             }
         }
 
-        KMemoryBlock * QueryMemory(const U8 *begin);
+        std::optional<MemoryInfo> QueryMemory(const U8 *begin);
 
         std::span<U8> addrspace;
         std::span<U8> code;

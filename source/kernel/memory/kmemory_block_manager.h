@@ -86,14 +86,14 @@ namespace FastNx::Kernel::Memory {
             auto first{FindBlock(begin)};
             const auto last{FindBlock(end)};
             for (; first && last && *first != *last; first = FindBlock(begin)) {
-                if ((*first)->state == MemoryState{MemoryTypeValues::Free})
+                if (first->second->state == MemoryState{MemoryTypeValues::Free})
                     return {};
-                begin += (*first)->pagescount * SwitchPageSize;
+                begin += first->second->pagescount * SwitchPageSize;
             }
             return first && last;
         }
 
-        std::optional<KMemoryBlock *> FindBlock(const U8 *guestptr);
+        std::optional<std::pair<const U8 *, KMemoryBlock *>> FindBlock(const U8 *guestptr);
 
         MemoryBackingPtr allocator;
         std::map<const U8 *, KMemoryBlock> treemap;

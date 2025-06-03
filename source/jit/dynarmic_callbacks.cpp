@@ -5,11 +5,11 @@
 #include <jit/dynarmic_callbacks.h>
 #include <jit/dynarmic_jit.h>
 
-#include <kernel/svc/types.h>
+#include <kernel/svc/syscall.h>
 
 namespace FastNx::Jit {
     U8 DynarmicCallbacks::MemoryRead8(const Dynarmic::A64::VAddr vaddr) {
-        if (Validate(vaddr, 1, true))
+        if (ValidateMemoryAccess(vaddr, 1))
             return ptable->Read<U8>(reinterpret_cast<U8 *>(vaddr));
         return {};
     }
@@ -18,7 +18,7 @@ namespace FastNx::Jit {
         return {MemoryRead64(vaddr), MemoryRead64(vaddr + 8)};
     }
     void DynarmicCallbacks::MemoryWrite8(const Dynarmic::A64::VAddr vaddr, const U8 value) {
-        if (Validate(vaddr, 1, false))
+        if (ValidateMemoryAccess(vaddr, 1))
             ptable->Write<U8>(reinterpret_cast<U8 *>(vaddr), value);
     }
     void DynarmicCallbacks::MemoryWrite128(const Dynarmic::A64::VAddr vaddr, const Dynarmic::A64::Vector value) {
@@ -34,16 +34,16 @@ namespace FastNx::Jit {
         std::unique_lock lock{mutex};
 
         AsyncLogger::Info("System call number {} occurred at {}", syscall, std::chrono::system_clock::now());
-        HosThreadContext hosstate;
-        jitctrl->GetRegisters(hosstate);
+        HosThreadContext hoststate;
+        jitctrl->GetRegisters(hoststate);
 
         // ReSharper disable once CppDFAEndlessLoop
-        for (; ;) {
+        for (bool dispatched{}; !dispatched;) {
             logger->FlushBuffers();
-            Kernel::Svc::Syscall(syscall, hosstate);
-            jitctrl->SetRegisters(hosstate);
+            if (Kernel::Svc::Syscall(syscall, hoststate))
+                dispatched = true;
 
-            std::scoped_lock scoped{mutex};
+            jitctrl->SetRegisters(hoststate);
         }
     }
 
@@ -65,13 +65,13 @@ namespace FastNx::Jit {
         return {};
     }
 
-    bool DynarmicCallbacks::Validate(const Dynarmic::A64::VAddr vaddr, const U64 size, [[maybe_unused]] bool read) const {
+    bool DynarmicCallbacks::ValidateMemoryAccess(const Dynarmic::A64::VAddr vaddr, const U64 size) const {
         auto *result{reinterpret_cast<U8 *>(vaddr)};
-        if (!ptable->Contains(result, size)) {
+
+        if (ptable->Contains(result, size) == TableType::None) {
             if (result <= static_cast<U8 *>(ptable->table.back()))
                 jitctrl->jitcore->HaltExecution(Dynarmic::HaltReason::MemoryAbort);
-            else
-                return false;
+            else return false;
         }
         return true;
     }

@@ -44,7 +44,7 @@ namespace FastNx::Jit {
         U64 GetTicksRemaining() override;
         U64 GetCNTPCT() override;
 
-        bool Validate(Dynarmic::A64::VAddr vaddr, U64 size, bool read) const;
+        bool ValidateMemoryAccess(Dynarmic::A64::VAddr vaddr, U64 size) const;
 
         U64 ticksleft{};
         std::shared_ptr<PageTable> ptable;
