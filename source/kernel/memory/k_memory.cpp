@@ -149,12 +149,8 @@ namespace FastNx::Kernel::Memory {
                 .base = block->first,
                 .size = block->second->pagescount * SwitchPageSize,
                 .type = block->second->state._type,
-                .attribute = {},
                 .permission = block->second->permission,
-                .ipcrefcount = {},
-                .devrefcount = {},
-                .padding = {}
             };
-        return {};
+        return std::nullopt;
     }
 }

@@ -45,15 +45,11 @@ namespace FastNx::Debug {
 
         NX_ASSERT(entrysize == sizeof(Elf64_Sym));
         for (; reinterpret_cast<const char *>(symbols) < stringtable; symbols++) {
-            boost::container::small_vector<char, 4096> demangled(4096);
-            const auto *strmangled{&stringtable[symbols->st_name]};
+            const auto *manglename{&stringtable[symbols->st_name]};
 
-            U64 len{demangled.size()};
             I32 status;
-            __cxxabiv1::__cxa_demangle(strmangled, demangled.data(), &len, &status);
-            if (status && status != -2)
-                continue;
-            solvedsyms.push_back(std::make_pair(symbols, std::string{!status ? demangled.data() : strmangled}));
+            const std::unique_ptr<char, decltype(std::free)*> demangled{__cxxabiv1::__cxa_demangle(manglename, nullptr, nullptr, &status), std::free};
+            solvedsyms.push_back(std::make_pair(symbols, std::string{!status ? demangled.get() : manglename}));
         }
 
     }
