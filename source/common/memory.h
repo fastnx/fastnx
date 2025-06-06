@@ -4,16 +4,21 @@
 #include <memory>
 #include <boost/container_hash/hash.hpp>
 #include <common/types.h>
+
+#include <jit/page_table.h>
 namespace FastNx {
     constexpr auto SwitchMemorySize{4_GBYTES};
 
 
     class MemoryBacking {
     public:
+        explicit MemoryBacking(const std::shared_ptr<Jit::PageTable> &table) : pagetable(table) {}
         virtual ~MemoryBacking() = default;
         virtual void Map(U8 *guest, U64 hostaddr, U64 size) = 0;
         virtual void Reprotec(U8 *guest, U64 size, I32 protection) = 0;
         virtual bool CanAllocate(const U8 *region, U64 size) = 0;
+
+        const std::shared_ptr<Jit::PageTable> pagetable;
     };
 
     using PagingType = std::pair<U8 *, U64>;
@@ -27,10 +32,10 @@ namespace FastNx {
         }
     };
 
-    class NxAllocator final : public MemoryBacking {
+    class SysAllocator final : public MemoryBacking {
     public:
-        NxAllocator();
-        ~NxAllocator() override;
+        explicit SysAllocator(const std::shared_ptr<Jit::PageTable> &table);
+        ~SysAllocator() override;
 
         std::span<U8> GetSpan(U64 baseaddr = {}, U64 offset = {}, bool ishost = false) const;
         std::span<U8> InitializeGuestAs(U64 aswidth, U64 assize);

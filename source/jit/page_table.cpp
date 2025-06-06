@@ -6,51 +6,69 @@
 
 
 namespace FastNx::Jit {
-    PageTable::PageTable(const std::shared_ptr<Kernel::Types::KProcess> &process) {
-        const auto &memory{process->memory};
-        CreateTable(TableType::Code, memory->code.begin().base(), memory->code.size());
-        CreateTable(TableType::Stack, memory->stack.begin().base(), process->stacksize);
+    void PageTable::Initialize(const std::shared_ptr<Kernel::Types::KProcess> &process) {
+        pagetablewidth = process->memory->processwidth;
+
+        table.resize(1ULL << (pagetablewidth - Kernel::SwitchPageBitsCount));
+        backing.resize(SwitchMemorySize / Kernel::SwitchPageSize);
+    }
+
+    auto GetOffset(const void *begin, const U64 width = 0) -> U64 {
+        // ReSharper disable once CppRedundantParentheses
+        return reinterpret_cast<U64>(begin) >> Kernel::SwitchPageBitsCount & ((1ULL << (width - Kernel::SwitchPageBitsCount)) - 1);
     }
     U8 *PageTable::GetTable(const void *useraddr) const {
         const auto *aligned{boost::alignment::align_down(const_cast<void *>(useraddr), Kernel::SwitchPageSize)};
         const auto offset{reinterpret_cast<U64>(useraddr) - reinterpret_cast<U64>(aligned)};
 
-        return static_cast<U8 *>(aligned ? table[reinterpret_cast<U64>(aligned) / Kernel::SwitchPageSize] : table.front()) + offset;
+        const auto tablepage{aligned ? table[GetOffset(aligned, pagetablewidth)] : table.front()};
+        return static_cast<U8 *>(tablepage(offset));
     }
 
-    U64 PageTable::GetPage(const void *begin) const {
-        return std::distance(table.begin(), std::ranges::find(table, begin)) * Kernel::SwitchPageSize;
-    }
-
-    void PageTable::CreateTable(const TableType type, void *begin, const U64 size) {
-        auto *bytesit{static_cast<U8 *>(begin)};
+    void PageTable::CreateTable(void *begin, void *host, U64 offset, const U64 size) {
+        auto *beginit{static_cast<U8 *>(begin)};
+        auto *hostit{static_cast<U8 *>(host) + offset};
         const auto *endit{static_cast<U8 *>(begin) + size};
 
-        table.reserve((endit - bytesit) / Kernel::SwitchPageSize);
-        while (bytesit != endit) {
-            table.emplace_back(bytesit);
-            bytesit += Kernel::SwitchPageSize;
+        for (; beginit != endit; beginit += Kernel::SwitchPageSize, hostit += Kernel::SwitchPageSize, offset += Kernel::SwitchPageSize) {
+            const auto tablestart{GetOffset(beginit, pagetablewidth)};
+
+            table[tablestart] = Page{beginit};
+            backing[offset >> Kernel::SwitchPageBitsCount] = Page{hostit};
         }
 
-        tableinfo.emplace(type, std::make_pair(GetPage(begin), GetPage(bytesit)));
+        tableinfo.emplace_back(std::make_pair(TableType::Undefined, std::make_pair(begin, beginit)));
+    }
+    void PageTable::MarkTable(const TableType _type, const void *begin, const U64 size) {
+        for (auto &[type, table]: tableinfo) {
+            if (type == TableType::Undefined && table.first == begin &&
+                table.second == static_cast<const U8 *>(begin) + size)
+                type = _type;
+        }
     }
 
-    TableType PageTable::Contains(void *usertable, U64 size) const {
+    std::pair<PageAttributeType, TableType> PageTable::Contains(void *usertable, U64 size) const {
         usertable = static_cast<U8 *>(boost::alignment::align_down(usertable, Kernel::SwitchPageSize));
-        auto type{TableType::None};
+        auto type{TableType::Undefined};
 
         size = boost::alignment::align_up(size, Kernel::SwitchPageSize);
-        const auto tableindex{usertable ? reinterpret_cast<U64>(usertable) / Kernel::SwitchPageSize : 0ULL};
+        const auto tableindex{GetOffset(usertable, pagetablewidth)};
 
-        const auto pages{size / Kernel::SwitchPageSize};
-        if (table.size() > tableindex) {
-            auto infoit{tableinfo.cbegin()};
-            for (; infoit != tableinfo.cend() && type == TableType::None; ++infoit)
-                if (const auto tablenum{reinterpret_cast<U64>(usertable)}; infoit->second.first >= tablenum && tablenum + pages < infoit->second.second)
-                    type = infoit->first;
-            if (type == TableType::None && table.size() - tableindex >= pages)
-                type = std::prev(tableinfo.cend())->first;
+        auto attribute{PageAttributeType::Mapped};
+        for (auto pcount{tableindex}; pcount < tableindex + size / Kernel::SwitchPageSize; pcount++) {
+            if (table[pcount].GetPageAttr() == PageAttributeType::Mapped)
+                continue;
+            attribute = PageAttributeType::Unmapped;
+            break;
         }
-        return type;
+
+        if (attribute == PageAttributeType::Mapped) {
+            auto infoit{tableinfo.cbegin()};
+            for (; infoit != tableinfo.cend() && type == TableType::Undefined; ++infoit) {
+                if (infoit->second.first <= usertable && static_cast<U8 *>(usertable) + size <= infoit->second.second)
+                    type = infoit->first;
+            }
+        }
+        return std::make_pair(attribute, type);
     }
 }

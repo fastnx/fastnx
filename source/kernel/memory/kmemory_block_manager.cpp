@@ -5,10 +5,10 @@
 
 
 namespace FastNx::Kernel::Memory {
+    KMemoryBlockManager::KMemoryBlockManager(Kernel &kernel) : hostslab(kernel.poffset), allocator(kernel.systemalloc) {}
+
     std::span<U8> KMemoryBlockManager::Initialize(const U64 width, const U64 assize, const Kernel &kernel) {
-        if (!allocator)
-            allocator = kernel.nxalloc;
-        const auto addrspace{kernel.nxalloc->InitializeGuestAs(width, assize)};
+        const auto addrspace{kernel.systemalloc->InitializeGuestAs(width, assize)};
 
         if (addrspace.empty())
             throw exception{"Could not create the AS for the current process"};

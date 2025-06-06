@@ -53,7 +53,8 @@ namespace FastNx::Kernel {
         constexpr auto Data{MemoryPermission::Read | MemoryPermission::Write};
     }
 
-    constexpr auto SwitchPageSize{1 << 12};
+    constexpr auto SwitchPageBitsCount{12};
+    constexpr auto SwitchPageSize{1 << SwitchPageBitsCount};
 
     struct ThreadPriority {
         U8 min, max;

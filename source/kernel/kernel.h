@@ -27,14 +27,13 @@ namespace FastNx::Kernel {
         std::shared_ptr<Jit::JitDynarmicController> GetJit(U32 corenumber);
 
         std::shared_ptr<Types::KProcess> GetCurrentProcess();
+        std::shared_ptr<Jit::PageTable> pagetable;
 
-        std::shared_ptr<NxAllocator> nxalloc;
+        std::shared_ptr<SysAllocator> systemalloc;
         std::shared_ptr<Memory::KSlabHeap> poffset;
         std::shared_ptr<Memory::KSlabHeap> userslabs;
         std::shared_ptr<Memory::KMemory> memory;
         std::shared_ptr<Threads::KScheduler> scheduler;
-
-        std::shared_ptr<Jit::PageTable> pagetable;
 
     private:
         U64 pidseed{InitialProcessId};

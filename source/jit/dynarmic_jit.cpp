@@ -9,13 +9,9 @@
 namespace FastNx::Jit {
 
     JitDynarmicController::JitDynarmicController(
-        const std::shared_ptr<Kernel::Types::KProcess> &process) :
-            pagination(std::make_shared<PageTable>(process)) {
+        const std::shared_ptr<Kernel::Types::KProcess> &ownerproc) : process(ownerproc) {
 
-        jitconfigs.hook_hint_instructions = true;
-        if (!process->kernel.pagetable)
-            process->kernel.pagetable = pagination;
-        callbacks.ptable = pagination;
+        callbacks.ptable = process->kernel.pagetable;
 #if !NDEBUG
         jitconfigs.check_halt_on_memory_access = true;
         jitconfigs.detect_misaligned_access_via_page_table = 8 | 16 | 32 | 64 | 128;
@@ -37,13 +33,13 @@ namespace FastNx::Jit {
         SetRegisters(context.arm_reglist);
 
         if (!jitcore->GetSP()) {
-            jitcore->SetPC(pagination->GetPage(context.pc_counter));
-            jitcore->SetSP(pagination->GetPage(context.stack));
+            jitcore->SetPC(reinterpret_cast<U64>(context.pc_counter));
+            jitcore->SetSP(reinterpret_cast<U64>(context.stack));
         }
 
         for (U64 counter{}; counter < 100; counter++) {
             if (!callbacks.GetTicksRemaining())
-                callbacks.ticksleft += 10'000;
+                callbacks.ticksleft += 10000;
 
             if (jitcore && initialized) {
                 ScopedSignalHandler installactions;
@@ -56,8 +52,12 @@ namespace FastNx::Jit {
     }
 
     void JitDynarmicController::Initialize(void *excepttls, void *usertls) {
-        // jitconfigs.page_table = pagination->table.data();
-        // jitconfigs.page_table_address_space_bits = 39;
+        /*
+        jitconfigs.page_table = reinterpret_cast<void **>(process->kernel.pagetable->table.data());
+        jitconfigs.absolute_offset_page_table = true;
+        jitconfigs.page_table_address_space_bits = callbacks.ptable->pagetablewidth;
+        jitconfigs.page_table_pointer_mask_bits = PageTable::PageAttrBitsCount;
+        */
 
         tpidr_el0 = reinterpret_cast<U64>(excepttls);
         tpidrro_el0 = reinterpret_cast<U64>(usertls);

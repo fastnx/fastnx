@@ -23,11 +23,11 @@ namespace FastNx::Kernel::Types {
         std::scoped_lock lock{threadind};
 
         memory->MapStackMemory(0, stacksize);
-        mainthread->Initialize(this, entrypoint, memory->stack.begin().base() + stacksize, kernelexcepttls, desiredcore);
-        const auto firstthread{handletable.Allocate(mainthread)};
+        mainthread->Initialize(this, entrypoint, memory->stack.begin().base(), kernelexcepttls, desiredcore);
+        const auto thisthread{handletable.Allocate(mainthread)};
         threads.emplace_back(std::move(mainthread));
 
-        NX_ASSERT(handletable.GetObject<KThread>(firstthread));
+        NX_ASSERT(handletable.GetObject<KThread>(thisthread));
     }
 
     void KProcess::Start() const {

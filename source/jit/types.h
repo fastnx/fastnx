@@ -3,16 +3,12 @@
 #include <common/types.h>
 namespace FastNx::Jit {
     struct HosThreadContext {
-        union GuestRegister {
-            explicit operator U64() const {
-                return X;
-            }
-            U64 X;
-            U32 W;
-        };
         union {
             struct {
-                GuestRegister R0, R1, R2;
+                U64 X0, X1, X2, X3, X4, X5, X6, X7;
+            };
+            struct {
+                U32 W0, W1, W2, W3, W4, W5, W6, W7;
             };
             std::array<U64, 31> gprlist{};
         };

@@ -37,8 +37,7 @@ namespace FastNx::Jit {
         HosThreadContext hoststate;
         jitctrl->GetRegisters(hoststate);
 
-        // ReSharper disable once CppDFAEndlessLoop
-        for (bool dispatched{}; !dispatched;) {
+        for (bool dispatched{}; !dispatched; ) {
             logger->FlushBuffers();
             if (Kernel::Svc::Syscall(syscall, hoststate))
                 dispatched = true;
@@ -67,11 +66,9 @@ namespace FastNx::Jit {
 
     bool DynarmicCallbacks::ValidateMemoryAccess(const Dynarmic::A64::VAddr vaddr, const U64 size) const {
         auto *result{reinterpret_cast<U8 *>(vaddr)};
-
-        if (ptable->Contains(result, size) == TableType::None) {
-            if (result <= static_cast<U8 *>(ptable->table.back()))
-                jitctrl->jitcore->HaltExecution(Dynarmic::HaltReason::MemoryAbort);
-            else return false;
+        if (const auto [attribute, kindof]{ptable->Contains(result, size)}; attribute == PageAttributeType::Unmapped) {
+            jitctrl->jitcore->HaltExecution(Dynarmic::HaltReason::MemoryAbort);
+            return {};
         }
         return true;
     }

@@ -7,9 +7,9 @@
 #include <common/memory.h>
 
 namespace FastNx {
-    constexpr auto FastNxSharedName{"/fastnx_shared"};
+    constexpr auto FastNxSharedName{"/fastnx"};
 
-    NxAllocator::NxAllocator() : sharedfd(shm_open(FastNxSharedName, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR)) {
+    SysAllocator::SysAllocator(const std::shared_ptr<Jit::PageTable> &table) : MemoryBacking(table), sharedfd(shm_open(FastNxSharedName, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR)) {
         if (!sharedfd)
             throw exception{"Failed to open the shared object"};
 
@@ -24,7 +24,7 @@ namespace FastNx {
         if (mprotect(hostptr + size, 4096, PROT_NONE))
             if (errno == ERANGE) {}
     }
-    NxAllocator::~NxAllocator() {
+    SysAllocator::~SysAllocator() {
         Device::FreeMemory(hostptr, size);
         Device::FreeMemory(hostptr + size, 4096);
 
@@ -32,7 +32,7 @@ namespace FastNx {
             shm_unlink(FastNxSharedName);
     }
 
-    std::span<U8> NxAllocator::GetSpan(const U64 baseaddr, U64 offset, const bool ishost) const {
+    std::span<U8> SysAllocator::GetSpan(const U64 baseaddr, U64 offset, const bool ishost) const {
         if (!offset)
             offset = size;
         if (!ishost && !guestptr)
@@ -40,7 +40,7 @@ namespace FastNx {
         return ishost ? std::span{hostptr + baseaddr, offset} : std::span{guestptr + baseaddr, offset};
     }
 
-   std::span<U8> NxAllocator::InitializeGuestAs(const U64 aswidth, const U64 assize) {
+   std::span<U8> SysAllocator::InitializeGuestAs(const U64 aswidth, const U64 assize) {
         constexpr auto AsanAvailableMap{0x600000000000};
         auto *memory{reinterpret_cast<void *>(aswidth + AsanAvailableMap)}; // We must preserve the number of leading zero bits
         auto *result{Device::AllocateGuestMemory(assize, memory)};
@@ -53,7 +53,7 @@ namespace FastNx {
         return {};
     }
 
-   void NxAllocator::Map(U8 *guest, const U64 hostaddr, U64 size) {
+   void SysAllocator::Map(U8 *guest, const U64 hostaddr, U64 size) {
         if (GetSpan(hostaddr, 0, true).empty())
             return;
 
@@ -62,6 +62,8 @@ namespace FastNx {
 
         if (mmap(guest, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_FIXED, sharedfd, hostaddr) != guest)
             throw exception{"Could not map at this address [ guest: {}, host: {:#x} ], errno: {}", fmt::ptr(guest), hostaddr, errno};
+
+        pagetable->CreateTable(guest, hostptr, hostaddr, size);
         alloclists.emplace(std::make_pair(guest, hostaddr), size);
 
 #if !defined(NDEBUG)
@@ -69,7 +71,7 @@ namespace FastNx {
 #endif
    }
 
-   bool NxAllocator::CanAllocate(const U8 *region, const U64 size) {
+   bool SysAllocator::CanAllocate(const U8 *region, const U64 size) {
         for (const auto &[allocinfo, _size]: alloclists) {
             const auto [guestmemory, _] = allocinfo;
             if (guestmemory <= region && guestmemory + _size > region)
@@ -79,7 +81,7 @@ namespace FastNx {
         return true;
    }
 
-   void NxAllocator::Reprotec(U8 *guest, const U64 size, const I32 protection) {
+   void SysAllocator::Reprotec(U8 *guest, const U64 size, const I32 protection) {
         const auto prots = [&] {
             I32 result{};
             if (protection & 1)

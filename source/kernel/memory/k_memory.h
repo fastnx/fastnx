@@ -1,4 +1,5 @@
 #pragma once
+#include <jit/page_table.h>
 #include <kernel/memory/kmemory_block_manager.h>
 #include <kernel/svc/types.h>
 
@@ -36,45 +37,41 @@ namespace FastNx::Kernel::Memory {
     class KMemory {
     public:
         explicit KMemory(Kernel &_kernel);
-        void InitializeProcessMemory(const Svc::CreateProcessParameter &proccfg);
+        void InitializeForProcess(const std::shared_ptr<Types::KProcess> &process, const Svc::CreateProcessParameter &proccfg);
 
-        void MapCodeMemory(U64 begin, U64 size, const std::vector<U8> &content);
-        void MapTlsMemory(U64 begin, U64 size);
-        void MapStackMemory(U64 begin, U64 size);
+        void MapCodeMemory(U64 begin, U64 size, const std::vector<U8> &content) const;
+        void MapTlsMemory(U64 begin, U64 size) const;
+        void MapStackMemory(U64 begin, U64 size) const;
 
-        void SetMemoryPermission(U64 begin, U64 size, I32 permission);
-        void FillMemory(U64 begin, U8 constant, U64 size);
+        void SetMemoryPermission(U64 begin, U64 size, I32 permission) const;
+        void FillMemory(U64 begin, U8 constant, U64 size) const;
 
         auto *GetSegment(const SegmentType type) {
-            switch (type) {
-                case SegmentType::Code:
-                    return &code;
-                case SegmentType::Alias:
-                    return &alias;
-                case SegmentType::Heap:
-                    return &heap;
-                case SegmentType::Stack:
-                    return &stack;
-                case SegmentType::TlsIo:
-                    return &tlsio;
-                default:
-                    std::unreachable();
-            }
+            if (type == SegmentType::Code)
+                return &code;
+            if (type == SegmentType::Alias)
+                return &alias;
+            if (type == SegmentType::Heap)
+                return &heap;
+            if (type == SegmentType::Stack)
+                return &stack;
+            if (type == SegmentType::TlsIo)
+                return &tlsio;
+            std::unreachable();
         }
 
-        std::optional<MemoryInfo> QueryMemory(const U8 *begin);
+        std::optional<MemoryInfo> QueryMemory(const U8 *begin) const;
 
         std::span<U8> addrspace;
-        std::span<U8> code;
-        std::span<U8> alias;
-        std::span<U8> heap;
-        std::span<U8> stack;
-        std::span<U8> tlsio;
+        std::span<U8> code, alias, heap, stack, tlsio;
+
+        U64 processwidth{};
     private:
-        void MapSegmentMemory(const std::span<U8> &memseg, U64 begin, U64 size, bool fill, const KMemoryBlock &block);
+        void MapSegmentMemory(const std::span<U8> &memseg, U64 begin, U64 size, bool fill, const KMemoryBlock &block) const;
 
         Kernel &kernel;
-        std::optional<KMemoryBlockManager> blockslist;
+        std::shared_ptr<KMemoryBlockManager> blockslist;
+        std::shared_ptr<Jit::PageTable> table;
     };
 
 }

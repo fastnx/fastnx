@@ -130,7 +130,7 @@ namespace FastNx::Horizon {
         parameters.enbaslr = true;
 
         const auto &memory{switchnx->kernel->memory};
-        memory->InitializeProcessMemory(parameters);
+        memory->InitializeForProcess(process, parameters);
 
         if (ValidateSet(codeset))
             SetProcessMemory(std::move(codeset));

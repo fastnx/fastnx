@@ -9,14 +9,14 @@ namespace FastNx::Kernel::Svc {
         const auto &memory{svcblock.process->memory};
         const auto &pagination{svcblock.process->kernel.pagetable};
 
-        const auto *address{pagination->GetTable(reinterpret_cast<U8 *>(U64{context.R2}))};
-        auto *outblock{pagination->GetTable(reinterpret_cast<U8 *>(U64{context.R0}))};
+        const auto *address{pagination->GetTable(reinterpret_cast<U8 *>(U64{context.X2}))};
+        auto *outblock{pagination->GetTable(reinterpret_cast<U8 *>(U64{context.X0}))};
 
         if (auto meminfo{memory->QueryMemory(address)}) {
-            meminfo->base = reinterpret_cast<void *>(pagination->GetPage(meminfo->base));
             std::construct_at(reinterpret_cast<Memory::MemoryInfo *>(outblock), *meminfo);
         }
 
-        context.R0.W = std::to_underlying(Result::Success);
+        context.W1 = {};
+        context.W0 = std::to_underlying(Result::Success);
     }
 }

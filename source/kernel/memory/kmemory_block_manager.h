@@ -75,7 +75,7 @@ namespace FastNx::Kernel::Memory {
 
     class KMemoryBlockManager {
     public:
-        explicit KMemoryBlockManager(const std::shared_ptr<KSlabHeap> &poffset) : hostslab(poffset) {}
+        explicit KMemoryBlockManager(Kernel &kernel);
 
         std::span<U8> Initialize(U64 width, U64 assize, const Kernel &kernel);
 
@@ -95,8 +95,8 @@ namespace FastNx::Kernel::Memory {
 
         std::optional<std::pair<const U8 *, KMemoryBlock *>> FindBlock(const U8 *guestptr);
 
-        MemoryBackingPtr allocator;
         std::map<const U8 *, KMemoryBlock> treemap;
         const std::shared_ptr<KSlabHeap> &hostslab;
+        MemoryBackingPtr allocator;
     };
 }

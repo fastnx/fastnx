@@ -6,9 +6,10 @@
 
 namespace FastNx::Kernel {
     Kernel::Kernel() :
-            nxalloc(std::make_shared<NxAllocator>()),
-            memory(std::make_unique<Memory::KMemory>(*this)),
-            scheduler(std::make_shared<Threads::KScheduler>(*this)) {
+        pagetable(std::make_shared<Jit::PageTable>()),
+        systemalloc(std::make_shared<SysAllocator>(pagetable)),
+        memory(std::make_unique<Memory::KMemory>(*this)),
+        scheduler(std::make_shared<Threads::KScheduler>(*this)) {
 
         const auto lastpid{pidseed + MaximumProcessIds};
         pidslist.reserve(lastpid - pidseed + 2);

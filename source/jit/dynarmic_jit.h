@@ -9,7 +9,7 @@
 namespace FastNx::Jit {
     class JitDynarmicController final : public JitCallBack, public std::enable_shared_from_this<JitDynarmicController> {
     public:
-        explicit JitDynarmicController(const std::shared_ptr<Kernel::Types::KProcess> &process);
+        explicit JitDynarmicController(const std::shared_ptr<Kernel::Types::KProcess> &ownerproc);
         void Run(JitThreadContext &context) override;
         void Initialize(void *excepttls, void *usertls) override;
 
@@ -22,6 +22,6 @@ namespace FastNx::Jit {
 
         // https://developer.arm.com/documentation/ddi0601/2025-03/AArch64-Registers/TPIDR-EL0--EL0-Read-Write-Software-Thread-ID-Register
         U64 tpidrro_el0{}, tpidr_el0{};
-        std::shared_ptr<PageTable> pagination;
+        const std::shared_ptr<Kernel::Types::KProcess> &process;
     };
 }

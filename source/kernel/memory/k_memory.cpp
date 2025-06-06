@@ -39,14 +39,14 @@ namespace FastNx::Kernel::Memory {
         return distribution(generator);
     }
 
-    KMemory::KMemory(Kernel &_kernel) : kernel(_kernel) {}
+    KMemory::KMemory(Kernel &_kernel) : kernel(_kernel), blockslist(std::make_shared<KMemoryBlockManager>(kernel)), table(_kernel.pagetable) {}
 
-    void KMemory::InitializeProcessMemory(const Svc::CreateProcessParameter &proccfg) {
+    void KMemory::InitializeForProcess(const std::shared_ptr<Types::KProcess> &process, const Svc::CreateProcessParameter &proccfg) {
         const auto width{GetWidthAs(proccfg.addrspace)};
         if (width < 39)
             return;
-        if (!blockslist)
-            blockslist.emplace(kernel.poffset);
+        processwidth = width;
+
         const auto codesize{boost::alignment::align_up(proccfg.codenumpages * SwitchPageSize, RegionAlignment)};
 
         switch (width) {
@@ -67,6 +67,8 @@ namespace FastNx::Kernel::Memory {
         for (const auto _type: EnumRange(SegmentType::Code, SegmentType::TlsIo))
             aslrlist.emplace_back(_type, GetRandom(0x6400) * RegionAlignment);
 
+
+        table->Initialize(process);
         /*
         for (const auto &[type, offset]: aslrlist) {
             if (auto *segment{GetSegment(type)}; !segment->empty())
@@ -75,7 +77,7 @@ namespace FastNx::Kernel::Memory {
         */
     }
 
-    void KMemory::MapSegmentMemory(const std::span<U8> &memseg, const U64 begin, U64 size, const bool fill, const KMemoryBlock &block) {
+    void KMemory::MapSegmentMemory(const std::span<U8> &memseg, const U64 begin, U64 size, const bool fill, const KMemoryBlock &block) const {
         U8* memory{memseg.begin().base() + begin};
         if (!size)
             size = reinterpret_cast<U64>(memseg.end().base() - begin);
@@ -84,7 +86,7 @@ namespace FastNx::Kernel::Memory {
         if (fill)
             std::memset(memory, 0, size);
     }
-    void KMemory::MapCodeMemory(const U64 begin, const U64 size, const std::vector<U8> &content) {
+    void KMemory::MapCodeMemory(const U64 begin, const U64 size, const std::vector<U8> &content) const {
         const auto _size{boost::alignment::align_up(size, SwitchPageSize)};
         NX_ASSERT(_size > content.size());
 
@@ -96,23 +98,28 @@ namespace FastNx::Kernel::Memory {
         std::memcpy(memory, content.data(), content.size());
         // Touching the pages adjacent to the content
         std::memset(memory + content.size(), 0, _size - content.size());
+
+        table->MarkTable(Jit::TableType::Code, memory, _size);
     }
 
-    void KMemory::MapTlsMemory(const U64 begin, const U64 size) {
+    void KMemory::MapTlsMemory(const U64 begin, const U64 size) const {
         MapSegmentMemory(tlsio, begin, size, true, KMemoryBlock{
             .pagescount = size / SwitchPageSize,
             .state = MemoryState{MemoryTypeValues::ThreadLocal}
         });
     }
 
-    void KMemory::MapStackMemory(const U64 begin, const U64 size) {
+    void KMemory::MapStackMemory(const U64 begin, const U64 size) const {
         MapSegmentMemory(stack, begin, size, true, KMemoryBlock{
             .pagescount = size / SwitchPageSize,
             .state = MemoryState{MemoryTypeValues::Stack}
         });
+
+        const U8 *stackit{stack.begin().base() + begin};
+        table->MarkTable(Jit::TableType::Stack, stackit, size);
     }
 
-    void KMemory::SetMemoryPermission(const U64 begin, const U64 size, const I32 permission) {
+    void KMemory::SetMemoryPermission(const U64 begin, const U64 size, const I32 permission) const {
         U8 *memory{code.begin().base() + begin};
         const auto _size{boost::alignment::align_up(size, SwitchPageSize)};
 
@@ -134,7 +141,7 @@ namespace FastNx::Kernel::Memory {
         }}, callback);
     }
 
-    void KMemory::FillMemory(const U64 begin, const U8 constant, const U64 size) {
+    void KMemory::FillMemory(const U64 begin, const U8 constant, const U64 size) const {
         U8 *memory{code.begin().base() + begin};
 
         const auto *beginpage{static_cast<U8 *>(boost::alignment::align_down(memory, SwitchPageSize))};
@@ -143,7 +150,7 @@ namespace FastNx::Kernel::Memory {
             std::memset(memory, constant, size);
     }
 
-    std::optional<MemoryInfo> KMemory::QueryMemory(const U8 *begin) {
+    std::optional<MemoryInfo> KMemory::QueryMemory(const U8 *begin) const {
         if (const auto block{blockslist->FindBlock(begin)})
             return MemoryInfo{
                 .base = block->first,
