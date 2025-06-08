@@ -53,8 +53,8 @@ namespace FastNx::Jit {
         void CreateTable(void *begin, void *host, U64 offset, U64 size);
         void DelimitTable(TableType _type, const void *begin, U64 size);
 
-        std::pair<PageAttributeType, TableType> Contains(void *usertable, U64 size) const;
-        U8 *GetTable(const void *useraddr) const;
+        std::pair<PageAttributeType, TableType> Contains(void *usertable, U64 size);
+        U8 * GetTable(const void *useraddr);
 
         template<typename T>
         T Read(const void *useraddr) {

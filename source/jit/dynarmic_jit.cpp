@@ -41,7 +41,7 @@ namespace FastNx::Jit {
         bool halted{};
         for (U64 counter{}; counter < 100; counter++) {
             if (!callbacks.GetTicksRemaining())
-                callbacks.ticksleft += 10000;
+                callbacks.ticksleft += 100000;
 
             if (jitcore && initialized) {
                 ScopedSignalHandler installactions;
@@ -53,8 +53,12 @@ namespace FastNx::Jit {
             }
         }
         GetRegisters(context.arm_reglist);
-        if (halted)
+        if (halted) {
             PrintArm(context.arm_reglist);
+            std::mutex mutex;
+            std::unique_lock guard(mutex);
+            std::unique_lock trap(mutex);
+        }
     }
 
     void JitDynarmicController::Initialize(void *excepttls, void *usertls) {

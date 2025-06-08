@@ -13,7 +13,7 @@ namespace FastNx {
         if (!sharedfd)
             throw exception{"Failed to open the shared object"};
 
-        U64 totalsize{size + 4096};
+        U64 totalsize{size + PageSize};
         if (ftruncate(sharedfd, totalsize))
             throw exception{"We don't have permissions to resize the shared object"};
 
@@ -21,12 +21,12 @@ namespace FastNx {
             throw exception{"Could not map memory with this FD"};
 
         // Installing a guard page at the end of the memory
-        if (mprotect(hostptr + size, 4096, PROT_NONE))
+        if (mprotect(hostptr + size, PageSize, PROT_NONE))
             if (errno == ERANGE) {}
     }
     SysAllocator::~SysAllocator() {
         Device::FreeMemory(hostptr, size);
-        Device::FreeMemory(hostptr + size, 4096);
+        Device::FreeMemory(hostptr + size, PageSize);
 
         if (sharedfd)
             shm_unlink(FastNxSharedName);

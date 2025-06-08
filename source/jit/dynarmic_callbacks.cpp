@@ -69,6 +69,7 @@ namespace FastNx::Jit {
             const auto &jit{jitctrl->jitcore};
             jit->DumpDisassembly();
             jit->HaltExecution(AbortReason);
+            return {};
         }
         return true;
     }

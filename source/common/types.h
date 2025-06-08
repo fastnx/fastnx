@@ -28,6 +28,7 @@ namespace FastNx {
     using F64 = double;
 
     constexpr std::string_view process{"fastnx"};
+    constexpr auto PageSize{4096};
 
     constexpr auto EnumRange(const auto front, const auto back) {
         using Type = std::underlying_type_t<decltype(front)>;

@@ -13,11 +13,11 @@ namespace FastNx::Jit {
         backing.resize(SwitchMemorySize / Kernel::SwitchPageSize);
     }
 
-    auto GetOffset(const void *begin, const U64 width = 0) -> U64 {
+    auto GetOffset(const void *begin, const U64 width) -> U64 {
         // ReSharper disable once CppRedundantParentheses
         return reinterpret_cast<U64>(begin) >> Kernel::SwitchPageBitsCount & ((1ULL << (width - Kernel::SwitchPageBitsCount)) - 1);
     }
-    U8 *PageTable::GetTable(const void *useraddr) const {
+    U8 * PageTable::GetTable(const void *useraddr) {
         const auto *aligned{boost::alignment::align_down(const_cast<void *>(useraddr), Kernel::SwitchPageSize)};
         const auto offset{reinterpret_cast<U64>(useraddr) - reinterpret_cast<U64>(aligned)};
 
@@ -47,7 +47,7 @@ namespace FastNx::Jit {
         }
     }
 
-    std::pair<PageAttributeType, TableType> PageTable::Contains(void *usertable, U64 size) const {
+    std::pair<PageAttributeType, TableType> PageTable::Contains(void *usertable, U64 size) {
         usertable = static_cast<U8 *>(boost::alignment::align_down(usertable, Kernel::SwitchPageSize));
         auto type{TableType::Allocated};
 
@@ -63,8 +63,8 @@ namespace FastNx::Jit {
         }
 
         if (attribute == PageAttributeType::Mapped)
-            for (const auto &[_type, markpage] : tableinfo)
-                if (markpage.first <= usertable && static_cast<U8 *>(usertable) + size <= markpage.second)
+            for (const auto &[_type, table] : tableinfo)
+                if (table.first <= usertable && static_cast<U8 *>(usertable) + size <= table.second)
                     type = _type;
         return std::make_pair(attribute, type);
     }
