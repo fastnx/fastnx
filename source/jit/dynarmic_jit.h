@@ -3,8 +3,6 @@
 
 #include <jit/types.h>
 #include <jit/dynarmic_callbacks.h>
-#include <jit/page_table.h>
-
 
 namespace FastNx::Jit {
     class JitDynarmicController final : public JitCallBack, public std::enable_shared_from_this<JitDynarmicController> {
@@ -14,6 +12,7 @@ namespace FastNx::Jit {
         void Initialize(void *excepttls, void *usertls) override;
 
         void GetRegisters(HosThreadContext &jitregs) override;
+        void Reset() override;
         void SetRegisters(const HosThreadContext &jitregs) override;
 
         Dynarmic::A64::UserConfig jitconfigs{};

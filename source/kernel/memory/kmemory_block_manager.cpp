@@ -14,12 +14,12 @@ namespace FastNx::Kernel::Memory {
             throw exception{"Could not create the AS for the current process"};
 
         const auto count{static_cast<U64>(addrspace.end() - addrspace.begin()) / SwitchPageSize};
-        treemap.insert_or_assign(addrspace.begin().base(), KMemoryBlock{
+        blocksmap.insert_or_assign(addrspace.begin().base(), KMemoryBlock{
             .pagescount = count,
             .state = MemoryState{MemoryTypeValues::Free}
         });
         // Fix to avoid breaking the std::map algorithm
-        treemap.insert_or_assign(addrspace.begin().base() + count * SwitchPageSize, KMemoryBlock{
+        blocksmap.insert_or_assign(addrspace.begin().base() + count * SwitchPageSize, KMemoryBlock{
             .pagescount = {},
             .state = MemoryState{MemoryTypeValues::Inaccessible}
         });
@@ -29,49 +29,58 @@ namespace FastNx::Kernel::Memory {
     }
 
     void KMemoryBlockManager::Map(const std::pair<U8 *, KMemoryBlock> &allocate) {
-        auto first{treemap.lower_bound(allocate.first)};
+        auto first{blocksmap.lower_bound(allocate.first)};
         const auto neededpages{allocate.second.pagescount};
         const auto size{neededpages * SwitchPageSize};
 
-        if (first == std::prev(treemap.end()))
+        if (!blocksmap.empty() && first == std::prev(blocksmap.end()))
             --first;
-        const auto last{treemap.lower_bound(allocate.first + size)};
+        const auto last{blocksmap.lower_bound(allocate.first + size)};
         if (!allocator->CanAllocate(allocate.first, size))
-            throw exception{"Address already allocated"};
+            throw exception{"Unable to allocate the required block"};
 
         bool reprotec{allocate.second.state != first->second.state};
         if (!reprotec)
             reprotec = allocate.second.permission != first->second.permission;
 
 
-        const bool isallocated{first->second.state != MemoryState{MemoryTypeValues::Free}};
+        const auto isallocated = [&] (const std::pair<const U8 *, const KMemoryBlock> &blockinfo) {
+            const auto blksize{blockinfo.second.pagescount * SwitchPageSize};
+            const auto state{blockinfo.second.state};
+            return !allocator->CanAllocate(blockinfo.first, blksize)
+                && state._type != MemoryTypeValues::Free;
+        };
 
         if (first == last) {
+            // first is above the requested allocation address, the previous block is likely free
+            if (isallocated(*first))
+                --first;
+            if (first->second.pagescount < neededpages)
+                throw exception{"The previous block is not free"};
             first->second.pagescount -= neededpages;
+            blocksmap.insert_or_assign(allocate.first, allocate.second);
+            first = blocksmap.lower_bound(allocate.first);
 
-            treemap.insert_or_assign(first->first + size, first->second);
-            treemap.insert_or_assign(allocate.first, allocate.second);
-
-        } else if (first->first + size < last->first && !isallocated) {
+        } else if (first->first + size < last->first && !isallocated(*first)) {
             auto splited{first->second};
             if (allocate.first > first->first) {
                 splited.pagescount -= neededpages;
-                treemap.insert_or_assign(first->first, splited);
-                treemap.insert_or_assign(allocate.first, allocate.second);
+                blocksmap.insert_or_assign(first->first, splited);
+                blocksmap.insert_or_assign(allocate.first, allocate.second);
             } else {
-                treemap.insert_or_assign(first->first, allocate.second);
+                blocksmap.insert_or_assign(first->first, allocate.second);
                 splited.pagescount -= neededpages;
-                treemap.insert_or_assign(allocate.first + size, splited);
+                blocksmap.insert_or_assign(allocate.first + size, splited);
             }
         } else {
             // There is an allocated memory space at the end of this block
             first->second.pagescount -= neededpages;
-            treemap.insert_or_assign(first->first + size, allocate.second);
+            blocksmap.insert_or_assign(first->first + size, allocate.second);
         }
 
-        if (!isallocated) {
-            if (const auto *hostoffset{hostslab->Reserve(nullptr, size)}; hostoffset != MemoryFailValue)
-                allocator->Map(allocate.first, reinterpret_cast<U64>(hostoffset), size);
+        if (!isallocated(*first)) {
+            if (const auto *available{hostslab->Reserve({}, size)}; available != MemoryFailValue)
+                allocator->Map(allocate.first, reinterpret_cast<U64>(available), size);
             else throw exception{"Failed to reserve {} bytes in host memory", size};
         }
 
@@ -108,8 +117,8 @@ namespace FastNx::Kernel::Memory {
     }
 
     std::optional<std::pair<const U8 *, KMemoryBlock *>> KMemoryBlockManager::FindBlock(const U8 *guestptr) {
-        auto firstblk{treemap.lower_bound(guestptr)};
-        if (firstblk != treemap.end()) {
+        auto firstblk{blocksmap.lower_bound(guestptr)};
+        if (firstblk != blocksmap.end()) {
             if (firstblk->first <= guestptr)
                 return std::make_pair(firstblk->first, &firstblk->second);
             if (const auto size{firstblk->second.pagescount * SwitchPageSize})
@@ -117,7 +126,7 @@ namespace FastNx::Kernel::Memory {
                     return std::make_pair(firstblk->first, &firstblk->second);
         }
         if (firstblk->first > guestptr)
-            if (--firstblk != treemap.end())
+            if (--firstblk != blocksmap.end())
                 return std::make_pair(firstblk->first, &firstblk->second);
         return std::nullopt;
     }

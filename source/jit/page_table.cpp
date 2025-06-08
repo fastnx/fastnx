@@ -37,11 +37,11 @@ namespace FastNx::Jit {
             backing[offset >> Kernel::SwitchPageBitsCount] = Page{hostit};
         }
 
-        tableinfo.emplace_back(std::make_pair(TableType::Undefined, std::make_pair(begin, beginit)));
+        tableinfo.emplace_back(std::make_pair(TableType::Allocated, std::make_pair(begin, beginit)));
     }
-    void PageTable::MarkTable(const TableType _type, const void *begin, const U64 size) {
+    void PageTable::DelimitTable(const TableType _type, const void *begin, const U64 size) {
         for (auto &[type, table]: tableinfo) {
-            if (type == TableType::Undefined && table.first == begin &&
+            if (type == TableType::Allocated && table.first == begin &&
                 table.second == static_cast<const U8 *>(begin) + size)
                 type = _type;
         }
@@ -49,26 +49,23 @@ namespace FastNx::Jit {
 
     std::pair<PageAttributeType, TableType> PageTable::Contains(void *usertable, U64 size) const {
         usertable = static_cast<U8 *>(boost::alignment::align_down(usertable, Kernel::SwitchPageSize));
-        auto type{TableType::Undefined};
+        auto type{TableType::Allocated};
 
         size = boost::alignment::align_up(size, Kernel::SwitchPageSize);
         const auto tableindex{GetOffset(usertable, pagetablewidth)};
 
         auto attribute{PageAttributeType::Mapped};
-        for (auto pcount{tableindex}; pcount < tableindex + size / Kernel::SwitchPageSize; pcount++) {
-            if (table[pcount].GetPageAttr() == PageAttributeType::Mapped)
+        for (auto livepage{tableindex}; livepage < tableindex + size / Kernel::SwitchPageSize; livepage++) {
+            if (table[livepage].GetPageAttr() == PageAttributeType::Mapped)
                 continue;
             attribute = PageAttributeType::Unmapped;
             break;
         }
 
-        if (attribute == PageAttributeType::Mapped) {
-            auto infoit{tableinfo.cbegin()};
-            for (; infoit != tableinfo.cend() && type == TableType::Undefined; ++infoit) {
-                if (infoit->second.first <= usertable && static_cast<U8 *>(usertable) + size <= infoit->second.second)
-                    type = infoit->first;
-            }
-        }
+        if (attribute == PageAttributeType::Mapped)
+            for (const auto &[_type, markpage] : tableinfo)
+                if (markpage.first <= usertable && static_cast<U8 *>(usertable) + size <= markpage.second)
+                    type = _type;
         return std::make_pair(attribute, type);
     }
 }

@@ -7,15 +7,13 @@
 namespace FastNx::Kernel::Svc {
     void QueryMemory(const SyscallParameters &svcblock, Jit::HosThreadContext &context) {
         const auto &memory{svcblock.process->memory};
-        const auto &pagination{svcblock.process->kernel.pagetable};
 
-        const auto *address{pagination->GetTable(reinterpret_cast<U8 *>(U64{context.X2}))};
-        auto *outblock{pagination->GetTable(reinterpret_cast<U8 *>(U64{context.X0}))};
+        const auto *address{reinterpret_cast<U8 *>(context.X2)};
+        auto *outblock{reinterpret_cast<U8 *>(context.X0)};
 
         if (auto meminfo{memory->QueryMemory(address)}) {
             std::construct_at(reinterpret_cast<Memory::MemoryInfo *>(outblock), *meminfo);
         }
-
         context.W1 = {};
         context.W0 = std::to_underlying(Result::Success);
     }

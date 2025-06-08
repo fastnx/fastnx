@@ -30,18 +30,16 @@ namespace FastNx::Jit {
     }
 
     void DynarmicCallbacks::CallSVC(const U32 syscall) {
-        Runtime::SpinLock mutex;
         std::unique_lock lock{mutex};
 
         AsyncLogger::Info("System call number {} occurred at {}", syscall, std::chrono::system_clock::now());
         HosThreadContext hoststate;
         jitctrl->GetRegisters(hoststate);
-
         for (bool dispatched{}; !dispatched; ) {
-            logger->FlushBuffers();
-            if (Kernel::Svc::Syscall(syscall, hoststate))
+            if (Kernel::Svc::Syscall64(syscall, hoststate))
                 dispatched = true;
-
+            if (!dispatched)
+                std::unique_lock endless{mutex};
             jitctrl->SetRegisters(hoststate);
         }
     }
@@ -64,11 +62,13 @@ namespace FastNx::Jit {
         return {};
     }
 
+    constexpr auto AbortReason{Dynarmic::HaltReason::MemoryAbort};
     bool DynarmicCallbacks::ValidateMemoryAccess(const Dynarmic::A64::VAddr vaddr, const U64 size) const {
         auto *result{reinterpret_cast<U8 *>(vaddr)};
-        if (const auto [attribute, kindof]{ptable->Contains(result, size)}; attribute == PageAttributeType::Unmapped) {
-            jitctrl->jitcore->HaltExecution(Dynarmic::HaltReason::MemoryAbort);
-            return {};
+        if (const auto [attribute, _]{ptable->Contains(result, size)}; attribute == PageAttributeType::Unmapped) {
+            const auto &jit{jitctrl->jitcore};
+            jit->DumpDisassembly();
+            jit->HaltExecution(AbortReason);
         }
         return true;
     }

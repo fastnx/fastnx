@@ -13,5 +13,5 @@ namespace FastNx::Kernel::Svc {
     using SyscallPrototype = std::function<void(const SyscallParameters &, Jit::HosThreadContext &)>;
 
     void QueryMemory(const SyscallParameters &svcblock, Jit::HosThreadContext &context);
-    bool Syscall(U32 table, Jit::HosThreadContext &context);
+    bool Syscall64(U32 table, Jit::HosThreadContext &context);
 }

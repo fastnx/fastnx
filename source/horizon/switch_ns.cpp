@@ -31,11 +31,8 @@ namespace FastNx::Horizon {
             if (FsSys::GetPathStr(apploader->backing) == apppath)
                 loader = apploader;
         }
-        if (!loader)
-            return;
-        if (loader->status != Loaders::LoaderStatus::Success) {
+        if (!loader || loader->status != Loaders::LoaderStatus::Success)
             throw exception{"Failed to load the application due to: {}", GetLoaderPrettyString(loader)};
-        }
 
         if (const auto exefs{loader->appdir->GetExefs()})
             if (const auto control{exefs->OpenFile("exefs/control.nacp")})

@@ -32,11 +32,13 @@ namespace FastNx::Jit {
     void JitDynarmicController::Run(JitThreadContext &context) {
         SetRegisters(context.arm_reglist);
 
-        if (!jitcore->GetSP()) {
-            jitcore->SetPC(reinterpret_cast<U64>(context.pc_counter));
-            jitcore->SetSP(reinterpret_cast<U64>(context.stack));
+        const auto PC{reinterpret_cast<U64>(context.pc_counter)};
+        const auto SP{reinterpret_cast<U64>(context.stack)};
+        if (jitcore->GetSP() != SP || jitcore->GetPC() != PC) {
+            jitcore->SetPC(PC);
+            jitcore->SetSP(SP);
         }
-
+        bool halted{};
         for (U64 counter{}; counter < 100; counter++) {
             if (!callbacks.GetTicksRemaining())
                 callbacks.ticksleft += 10000;
@@ -44,11 +46,15 @@ namespace FastNx::Jit {
             if (jitcore && initialized) {
                 ScopedSignalHandler installactions;
                 jitcore->ClearExclusiveState();
-                if (jitcore->Run() == Dynarmic::HaltReason::MemoryAbort)
-                    PrintArm(context.arm_reglist);
+                if (jitcore->Run() != Dynarmic::HaltReason::MemoryAbort)
+                    continue;
+                halted = true;
+                break;
             }
         }
         GetRegisters(context.arm_reglist);
+        if (halted)
+            PrintArm(context.arm_reglist);
     }
 
     void JitDynarmicController::Initialize(void *excepttls, void *usertls) {
@@ -65,7 +71,7 @@ namespace FastNx::Jit {
         callbacks.jitctrl = shared_from_this();
         jitconfigs.callbacks = &callbacks;
         jitcore = std::make_unique<Dynarmic::A64::Jit>(jitconfigs);
-        jitcore->ClearCache();
+        Reset();
 
         initialized = true;
     }
@@ -87,14 +93,22 @@ namespace FastNx::Jit {
         jitregs.pstate = jitcore->GetPstate();
     }
 
+    void JitDynarmicController::Reset() {
+        jitcore->ClearCache();
+        jitcore->Reset();
+
+        jitcore->ClearHalt();
+    }
+
     void JitDynarmicController::SetRegisters(const HosThreadContext &jitregs) {
         jitcore->SetRegisters(jitregs.gprlist);
 
-        auto vectors{jitcore->GetVectors()};
+        std::array<Dynarmic::A64::Vector, 32> vectors;
         for (const auto &[index, floats]: std::views::enumerate(jitregs.floats)) {
-            Copy(vectors[index], floats);
+            vectors[index] = floats;
         }
-        jitcore->SetVectors(vectors);
+        if (!IsEmpty(vectors))
+            jitcore->SetVectors(vectors);
         jitcore->SetSP(jitregs.sp);
         jitcore->SetPC(jitregs.pc);
 

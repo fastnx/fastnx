@@ -10,7 +10,7 @@ namespace FastNx::Kernel::Svc {
         {0x6, QueryMemory}
     };
 
-    bool Syscall(const U32 table, Jit::HosThreadContext &context) {
+    bool Syscall64(const U32 table, Jit::HosThreadContext &context) {
         static auto application{Core::GetContext()};
         static auto &kernel{application->switchnx->kernel};
 

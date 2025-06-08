@@ -2,11 +2,14 @@
 #include <cstring>
 #include <vector>
 #include <common/types.h>
+#include <common/allocators.h>
 
 #include <kernel/types.h>
+
+
 namespace FastNx::Jit {
     enum class TableType : U32 {
-        Undefined,
+        Allocated,
         Code,
         Stack
     };
@@ -22,30 +25,33 @@ namespace FastNx::Jit {
         struct Page {
             auto GetPageAttr() const {
                 // ReSharper disable once CppRedundantParentheses
-                return static_cast<PageAttributeType>(base & ((1 << PageAttrBitsCount) - 1));
+                return static_cast<PageAttributeType>(taggedptr & ((1 << PageAttrBitsCount) - 1));
             }
             void SetPageAttr(PageAttributeType type) {
-                base |= static_cast<U64>(type);
+                taggedptr |= static_cast<U64>(type);
             }
 
             auto operator ()(const U64 offset) const -> void* {
-                auto result{base};
+                auto result{taggedptr};
+                if (!result)
+                    return {};
                 result &= ~0 << PageAttrBitsCount;
                 return reinterpret_cast<void *>(result + offset);
             }
 
             Page() = default;
-            explicit Page(const void *value, const PageAttributeType type = PageAttributeType::Mapped) : base(reinterpret_cast<U64>(value)) {
+            explicit Page(const void *value, const PageAttributeType type = PageAttributeType::Mapped) :
+                taggedptr(reinterpret_cast<U64>(value)) {
                 SetPageAttr(type);
             }
-            U64 base{};
+            U64 taggedptr{};
         };
         static_assert(sizeof(Page) == sizeof(void *));
 
         PageTable() = default;
         void Initialize(const std::shared_ptr<Kernel::Types::KProcess> &process);
         void CreateTable(void *begin, void *host, U64 offset, U64 size);
-        void MarkTable(TableType _type, const void *begin, U64 size);
+        void DelimitTable(TableType _type, const void *begin, U64 size);
 
         std::pair<PageAttributeType, TableType> Contains(void *usertable, U64 size) const;
         U8 *GetTable(const void *useraddr) const;
@@ -53,14 +59,20 @@ namespace FastNx::Jit {
         template<typename T>
         T Read(const void *useraddr) {
             T type;
-            std::memcpy(&type, GetTable(useraddr), sizeof(T));
+            const auto *pointer{GetTable(useraddr)};
+            if (!pointer)
+                throw std::bad_alloc{};
+            std::memcpy(&type, pointer, sizeof(T));
             return type;
         }
         template<typename T>
         void Write(const void *useraddr, const T &value) {
-            std::memcpy(GetTable(useraddr), &value, sizeof(T));
+            auto *pointer{GetTable(useraddr)};
+            if (!pointer)
+                throw std::bad_alloc{};
+            std::memcpy(pointer, &value, sizeof(T));
         }
-        std::vector<Page> table; // Nossa table de endereços
+        SwappableVector<Page> table; // Nossa table de endereços
         std::vector<Page> backing; // Memória fisica
 
         U64 pagetablewidth{};

@@ -1,6 +1,7 @@
 #pragma once
 #include <dynarmic/interface/A64/config.h>
 
+#include <runtime/spin_lock.h>
 #include <jit/page_table.h>
 
 namespace FastNx::Jit {
@@ -47,6 +48,7 @@ namespace FastNx::Jit {
         bool ValidateMemoryAccess(Dynarmic::A64::VAddr vaddr, U64 size) const;
 
         U64 ticksleft{};
+        Runtime::SpinLock mutex;
         std::shared_ptr<PageTable> ptable;
         std::shared_ptr<JitDynarmicController> jitctrl;
     };

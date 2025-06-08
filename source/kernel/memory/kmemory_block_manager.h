@@ -95,7 +95,7 @@ namespace FastNx::Kernel::Memory {
 
         std::optional<std::pair<const U8 *, KMemoryBlock *>> FindBlock(const U8 *guestptr);
 
-        std::map<const U8 *, KMemoryBlock> treemap;
+        std::map<const U8 *, KMemoryBlock> blocksmap;
         const std::shared_ptr<KSlabHeap> &hostslab;
         MemoryBackingPtr allocator;
     };

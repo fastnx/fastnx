@@ -77,10 +77,10 @@ namespace FastNx::Kernel::Memory {
         */
     }
 
-    void KMemory::MapSegmentMemory(const std::span<U8> &memseg, const U64 begin, U64 size, const bool fill, const KMemoryBlock &block) const {
-        U8* memory{memseg.begin().base() + begin};
+    void KMemory::MapSegmentMemory(const std::span<U8> &segment, const U64 begin, U64 size, const bool fill, const KMemoryBlock &block) const {
+        U8* memory{segment.begin().base() + begin};
         if (!size)
-            size = reinterpret_cast<U64>(memseg.end().base() - begin);
+            size = reinterpret_cast<U64>(segment.end().base() - begin);
 
         blockslist->Map({memory, block});
         if (fill)
@@ -99,7 +99,7 @@ namespace FastNx::Kernel::Memory {
         // Touching the pages adjacent to the content
         std::memset(memory + content.size(), 0, _size - content.size());
 
-        table->MarkTable(Jit::TableType::Code, memory, _size);
+        table->DelimitTable(Jit::TableType::Code, memory, _size);
     }
 
     void KMemory::MapTlsMemory(const U64 begin, const U64 size) const {
@@ -116,7 +116,7 @@ namespace FastNx::Kernel::Memory {
         });
 
         const U8 *stackit{stack.begin().base() + begin};
-        table->MarkTable(Jit::TableType::Stack, stackit, size);
+        table->DelimitTable(Jit::TableType::Stack, stackit, size);
     }
 
     void KMemory::SetMemoryPermission(const U64 begin, const U64 size, const I32 permission) const {
@@ -157,6 +157,12 @@ namespace FastNx::Kernel::Memory {
                 .size = block->second->pagescount * SwitchPageSize,
                 .type = block->second->state._type,
                 .permission = block->second->permission,
+            };
+        if (begin < addrspace.begin().base())
+            return MemoryInfo{
+                .base = addrspace.end().base(),
+                .size = 0 - reinterpret_cast<U64>(addrspace.end().base()),
+                .type = MemoryTypeValues::Inaccessible,
             };
         return std::nullopt;
     }
