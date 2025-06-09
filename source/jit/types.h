@@ -3,7 +3,7 @@
 #include <common/types.h>
 namespace FastNx::Jit {
     struct REGW {
-        void operator=(const U32 val) noexcept {
+        void operator=(const U32 val) {
             value = val;
             upper = {};
         }
@@ -18,7 +18,7 @@ namespace FastNx::Jit {
             struct {
                 REGW W0, W1, W2, W3, W4, W5, W6, W7;
             };
-            std::array<U64, 31> gprlist{};
+            std::array<U64, 31> GPRs{};
         };
         std::array<std::array<U64, 2>, 32> floats{};
         U32 fpcr{};
@@ -44,8 +44,8 @@ namespace FastNx::Jit {
         virtual void Run(JitThreadContext &context) = 0;
         virtual void Reset() = 0;
 
-        virtual void GetRegisters(HosThreadContext &jitregs) = 0;
-        virtual void SetRegisters(const HosThreadContext &jitregs) = 0;
+        virtual void GetContext(HosThreadContext &jitregs) = 0;
+        virtual void SetContext(const HosThreadContext &jitregs) = 0;
 
         bool initialized{};
     };

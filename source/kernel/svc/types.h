@@ -4,11 +4,12 @@
 #include <kernel/types.h>
 
 namespace FastNx::Kernel::Svc {
+    // https://switchbrew.org/wiki/Error_codes
+    // https://switchbrew.org/wiki/SVC#Result
     enum class Result : U32 {
         Success
     };
 
-    // https://switchbrew.org/wiki/SVC#Result
     enum class MemoryRegion {
         Application,
         Applet,

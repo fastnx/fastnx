@@ -5,7 +5,7 @@
 #include <jit/page_table.h>
 
 namespace FastNx::Jit {
-    class JitDynarmicController;
+    class DynarmicJit;
 
     class DynarmicCallbacks final : public Dynarmic::A64::UserCallbacks {
     public:
@@ -50,6 +50,6 @@ namespace FastNx::Jit {
         U64 ticksleft{};
         Runtime::SpinLock mutex;
         std::shared_ptr<PageTable> ptable;
-        std::shared_ptr<JitDynarmicController> jitctrl;
+        std::shared_ptr<DynarmicJit> parent;
     };
 }

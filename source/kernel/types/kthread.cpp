@@ -15,9 +15,9 @@ namespace FastNx::Kernel::Types {
         for (; state && count < 100; count++) {
             // Simulating some work in this thread
             if (const auto &jit{kernel.GetJit(desiredcpu)}) {
-                if (!jit->initialized)
+                if (!jit->initialized) {
                     jit->Initialize(exceptiontls, usertls);
-
+                }
                 jit->Run(jitload);
             }
             scheduler->Yield();
@@ -25,9 +25,8 @@ namespace FastNx::Kernel::Types {
     }
 
     void KThread::Initialize(KProcess *process, void *ep, void *_stack, void *_tls, const U32 firstcpu) {
-        if (process)
-            if (parent = dynamic_cast<KSynchronizationObject *>(process); parent)
-                parent->IncreaseLifetime();
+        if (parent = dynamic_cast<KSynchronizationObject *>(process); parent)
+            parent->IncreaseLifetime();
 
         desiredcpu = firstcpu;
         threadid = kernel.GetThreadId();
@@ -36,9 +35,8 @@ namespace FastNx::Kernel::Types {
         exceptiontls = _tls;
 
         // Sets up the JIT parameters
-        jitload.stack = stack;
+        jitload.stack = static_cast<U8 *>(stack) - 0x1000;
         jitload.pc_counter = entrypoint;
-
         if (!process)
             return;
         // https://switchbrew.org/wiki/Thread_Local_Region

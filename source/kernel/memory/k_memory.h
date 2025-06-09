@@ -66,12 +66,12 @@ namespace FastNx::Kernel::Memory {
         std::span<U8> code, alias, heap, stack, tlsio;
 
         U64 processwidth{};
+        std::shared_ptr<Jit::PageTable> table;
     private:
         void MapSegmentMemory(const std::span<U8> &segment, U64 begin, U64 size, bool fill, const KMemoryBlock &block) const;
 
         Kernel &kernel;
         std::shared_ptr<KMemoryBlockManager> blockslist;
-        std::shared_ptr<Jit::PageTable> table;
     };
 
 }

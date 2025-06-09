@@ -39,7 +39,7 @@ namespace FastNx::Kernel::Memory {
         return distribution(generator);
     }
 
-    KMemory::KMemory(Kernel &_kernel) : kernel(_kernel), blockslist(std::make_shared<KMemoryBlockManager>(kernel)), table(_kernel.pagetable) {}
+    KMemory::KMemory(Kernel &_kernel) : table(_kernel.pagetable), kernel(_kernel), blockslist(std::make_shared<KMemoryBlockManager>(kernel)) {}
 
     void KMemory::InitializeForProcess(const std::shared_ptr<Types::KProcess> &process, const Svc::CreateProcessParameter &proccfg) {
         const auto width{GetWidthAs(proccfg.addrspace)};

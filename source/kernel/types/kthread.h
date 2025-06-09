@@ -24,8 +24,9 @@ namespace FastNx::Kernel::Types {
         std::mutex condmutex;
         std::condition_variable condsched;
 
-        Jit::JitThreadContext jitload{};
     private:
+        Jit::JitThreadContext jitload{};
+
         std::list<KSynchronizationObject *> syncobjs;
         KSynchronizationObject *parent{}; // Process this thread belongs to
     protected:

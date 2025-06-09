@@ -8,9 +8,8 @@
 #include <jit/dynarmic_jit.h>
 namespace FastNx::Jit {
 
-    JitDynarmicController::JitDynarmicController(
-        const std::shared_ptr<Kernel::Types::KProcess> &ownerproc) : process(ownerproc) {
-
+    DynarmicJit::DynarmicJit(
+        const std::shared_ptr<Kernel::Types::KProcess> &runnable) : process(runnable) {
         callbacks.ptable = process->kernel.pagetable;
 #if !NDEBUG
         jitconfigs.check_halt_on_memory_access = true;
@@ -18,50 +17,45 @@ namespace FastNx::Jit {
 #endif
         jitconfigs.tpidr_el0 = &tpidr_el0;
         jitconfigs.tpidrro_el0 = &tpidrro_el0;
-        jitconfigs.absolute_offset_page_table = true;
     }
+
     void PrintArm(const HosThreadContext &context) {
-        for (const auto [index, value]: std::ranges::views::enumerate(context.gprlist | std::views::drop(8)))
-            AsyncLogger::Puts("R{}, Value: {:X} ", index, value);
+        auto regit{context.GPRs.begin()};
+        const auto regbegin{regit};
+        for (; regit != context.GPRs.end(); ++regit)
+            AsyncLogger::Puts("R{}, Value: {:X} ", std::distance(regbegin, regit), *regit);
 
         AsyncLogger::Puts("SP, Value: {:X} ", context.sp);
         AsyncLogger::Puts("PC, Value: {:X} ", context.pc);
         AsyncLogger::Puts("\n");
     }
 
-    void JitDynarmicController::Run(JitThreadContext &context) {
-        SetRegisters(context.arm_reglist);
+    void DynarmicJit::Run(JitThreadContext &context) {
+        SetContext(context.arm_reglist);
+        if (!dyn64 || !initialized)
+            return;
 
-        const auto PC{reinterpret_cast<U64>(context.pc_counter)};
-        const auto SP{reinterpret_cast<U64>(context.stack)};
-        if (jitcore->GetSP() != SP || jitcore->GetPC() != PC) {
-            jitcore->SetPC(PC);
-            jitcore->SetSP(SP);
+        if (!dyn64->GetSP()) {
+            dyn64->SetPC(reinterpret_cast<U64>(context.pc_counter));
+            dyn64->SetSP(reinterpret_cast<U64>(context.stack));
         }
         bool halted{};
         for (U64 counter{}; counter < 100; counter++) {
             if (!callbacks.GetTicksRemaining())
                 callbacks.ticksleft += 100000;
 
-            if (jitcore && initialized) {
-                ScopedSignalHandler installactions;
-                jitcore->ClearExclusiveState();
-                if (jitcore->Run() != Dynarmic::HaltReason::MemoryAbort)
-                    continue;
-                halted = true;
-                break;
-            }
+            ScopedSignalHandler installactions;
+            if (dyn64->Run() != Dynarmic::HaltReason::MemoryAbort)
+                continue;
+            halted = true;
+            break;
         }
-        GetRegisters(context.arm_reglist);
-        if (halted) {
+        GetContext(context.arm_reglist);
+        if (halted)
             PrintArm(context.arm_reglist);
-            std::mutex mutex;
-            std::unique_lock guard(mutex);
-            std::unique_lock trap(mutex);
-        }
     }
 
-    void JitDynarmicController::Initialize(void *excepttls, void *usertls) {
+    void DynarmicJit::Initialize(void *excepttls, void *usertls) {
         /*
         jitconfigs.page_table = reinterpret_cast<void **>(process->kernel.pagetable->table.data());
         jitconfigs.absolute_offset_page_table = true;
@@ -72,52 +66,53 @@ namespace FastNx::Jit {
         tpidr_el0 = reinterpret_cast<U64>(excepttls);
         tpidrro_el0 = reinterpret_cast<U64>(usertls);
 
-        callbacks.jitctrl = shared_from_this();
+        jitconfigs.define_unpredictable_behaviour = true;
+        callbacks.parent = shared_from_this();
         jitconfigs.callbacks = &callbacks;
-        jitcore = std::make_unique<Dynarmic::A64::Jit>(jitconfigs);
+        dyn64 = std::make_unique<Dynarmic::A64::Jit>(jitconfigs);
         Reset();
 
         initialized = true;
     }
 
-    void JitDynarmicController::GetRegisters(HosThreadContext &jitregs) {
+    void DynarmicJit::GetContext(HosThreadContext &jitregs) {
         boost::container::small_vector<U64, 31> regsvalues;
-        for (const auto value: jitcore->GetRegisters()) {
+        for (const auto value: dyn64->GetRegisters()) {
             regsvalues.emplace_back(value);
         }
 
-        Copy(jitregs.gprlist, regsvalues);
-        jitregs.sp = jitregs.gprlist[29];
-        jitregs.pc = jitregs.gprlist[30];
+        Copy(jitregs.GPRs, regsvalues);
+        jitregs.sp = jitregs.GPRs[29];
+        jitregs.pc = jitregs.GPRs[30];
 
-        jitregs.floats = jitcore->GetVectors();
+        jitregs.floats = dyn64->GetVectors();
 
-        jitregs.fpcr = jitcore->GetFpcr();
-        jitregs.fpsr = jitcore->GetFpsr();
-        jitregs.pstate = jitcore->GetPstate();
+        jitregs.fpcr = dyn64->GetFpcr();
+        jitregs.fpsr = dyn64->GetFpsr();
+        jitregs.pstate = dyn64->GetPstate();
     }
 
-    void JitDynarmicController::Reset() {
-        jitcore->ClearCache();
-        jitcore->Reset();
+    void DynarmicJit::Reset() {
+        dyn64->ClearCache();
+        dyn64->Reset();
 
-        jitcore->ClearHalt();
+        dyn64->ClearHalt();
     }
 
-    void JitDynarmicController::SetRegisters(const HosThreadContext &jitregs) {
-        jitcore->SetRegisters(jitregs.gprlist);
+    void DynarmicJit::SetContext(const HosThreadContext &jitregs) {
+        dyn64->SetRegisters(jitregs.GPRs);
 
         std::array<Dynarmic::A64::Vector, 32> vectors;
         for (const auto &[index, floats]: std::views::enumerate(jitregs.floats)) {
             vectors[index] = floats;
         }
         if (!IsEmpty(vectors))
-            jitcore->SetVectors(vectors);
-        jitcore->SetSP(jitregs.sp);
-        jitcore->SetPC(jitregs.pc);
+            dyn64->SetVectors(vectors);
+        dyn64->SetSP(jitregs.sp);
+        dyn64->SetPC(jitregs.pc);
 
-        jitcore->SetPstate(jitregs.pstate);
-        jitcore->SetFpsr(jitregs.fpsr);
-        jitcore->SetFpcr(jitregs.fpcr);
+        dyn64->SetPstate(jitregs.pstate);
+        dyn64->SetFpsr(jitregs.fpsr);
+        dyn64->SetFpcr(jitregs.fpcr);
     }
 }
