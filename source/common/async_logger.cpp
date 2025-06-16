@@ -17,8 +17,11 @@ namespace FastNx {
             if (const auto debugger{tracer.substr(strlen("TracerPid:") + 1)}; !debugger.empty())
                 if (strtoull(debugger.data(), nullptr, 10))
                     return true;
-
+#if NDEBUG
         return ptrace(PTRACE_TRACEME, 0, nullptr, nullptr) < 0;
+#else
+        return true;
+#endif
     }
 
     std::shared_ptr<AsyncLogger> BuildAsyncLogger(FsSys::ReFs::DirectoryFileAccess *logdir) {
@@ -68,7 +71,7 @@ namespace FastNx {
                 return "Info";
             std::unreachable();
         }();
-        const auto time{std::chrono::system_clock::now()};
+        const auto &time{std::chrono::system_clock::now()};
 
         std::shared_lock guard(lock);
         static std::vector<std::string_view> lists;

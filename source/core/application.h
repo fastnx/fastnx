@@ -19,7 +19,6 @@ namespace FastNx::Core {
 
         std::shared_ptr<AppSetup> settings;
         std::shared_ptr<Horizon::SwitchNs> switchnx;
-    private:
         std::shared_ptr<Assets> assets;
         std::shared_ptr<Horizon::KeySet> keys;
     };

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <common/container.h>
 #include <common/traits.h>
 
 struct FormatSize {
@@ -29,6 +30,6 @@ struct fmt::formatter<FormatSize> {
             if (!++fmt)
                 std::terminate();
         }
-        return fmt::format_to(ctx.out(), "{} {}", value, *fmt);
+        return fmt::format_to(ctx.out(), "{:.06} {}", value, *fmt);
     }
 };

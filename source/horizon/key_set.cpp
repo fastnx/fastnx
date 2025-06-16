@@ -148,6 +148,16 @@ namespace FastNx::Horizon {
         tickets.insert_or_assign(pfstikhash, std::make_pair(tik, std::move(ticket)));
     }
 
+    void KeySet::RemoveTicket(const FsSys::VfsBackingFilePtr &tik) {
+        auto ticketit{tickets.begin()};
+        for (; ticketit != tickets.end(); ++ticketit) {
+            if (ticketit->second.first != tik)
+                continue;
+            tickets.erase(ticketit);
+            break;
+        }
+    }
+
     std::optional<std::array<U8, 16>> KeySet::GetIndexableKey(const KeyIndexType type, const U32 index) {
         if (const auto keyval{indexablekeys.find({type, index})}; keyval != indexablekeys.end())
             return ToArrayOfBytes<16>(keyval->second);

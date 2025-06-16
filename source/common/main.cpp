@@ -8,10 +8,13 @@
 #include <boost/interprocess/sync/file_lock.hpp>
 
 #include <core/application.h>
+#include <core/cache.h>
 #include <device/capabilities.h>
 
 #include <fs_sys/refs/buffered_file.h>
 #include <common/async_logger.h>
+
+
 namespace FastNx {
     FsSys::FsPath GetUserDir() {
         if (const auto *user{getpwuid(getuid())})
@@ -24,19 +27,21 @@ namespace FastNx {
     }
 }
 
-namespace boost_po = boost::program_options;
-boost_po::options_description fastopts("Allowed options");
+namespace bpo = boost::program_options;
+bpo::options_description fastopts("Allowed options");
 
-bool disableswap;
+bool lockmmap;
 
 using namespace FastNx;
 
 I32 main(const I32 argc, const char **argv) {
     fastopts.add_options()
         ("help", "Display this table")
-        ("disable-disk-swap", "Block all future memory mappings in RAM");
+        ("lock-mmap", "Block all future memory mappings in RAM")
+        ("clear-cache", "Removes all cache files created by the emulator")
+        ("export", "Exports all content produced by the system");
 
-    boost_po::variables_map vm;
+    bpo::variables_map vm;
     store(parse_command_line(argc, argv, fastopts), vm);
     notify(vm);
 
@@ -44,9 +49,9 @@ I32 main(const I32 argc, const char **argv) {
         fastopts.print(std::cerr);
         return EXIT_SUCCESS;
     }
-    disableswap = vm.contains("disable-disk-swap");
-    if (disableswap)
-        Device::LockAllMapping();
+    lockmmap = vm.contains("lock-mmap");
+    if (lockmmap)
+        Device::LockAll();
 
     NX_ASSERT(FastNx::FsSys::ReFs::BufferedFile("app_lock", 0, FastNx::FsSys::FileModeType::WriteOnly, true));
 
@@ -72,6 +77,10 @@ I32 main(const I32 argc, const char **argv) {
 
     if (const auto &application{Core::GetContext()}) {
         application->Initialize();
+        if (vm.contains("clear-cache"))
+            Core::ClearCache(application);
+        if (vm.contains("export"))
+            Core::ExportCache(application);
         // application->DumpAllLogos();
         application->LoadFirstPickedGame();
     }

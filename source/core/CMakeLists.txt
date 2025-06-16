@@ -5,6 +5,10 @@ target_sources(fastnx PRIVATE
     application.h
     assets.cpp
     assets.h
+    tarball.cpp
+    tarball.h
+    cache.cpp
+    cache.h
     games_lists.cpp
     games_lists.h
     app_setup.cpp

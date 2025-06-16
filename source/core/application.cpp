@@ -13,6 +13,7 @@
 
 #include <core/application.h>
 
+
 namespace FastNx::Core {
     U64 GetCoreNumber() {
         return sched_getcpu();

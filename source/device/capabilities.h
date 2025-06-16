@@ -6,7 +6,7 @@ namespace FastNx::Device {
 
     U64 GetCoresCount();
     U64 GetHostPageSize();
-    void LockAllMapping();
+    void LockAll();
 
     void SetCore(U32 coreid);
 }

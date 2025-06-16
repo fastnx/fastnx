@@ -2,6 +2,9 @@
 
 #include <common/async_logger.h>
 #include <common/exception.h>
+#include <common/format.h>
+
+#include <core/cache.h>
 #include <core/assets.h>
 
 #include <fs_sys/refs/buffered_file.h>
@@ -30,6 +33,7 @@ namespace FastNx::Core {
         if (const FsSys::FsPath target{"com/callsvc/fastnx"}; !ContainsPath(_pcwd, target)) {
             MoveProcess(target);
         }
+        AsyncLogger::Info("Application cache directory size: {}", FormatSize{GetCacheDirectorySize()});
     }
 
     void Assets::Destroy() {

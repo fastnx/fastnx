@@ -39,6 +39,7 @@ namespace FastNx::Jit {
         for (bool dispatched{}; !dispatched; ) {
             if (Kernel::Svc::Syscall64(syscall, armstate))
                 dispatched = true;
+            logger->FlushBuffers();
             if (!dispatched)
                 std::unique_lock endless{mutex};
 
