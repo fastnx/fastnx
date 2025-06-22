@@ -1,7 +1,7 @@
 #include <fs_sys/vfs/offset_file.h>
 
 namespace FastNx::FsSys::Vfs {
-    OffsetFile::OffsetFile(const VfsBackingFilePtr &backing, const FsPath &_path, const U64 offset, const U64 size, const bool isHuge) : VfsBackingFile(_path), size(size), begin(offset), _source(backing) {
+    OffsetFile::OffsetFile(const VfsBackingFilePtr &backing, const FsPath &_path, const U64 offset, const U64 size, const bool isHuge) : VfsBackingFile(_path), size(size), begin(offset), filesrc(backing) {
         eof = offset + size;
         if (isHuge)
             hugefs = std::dynamic_pointer_cast<ReFs::HugeFile>(backing);
@@ -9,12 +9,12 @@ namespace FastNx::FsSys::Vfs {
     }
 
     OffsetFile::operator bool() const {
-        return _source->GetSize() >= begin + size;
+        return filesrc->GetSize() >= begin + size;
     }
 
     U64 OffsetFile::GetSize() const {
-        if (_source)
-            return std::min(_source->GetSize(), eof - begin);
+        if (filesrc)
+            return std::min(filesrc->GetSize(), eof - begin);
         return size;
     }
     void OffsetFile::SetSize(U64 newsize) {
@@ -27,7 +27,7 @@ namespace FastNx::FsSys::Vfs {
         const auto result = [&] {
             if (hugefs)
                 return hugefs->ReadTypeFaster(dest, size, begin + offset);
-            return _source->ReadType(dest, size, begin + offset);
+            return filesrc->ReadType(dest, size, begin + offset);
         }();
         return result;
     }

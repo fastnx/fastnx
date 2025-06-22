@@ -77,12 +77,14 @@ I32 main(const I32 argc, const char **argv) {
 
     if (const auto &application{Core::GetContext()}) {
         application->Initialize();
-        if (vm.contains("clear-cache"))
+        if (vm.contains("clear-cache")) {
             Core::ClearCache(application);
-        if (vm.contains("export"))
+        } else if (vm.contains("export")) {
             Core::ExportCache(application);
-        // application->DumpAllLogos();
-        application->LoadFirstPickedGame();
+        } else {
+            application->LoadFirstPickedGame();
+            // application->DumpAllLogos();
+        }
     }
 
     std::atexit([] {

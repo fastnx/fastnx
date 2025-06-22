@@ -78,8 +78,8 @@ namespace FastNx::FsSys::ReFs {
             return {};
 
         using std::filesystem::perms;
-        if (const auto _perms{_directory.permissions()}; _perms != perms{}) {
-            if ((_perms & perms::others_exec) != perms::others_exec) {
+        if (const auto subperms{_directory.permissions()}; subperms != perms{}) {
+            if ((subperms & perms::others_exec) != perms::others_exec) {
                 NX_ASSERT(descriptor == -1);
                 return {};
             }
@@ -113,7 +113,6 @@ namespace FastNx::FsSys::ReFs {
         if (create && is_regular_file(openpath))
             remove(openpath);
 #endif
-
         std::lock_guard lock{spinlock};
         if (const auto file{filelist.find(openpath)}; file != filelist.end()) {
             if (file->second->mode == mode)

@@ -20,6 +20,6 @@ namespace FastNx::FsSys::Vfs {
         U64 eof{};
 
         std::shared_ptr<ReFs::HugeFile> hugefs{};
-        VfsBackingFilePtr _source{};
+        VfsBackingFilePtr filesrc{};
     };
 }

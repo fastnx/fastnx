@@ -75,27 +75,27 @@ namespace FastNx::FsSys::ReFs {
                 return size;
         }
 
-        if (const auto _size{std::min(size, 64_KBYTES)}; buffer.size() < _size)
-            buffer.resize(_size);
+        if (const auto minimal{std::min(size, 64_KBYTES)}; buffer.size() < minimal)
+            buffer.resize(minimal);
         const auto result = [&] -> U64 {
             U64 copied{};
-            for (U64 _offset{offset}; _offset < offset + size;) {
+            for (U64 readoff{offset}; readoff < offset + size;) {
                 const auto iosize{buffer.size() < size - copied ? buffer.size() : size - copied};
 
-                U64 retrieved{};
                 if (buffer.size() < copied)
                     buffer.resize(copied);
                 NX_ASSERT(buffer.size() >= copied);
-                if (retrieved = static_cast<U64>(pread64(descriptor, &buffer[copied], iosize, offset)); retrieved == -1ULL) {
+                U64 getret{};
+                if ((getret = static_cast<U64>(pread64(descriptor, buffer.data(), iosize, offset))) < 0) {
                     if (errno == EFAULT)
                         return descriptor = -1;
                     return {};
                 }
-                start = offset;
-                std::memcpy(dest, &buffer[copied], retrieved);
-                _offset += retrieved;
-                copied += retrieved;
-                if (retrieved != iosize)
+                start = readoff;
+                std::memcpy(dest, buffer.data(), getret);
+                readoff += getret;
+                copied += getret;
+                if (getret != iosize)
                     break;
             }
             valid = copied;
@@ -111,9 +111,8 @@ namespace FastNx::FsSys::ReFs {
             std::memset(buffer.data(), 0, buffer.size()); // Invalidation of our internal buffer
 #endif
         }
-        if (size > buffer.size()) {
+        if (size > buffer.size())
             buffer.resize(size);
-        }
         std::memcpy(buffer.data(), source, size);
         const auto copied{pwrite64(descriptor, buffer.data(), size, offset)};
 

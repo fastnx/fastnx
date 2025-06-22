@@ -63,10 +63,10 @@ namespace FastNx::FsSys::ReFs {
 
     U64 HugeFile::ReadTypeFaster(U8 *dest, const U64 size, const U64 offset) {
         U64 copied{};
-        for (U64 _offat{offset}; _offat < offset + size; ) {
+        for (U64 offat{offset}; offat < offset + size; ) {
             const auto stride{std::min(size - copied, 4_MBYTES)};
-            copied += ReadTypeImpl(dest, stride, _offat);
-            _offat += stride;
+            copied += ReadTypeImpl(dest, stride, offat);
+            offat += stride;
             dest += stride;
         }
         return copied;
